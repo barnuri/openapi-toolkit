@@ -3,7 +3,6 @@ import { getEditor } from './helpers/getEditor';
 import { writeFileSync } from 'fs';
 import openapiSchemaExample from './openapiSchemaExample.json';
 
-console.log(openapiSchemaExample);
 const editors = ['Order', 'User', 'Category', 'Tag', 'Pet', 'ApiResponse'].map(tabName => getEditor((openapiSchemaExample as any) as OpenApiDocument, tabName));
 const html = editors.map(x => x.toHtml()).join('');
 writeFileSync('./openapiSchemaExample.result.json', JSON.stringify(editors, undefined, 4), 'utf-8');
