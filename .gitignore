@@ -8,3 +8,5 @@ build
 **/*.pyc
 **/node_modules
 **/debug.log
+openapiSchemaExample.result.json
+openapiSchemaExample.html

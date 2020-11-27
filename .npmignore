@@ -10,3 +10,5 @@ tsconfig.json
 .prettierrc.json
 openapiSchemaExample.json
 **/debug.log
+openapiSchemaExample.result.json
+openapiSchemaExample.html
