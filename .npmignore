@@ -1,0 +1,12 @@
+src
+**/*.ts
+*.ts
+!**/*.d.ts
+!*.d.ts
+package-lock.json
+tslint.json
+tsconfig.json
+.prettierrc
+.prettierrc.json
+openapiSchemaExample.json
+**/debug.log
