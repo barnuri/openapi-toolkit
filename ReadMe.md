@@ -27,4 +27,4 @@ require('child_process').exec(start + ' ' + './openapiSchemaExample.html');
 
 ## Result
 
-![Example](raw.githubusercontent.com/barnuri/openapi-definition-to-editor/master/ex.png)
+![Example](https://github.com/barnuri/openapi-definition-to-editor/blob/master/ex.png?raw=true)
