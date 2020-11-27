@@ -4,7 +4,11 @@
 npm i openapi-definition-to-editor
 ```
 
-# Example of using
+# Look at editorInputToHtml.ts to handle editors by yourself
+
+[editorInputToHtml.ts](src/converters/editorInputToHtml.ts)
+
+# Example of using editorInputToHtml.ts
 
 ## Download this file
 
@@ -29,7 +33,3 @@ require('child_process').exec(start + ' ' + './openapiSchemaExample.html');
 ## Result
 
 ![Example](https://github.com/barnuri/openapi-definition-to-editor/blob/master/ex.png?raw=true)
-
-# Look at editorInputToHtml.ts to handle editors by yourself
-
-[editorInputToHtml.ts](src/converters/editorInputToHtml.ts)
