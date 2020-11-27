@@ -7,7 +7,4 @@ export class EditorInput {
     getName() {
         return (this.path || '').split('.').splice(-1)[0];
     }
-    toHtml() {
-        return '';
-    }
 }
