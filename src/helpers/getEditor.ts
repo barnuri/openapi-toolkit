@@ -30,6 +30,8 @@ export function getEditor(openApiDocument: OpenApiDocument, definistionName: str
             arrayInput.path = path;
             arrayInput.required = inputIsRequired(path, parentDefinition);
             arrayInput.itemInput = itemPrimitiveInput || getEditorInput(path, getOpenApiDefinitionObject(definitionObj.items!, definitions), parentDefinition);
+            arrayInput.openApiDefinition = definitionObj;
+            arrayInput.openApiParentDefinition = parentDefinition;
             return arrayInput;
         }
         // is object
@@ -41,6 +43,8 @@ export function getEditor(openApiDocument: OpenApiDocument, definistionName: str
         definitionObj.anyOf = definitionObj.anyOf || [];
         const objectEditor = new EditorObjectInput();
         objectEditor.path = path;
+        objectEditor.openApiDefinition = definitionObj;
+        objectEditor.openApiParentDefinition = parentDefinition;
         objectEditor.properties = propsInputs;
         objectEditor.switchable = definitionObj.anyOf.length > 0;
         if (objectEditor.switchable) {
