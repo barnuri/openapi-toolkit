@@ -1,8 +1,7 @@
-import { Component, Prop, h } from '@stencil/core';
+import { Component, h } from '@stencil/core';
 
 @Component({
     tag: 'editor-input',
-    styleUrl: 'editor-input.css',
     shadow: true,
 })
 export class EditorInputComponent {

@@ -1,26 +1,37 @@
 {
-  "name": "editor-input",
-  "version": "0.0.1",
-  "description": "Stencil Component Starter",
-  "main": "dist/index.cjs.js",
-  "module": "dist/custom-elements/index.js",
-  "es2015": "dist/esm/index.mjs",
-  "es2017": "dist/esm/index.mjs",
-  "types": "dist/custom-elements/index.d.ts",
-  "collection": "dist/collection/collection-manifest.json",
-  "collection:main": "dist/collection/index.js",
-  "unpkg": "dist/editor-input/editor-input.js",
-  "files": [
-    "dist/",
-    "loader/"
-  ],
-  "scripts": {
-    "build": "stencil build --docs",
-    "start": "stencil build --dev --watch --serve",
-    "generate": "stencil generate"
-  },
-  "dependencies": {
-    "@stencil/core": "^2.0.1"
-  },
-  "license": "MIT"
+    "name": "editor-input",
+    "version": "1.0.1",
+    "author": "Bar Nuri",
+    "description": "Stencil Component Starter",
+    "main": "dist/index.cjs.js",
+    "module": "dist/custom-elements/index.js",
+    "es2015": "dist/esm/index.mjs",
+    "es2017": "dist/esm/index.mjs",
+    "types": "dist/custom-elements/index.d.ts",
+    "collection": "dist/collection/collection-manifest.json",
+    "collection:main": "dist/collection/index.js",
+    "unpkg": "dist/editor-input/editor-input.js",
+    "files": [
+        "dist/",
+        "loader/"
+    ],
+    "scripts": {
+        "build": "stencil build --docs",
+        "start": "stencil build --dev --watch --serve",
+        "generate": "stencil generate",
+        "prepublish": "rimraf dist && rimraf loader && npm run build",
+        "postpublish": "npm version patch && git push"
+    },
+    "dependencies": {
+        "@stencil/core": "^2.0.1"
+    },
+    "license": "MIT",
+    "homepage": "https://github.com/barnuri/openapi-definition-to-editor",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/barnuri/openapi-definition-to-editor"
+    },
+    "devDependencies": {
+        "rimraf": "^3.0.2"
+    }
 }
