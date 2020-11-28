@@ -8,7 +8,7 @@ import { EditorPrimitiveInput, getEditorInputName } from 'openapi-definition-to-
 })
 export class EditorPrimitiveInputComponent implements OnInit {
     constructor() {}
-    @Input() changes: any;
+    @Input() getChanges: () => any;
     @Input() setChanges: (val: any) => void;
     @Input() value: any;
     @Input() primitiveInput: EditorPrimitiveInput;
@@ -18,11 +18,10 @@ export class EditorPrimitiveInputComponent implements OnInit {
     ngOnInit(): void {
         this.name = getEditorInputName(this.primitiveInput);
         this.value = this.value || {};
-        this.changes = this.changes || {};
-        this.pathValue = this.changes[this.primitiveInput.path] || this.value[this.primitiveInput.path] || '';
+        this.pathValue = this.getChanges[this.primitiveInput.path] || this.value[this.primitiveInput.path] || '';
         this.enumOptions = this.primitiveInput.enumNames || this.primitiveInput.enumValues || [];
     }
     setValue(newVal) {
-        this.setChanges({ ...this.changes, [this.primitiveInput.path]: newVal });
+        this.setChanges({ ...this.getChanges(), [this.primitiveInput.path]: newVal });
     }
 }

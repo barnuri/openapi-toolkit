@@ -10,7 +10,7 @@
             <u>common:</u>
         </b>
         <app-editor-input
-            [changes]="changes"
+            [getChanges]="getChanges"
             [editorInput]="fixIndexPath(x)"
             [setChanges]="setChanges"
             [value]="value"
@@ -23,7 +23,7 @@
                     <u>{{ objectInput.switchableOptions![i] }}</u>
                 </b>
                 <app-editor-input
-                    [changes]="changes"
+                    [getChanges]="getChanges"
                     [editorInput]="fixIndexPath(switchableObject)"
                     [setChanges]="setChanges"
                     [value]="value"

@@ -9,7 +9,7 @@ import { EditorInput } from 'openapi-definition-to-editor';
 export class EditorInputComponent implements OnInit {
     constructor() {}
     @Input() editorInput: EditorInput;
-    @Input() changes: any;
+    @Input() getChanges: () => any;
     @Input() setChanges: (val: any) => void;
     @Input() value: any;
     ngOnInit(): void {}

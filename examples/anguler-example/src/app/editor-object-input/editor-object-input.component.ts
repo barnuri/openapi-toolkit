@@ -8,7 +8,7 @@ import { EditorInput, EditorObjectInput, getEditorInputName } from 'openapi-defi
 })
 export class EditorObjectInputComponent implements OnInit {
     constructor() {}
-    @Input() changes: any;
+    @Input() getChanges: () => any;
     @Input() setChanges: (val: any) => void;
     @Input() value: any;
     @Input() objectInput: EditorObjectInput;

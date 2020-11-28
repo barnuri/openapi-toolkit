@@ -10,13 +10,16 @@ export class EditorComponent implements OnInit {
     constructor() {}
     @Input() editor: Editor;
     changes: any;
-    getChanges;
     ngOnInit(): void {
         this.changes = {};
     }
     setChanges(val: any): void {
         val = val || {};
-        this.changes = { ...this.changes, ...val };
+        this.changes = { ...val };
         console.log(this.changes);
+    }
+    getChanges() {
+        this.changes = this.changes || {};
+        return this.changes;
     }
 }

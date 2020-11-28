@@ -8,7 +8,7 @@ import { EditorArrayInput, getEditorInputName } from 'openapi-definition-to-edit
 })
 export class EditorArrayInputComponent implements OnInit {
     constructor() {}
-    @Input() changes: any;
+    @Input() getChanges: () => any;
     @Input() setChanges: (val: any) => void;
     @Input() value: any;
     @Input() arrayInput: EditorArrayInput;
@@ -21,14 +21,14 @@ export class EditorArrayInputComponent implements OnInit {
         this.name = getEditorInputName(this.arrayInput).replace('[i]', ``);
     }
     deleteItem(index: number) {
-        this.changes = this.changes || {};
         this.items[index] = this.items[index] || {};
         this.items[index]['x-editorDeleted'] = true;
         const prefixKey = this.arrayInput.itemInput.path.replace('[i]', `[${index}]`);
-        Object.keys(this.changes)
+        const changes = this.getChanges();
+        Object.keys(changes)
             .filter(key => key.includes(prefixKey))
-            .forEach(key => delete this.changes[key]);
-        this.setChanges({ ...this.changes });
+            .forEach(key => delete changes[key]);
+        this.setChanges({ ...changes });
     }
     addItem() {
         this.items.push({ 'x-editorDeleted': false });

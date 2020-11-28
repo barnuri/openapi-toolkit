@@ -1,19 +1,19 @@
 <app-editor-primitive-input
-    [changes]="changes"
+    [getChanges]="getChanges"
     [setChanges]="setChanges"
     [value]="value"
     *ngIf="editorInput.editorType === 'EditorPrimitiveInput'"
     [primitiveInput]="editorInput"
 ></app-editor-primitive-input>
 <app-editor-array-input
-    [changes]="changes"
+    [getChanges]="getChanges"
     [setChanges]="setChanges"
     [value]="value"
     *ngIf="editorInput.editorType === 'EditorArrayInput'"
     [arrayInput]="editorInput"
 ></app-editor-array-input>
 <app-editor-object-input
-    [changes]="changes"
+    [getChanges]="getChanges"
     [setChanges]="setChanges"
     [value]="value"
     *ngIf="editorInput.editorType === 'EditorObjectInput'"
