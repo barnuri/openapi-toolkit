@@ -8,9 +8,11 @@ npm i openapi-definition-to-editor
 
 ## 1) [React Example](./examples/react-example)
 
+## 2) [Angular Example](./examples/anguler-example)
+
 ---
 
-## 2) Look at editorInputToHtml.ts to handle editors by yourself
+## 3) Look at editorInputToHtml.ts to handle editors by yourself
 
 [editorInputToHtml.ts](src/converters/editorInputToHtml.ts)
 

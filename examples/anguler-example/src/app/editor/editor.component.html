@@ -1,0 +1,12 @@
+<div>
+    <h1>{{ editor.name }}</h1>
+    <div style="padding-left: '20px'">
+        <app-editor-input
+            *ngFor="let input of editor.inputs"
+            [value]="{}"
+            [changes]="changes"
+            [setChanges]="setChanges"
+            [editorInput]="input"
+        ></app-editor-input>
+    </div>
+</div>

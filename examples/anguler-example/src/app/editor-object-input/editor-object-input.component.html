@@ -1,0 +1,34 @@
+<div style="padding-left: '20px'">
+    <b>{{ name }}</b> :
+    <span *ngIf="objectInput.switchable">
+        <b *ngIf="objectInput.switchable"><u>switchable:</u> </b>
+        <button (click)="setSwitchableSelected('common')">common</button>
+        <button (click)="setSwitchableSelected(switchableName)" *ngFor="let switchableName of objectInput.switchableOptions">{{ switchableName }}</button>
+    </span>
+    <div style="padding-left: '20px'">
+        <b *ngIf="objectInput.switchable">
+            <u>common:</u>
+        </b>
+        <app-editor-input
+            [changes]="changes"
+            [editorInput]="fixIndexPath(x)"
+            [setChanges]="setChanges"
+            [value]="value"
+            *ngFor="let x of objectInput.properties"
+        ></app-editor-input>
+
+        <div *ngFor="let switchableObject of objectInput.switchableObjects; let i = index">
+            <div *ngIf="switchableSelected == objectInput.switchableOptions![i]">
+                <b>
+                    <u>{{ objectInput.switchableOptions![i] }}</u>
+                </b>
+                <app-editor-input
+                    [changes]="changes"
+                    [editorInput]="fixIndexPath(switchableObject)"
+                    [setChanges]="setChanges"
+                    [value]="value"
+                ></app-editor-input>
+            </div>
+        </div>
+    </div>
+</div>
