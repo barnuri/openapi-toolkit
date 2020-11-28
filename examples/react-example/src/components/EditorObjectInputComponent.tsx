@@ -1,0 +1,52 @@
+import { EditorInput, EditorObjectInput, getEditorInputName } from 'openapi-definition-to-editor';
+import * as React from 'react';
+import EditorInputComponent from './EditorInputComponent';
+import EditorProps from './EditorProps';
+
+const EditorObjectInputComponent = ({ objectInput, changes, setChanges, value }: EditorProps & { objectInput: EditorObjectInput }) => {
+    const fixIndexPath = (x: EditorInput) => {
+        x.path = `${objectInput.path}.${getEditorInputName(x)}`;
+        return x;
+    };
+    objectInput.properties = objectInput.properties || [];
+    const propsComponents = objectInput.properties.map((x, i) => (
+        <EditorInputComponent key={x.path + i} changes={changes} editorInput={fixIndexPath(x)} setChanges={setChanges} value={value} />
+    ));
+    if (objectInput.switchable) {
+        const commonProps = (
+            <div style={{ paddingLeft: '20px' }}>
+                <b>
+                    <u>common:</u>
+                </b>
+                {{ propsComponents }}
+            </div>
+        );
+        objectInput.switchableOptions = objectInput.switchableOptions || [];
+        objectInput.switchableObjects = objectInput.switchableObjects || [];
+        return (
+            <div>
+                <b>{getEditorInputName(objectInput)}</b>:
+                <b>
+                    <u>switchable:</u>
+                </b>
+                {objectInput.switchableOptions.join(',')}
+                {commonProps}
+                {objectInput.switchableObjects.map((x, i) => (
+                    <div key={x.path + i} style={{ paddingLeft: '20px' }}>
+                        <b>
+                            <u>{objectInput.switchableOptions![i]}</u>
+                        </b>
+                        props: {<EditorInputComponent changes={changes} editorInput={fixIndexPath(x)} setChanges={setChanges} value={value} />}
+                    </div>
+                ))}
+            </div>
+        );
+    }
+    return (
+        <div style={{ paddingLeft: '20px' }}>
+            <b>{getEditorInputName(objectInput)}</b>: <div style={{ paddingLeft: '20px' }}>{propsComponents}</div>
+        </div>
+    );
+};
+
+export default EditorObjectInputComponent;

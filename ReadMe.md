@@ -4,17 +4,23 @@
 npm i openapi-definition-to-editor
 ```
 
-# Look at editorInputToHtml.ts to handle editors by yourself
+# Examples
+
+## 1) [React Example](./examples/react-example)
+
+---
+
+## 2) Look at editorInputToHtml.ts to handle editors by yourself
 
 [editorInputToHtml.ts](src/converters/editorInputToHtml.ts)
 
-# Example of using editorInputToHtml.ts
+## Example of using editorInputToHtml.ts
 
 ## Download this file
 
 https://raw.githubusercontent.com/barnuri/openapi-definition-to-editor/master/src/openapiSchemaExample.json
 
-## Then use this code
+### Then use this code
 
 ```js
 import { writeFileSync } from 'fs';
@@ -30,6 +36,6 @@ require('child_process').exec(start + ' ' + './openapiSchemaExample.html');
 
 ```
 
-## Result
+### Result
 
 ![Example](https://github.com/barnuri/openapi-definition-to-editor/blob/master/ex.png?raw=true)

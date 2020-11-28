@@ -1,3 +1,4 @@
+import { getEditorInputName } from '../helpers/getEditorInputName';
 import { Editor, EditorArrayInput, EditorInput, EditorObjectInput, EditorPrimitiveInput } from '../models';
 
 export function editorInputToHtml(input: EditorInput | Editor | Editor[]) {
@@ -6,17 +7,18 @@ export function editorInputToHtml(input: EditorInput | Editor | Editor[]) {
         const editors = input as Editor[];
         return editors.map(x => editorInputToHtml(x)).join('');
     }
+
     if (input instanceof Editor) {
         const editor = input as Editor;
         return `<h1>${editor.name}</h1><div style='padding-left:20px'>${(editor.inputs || []).map(x => editorInputToHtml(x)).join('')}</div>`;
     }
 
-    if (input instanceof EditorArrayInput) {
+    if (input.editorType == 'EditorArrayInput') {
         const arrayInput = input as EditorArrayInput;
-        return `<b>${arrayInput.getName()}</b>:  array of <div style='padding-left:20px'>${editorInputToHtml(arrayInput.itemInput)}</div>`;
+        return `<b>${getEditorInputName(arrayInput)}</b>:  array of <div style='padding-left:20px'>${editorInputToHtml(arrayInput.itemInput)}</div>`;
     }
 
-    if (input instanceof EditorPrimitiveInput) {
+    if (input.editorType == 'EditorPrimitiveInput') {
         const primitiveInput = input as EditorPrimitiveInput;
         const requiredDot = primitiveInput.required ? `<span style="color:red">*</span>` : '';
         let html = '';
@@ -30,11 +32,11 @@ export function editorInputToHtml(input: EditorInput | Editor | Editor[]) {
         } else {
             html = `<input type='${primitiveInput.type}' />`;
         }
-        html = `<div><b>${primitiveInput.getName()}:<b> ${requiredDot} ${html}</div>`;
+        html = `<div><b>${getEditorInputName(primitiveInput)}:<b> ${requiredDot} ${html}</div>`;
         return html;
     }
 
-    if (input instanceof EditorObjectInput) {
+    if (input.editorType == 'EditorObjectInput') {
         const objectInput = input as EditorObjectInput;
         objectInput.properties = objectInput.properties || [];
         const propsHtml = objectInput.properties.map(x => editorInputToHtml(x)).join('');
@@ -43,7 +45,7 @@ export function editorInputToHtml(input: EditorInput | Editor | Editor[]) {
             objectInput.switchableOptions = objectInput.switchableOptions || [];
             objectInput.switchableObjects = objectInput.switchableObjects || [];
             return (
-                `<b>${objectInput.getName()}</b>:  ` +
+                `<b>${getEditorInputName(objectInput)}</b>:  ` +
                 `<b><u>switchable:</u></b> ${objectInput.switchableOptions.join(',')}` +
                 commonProps +
                 objectInput.switchableObjects
@@ -51,7 +53,7 @@ export function editorInputToHtml(input: EditorInput | Editor | Editor[]) {
                     .join('')
             );
         }
-        return `<b>${objectInput.getName()}</b>: <div style='padding-left:20px'>${propsHtml}</div>`;
+        return `<b>${getEditorInputName(objectInput)}</b>: <div style='padding-left:20px'>${propsHtml}</div>`;
     }
 
     throw new Error('bad type');

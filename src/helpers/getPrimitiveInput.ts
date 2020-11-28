@@ -34,7 +34,7 @@ export function getPrimitiveInput(
     editor.minLength = definition.minLength;
     editor.maximum = definition.maximum;
     editor.minimum = definition.minimum;
-
+    editor.editorType = 'EditorPrimitiveInput';
     return editor;
 }
 

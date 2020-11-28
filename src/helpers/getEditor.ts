@@ -32,6 +32,7 @@ export function getEditor(openApiDocument: OpenApiDocument, definistionName: str
             arrayInput.itemInput = itemPrimitiveInput || getEditorInput(path, getOpenApiDefinitionObject(definitionObj.items!, definitions), parentDefinition);
             arrayInput.openApiDefinition = definitionObj;
             arrayInput.openApiParentDefinition = parentDefinition;
+            arrayInput.editorType = 'EditorArrayInput';
             return arrayInput;
         }
         // is object
@@ -47,6 +48,7 @@ export function getEditor(openApiDocument: OpenApiDocument, definistionName: str
         objectEditor.openApiParentDefinition = parentDefinition;
         objectEditor.properties = propsInputs;
         objectEditor.switchable = definitionObj.anyOf.length > 0;
+        objectEditor.editorType = 'EditorObjectInput';
         if (objectEditor.switchable) {
             objectEditor.switchableOptions = definitionObj.anyOf!.map(x => getOpenApiDefinitionObject(x, definitions).title!);
             objectEditor.switchableObjects = [];
