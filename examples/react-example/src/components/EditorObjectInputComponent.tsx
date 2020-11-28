@@ -1,9 +1,11 @@
 import { EditorInput, EditorObjectInput, getEditorInputName } from 'openapi-definition-to-editor';
 import * as React from 'react';
+import { useState } from 'react';
 import EditorInputComponent from './EditorInputComponent';
 import EditorProps from './EditorProps';
 
 const EditorObjectInputComponent = ({ objectInput, changes, setChanges, value }: EditorProps & { objectInput: EditorObjectInput }) => {
+    const [switchableSelected, setSwitchableSelected] = useState('' as string);
     const fixIndexPath = (x: EditorInput) => {
         x.path = `${objectInput.path}.${getEditorInputName(x)}`;
         return x;
@@ -18,7 +20,7 @@ const EditorObjectInputComponent = ({ objectInput, changes, setChanges, value }:
                 <b>
                     <u>common:</u>
                 </b>
-                {{ propsComponents }}
+                {propsComponents}
             </div>
         );
         objectInput.switchableOptions = objectInput.switchableOptions || [];
@@ -29,14 +31,22 @@ const EditorObjectInputComponent = ({ objectInput, changes, setChanges, value }:
                 <b>
                     <u>switchable:</u>
                 </b>
-                {objectInput.switchableOptions.join(',')}
+                {['common', ...objectInput.switchableOptions].map(s => (
+                    <button key={s} onClick={() => setSwitchableSelected(s)}>
+                        {s}
+                    </button>
+                ))}
                 {commonProps}
                 {objectInput.switchableObjects.map((x, i) => (
                     <div key={x.path + i} style={{ paddingLeft: '20px' }}>
-                        <b>
-                            <u>{objectInput.switchableOptions![i]}</u>
-                        </b>
-                        props: {<EditorInputComponent changes={changes} editorInput={fixIndexPath(x)} setChanges={setChanges} value={value} />}
+                        {switchableSelected === objectInput.switchableOptions![i] && (
+                            <>
+                                <b>
+                                    <u>{objectInput.switchableOptions![i]}</u>
+                                </b>
+                                {<EditorInputComponent changes={changes} editorInput={fixIndexPath(x)} setChanges={setChanges} value={value} />}
+                            </>
+                        )}
                     </div>
                 ))}
             </div>

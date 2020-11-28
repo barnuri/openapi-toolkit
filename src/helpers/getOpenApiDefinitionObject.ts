@@ -7,5 +7,9 @@ export function getOpenApiDefinitionObject(definition: OpenApiDefinition, defini
     if (Object.keys(definition).includes('$ref')) {
         return definitions[(definition as OpenApiDefinitionReference).$ref.split('/').splice(-1)[0]];
     }
+    if (Object.keys(definition).includes('oneOf')) {
+        const def = (definition as OpenApiDefinitionObject).oneOf!.filter((x: any) => x.type != 'null')[0];
+        return getOpenApiDefinitionObject(def, definitions);
+    }
     return definition as OpenApiDefinitionObject;
 }
