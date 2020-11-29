@@ -10,9 +10,9 @@
             <u>common:</u>
         </b>
         <app-editor-input
-            [getChanges]="getChanges"
+            [changes]="changes"
             [editorInput]="fixIndexPath(x)"
-            [setChanges]="setChanges"
+            (setChanges)="setChanges.emit($event)"
             [value]="value"
             *ngFor="let x of objectInput.properties"
         ></app-editor-input>
@@ -23,9 +23,9 @@
                     <u>{{ objectInput.switchableOptions![i] }}</u>
                 </b>
                 <app-editor-input
-                    [getChanges]="getChanges"
+                    [changes]="changes"
                     [editorInput]="fixIndexPath(switchableObject)"
-                    [setChanges]="setChanges"
+                    (setChanges)="setChanges.emit($event)"
                     [value]="value"
                 ></app-editor-input>
             </div>

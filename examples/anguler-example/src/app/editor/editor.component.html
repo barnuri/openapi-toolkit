@@ -4,8 +4,8 @@
         <app-editor-input
             *ngFor="let input of editor.inputs"
             [value]="{}"
-            [getChanges]="getChanges"
-            [setChanges]="setChanges"
+            [changes]="getChanges()"
+            (setChanges)="setChanges($event)"
             [editorInput]="input"
         ></app-editor-input>
     </div>

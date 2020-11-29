@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { EditorPrimitiveInput, getEditorInputName } from 'openapi-definition-to-editor';
 
 @Component({
@@ -8,8 +8,8 @@ import { EditorPrimitiveInput, getEditorInputName } from 'openapi-definition-to-
 })
 export class EditorPrimitiveInputComponent implements OnInit {
     constructor() {}
-    @Input() getChanges: () => any;
-    @Input() setChanges: (val: any) => void;
+    @Input() changes: any;
+    @Output() setChanges = new EventEmitter();
     @Input() value: any;
     @Input() primitiveInput: EditorPrimitiveInput;
     name: string;
@@ -18,10 +18,10 @@ export class EditorPrimitiveInputComponent implements OnInit {
     ngOnInit(): void {
         this.name = getEditorInputName(this.primitiveInput);
         this.value = this.value || {};
-        this.pathValue = this.getChanges[this.primitiveInput.path] || this.value[this.primitiveInput.path] || '';
+        this.pathValue = this.changes[this.primitiveInput.path] || this.value[this.primitiveInput.path] || '';
         this.enumOptions = this.primitiveInput.enumNames || this.primitiveInput.enumValues || [];
     }
     setValue(newVal) {
-        this.setChanges({ ...this.getChanges(), [this.primitiveInput.path]: newVal });
+        this.setChanges.emit({ ...this.changes, [this.primitiveInput.path]: newVal });
     }
 }

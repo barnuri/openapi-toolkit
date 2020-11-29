@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { EditorArrayInput, getEditorInputName } from 'openapi-definition-to-editor';
 
 @Component({
@@ -8,8 +8,8 @@ import { EditorArrayInput, getEditorInputName } from 'openapi-definition-to-edit
 })
 export class EditorArrayInputComponent implements OnInit {
     constructor() {}
-    @Input() getChanges: () => any;
-    @Input() setChanges: (val: any) => void;
+    @Input() changes: any;
+    @Output() setChanges = new EventEmitter();
     @Input() value: any;
     @Input() arrayInput: EditorArrayInput;
     items: any[] = [];
@@ -24,11 +24,11 @@ export class EditorArrayInputComponent implements OnInit {
         this.items[index] = this.items[index] || {};
         this.items[index]['x-editorDeleted'] = true;
         const prefixKey = this.arrayInput.itemInput.path.replace('[i]', `[${index}]`);
-        const changes = this.getChanges();
+        const changes = this.changes;
         Object.keys(changes)
             .filter(key => key.includes(prefixKey))
             .forEach(key => delete changes[key]);
-        this.setChanges({ ...changes });
+        this.setChanges.emit({ ...changes });
     }
     addItem() {
         this.items.push({ 'x-editorDeleted': false });

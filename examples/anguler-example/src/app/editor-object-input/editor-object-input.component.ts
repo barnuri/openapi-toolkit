@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { EditorInput, EditorObjectInput, getEditorInputName } from 'openapi-definition-to-editor';
 
 @Component({
@@ -8,8 +8,8 @@ import { EditorInput, EditorObjectInput, getEditorInputName } from 'openapi-defi
 })
 export class EditorObjectInputComponent implements OnInit {
     constructor() {}
-    @Input() getChanges: () => any;
-    @Input() setChanges: (val: any) => void;
+    @Input() changes: any;
+    @Output() setChanges = new EventEmitter();
     @Input() value: any;
     @Input() objectInput: EditorObjectInput;
     switchableSelected: string;

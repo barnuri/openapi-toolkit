@@ -1,20 +1,20 @@
 <app-editor-primitive-input
-    [getChanges]="getChanges"
-    [setChanges]="setChanges"
+    [changes]="changes"
+    (setChanges)="setChanges.emit($event)"
     [value]="value"
     *ngIf="editorInput.editorType === 'EditorPrimitiveInput'"
     [primitiveInput]="editorInput"
 ></app-editor-primitive-input>
 <app-editor-array-input
-    [getChanges]="getChanges"
-    [setChanges]="setChanges"
+    [changes]="changes"
+    (setChanges)="setChanges.emit($event)"
     [value]="value"
     *ngIf="editorInput.editorType === 'EditorArrayInput'"
     [arrayInput]="editorInput"
 ></app-editor-array-input>
 <app-editor-object-input
-    [getChanges]="getChanges"
-    [setChanges]="setChanges"
+    [changes]="changes"
+    (setChanges)="setChanges.emit($event)"
     [value]="value"
     *ngIf="editorInput.editorType === 'EditorObjectInput'"
     [objectInput]="editorInput"

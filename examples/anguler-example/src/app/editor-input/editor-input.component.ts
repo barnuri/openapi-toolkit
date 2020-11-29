@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { EditorInput } from 'openapi-definition-to-editor';
 
 @Component({
@@ -9,8 +9,8 @@ import { EditorInput } from 'openapi-definition-to-editor';
 export class EditorInputComponent implements OnInit {
     constructor() {}
     @Input() editorInput: EditorInput;
-    @Input() getChanges: () => any;
-    @Input() setChanges: (val: any) => void;
+    @Input() changes: any;
+    @Output() setChanges = new EventEmitter();
     @Input() value: any;
     ngOnInit(): void {}
 }
