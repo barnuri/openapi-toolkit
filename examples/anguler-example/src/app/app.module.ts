@@ -1,6 +1,5 @@
 import { BrowserModule } from '@angular/platform-browser';
-import { CUSTOM_ELEMENTS_SCHEMA, NgModule } from '@angular/core';
-
+import { NgModule } from '@angular/core';
 import { AppComponent } from './app.component';
 import { EditorInputComponent } from './editor-input/editor-input.component';
 import { EditorComponent } from './editor/editor.component';
@@ -11,11 +10,10 @@ import { EditorsComponent } from './editors/editors.component';
 import { CommonModule } from '@angular/common';
 
 @NgModule({
-    // tslint:disable-next-line: max-line-length
     declarations: [
         AppComponent,
-        EditorInputComponent,
         EditorComponent,
+        EditorInputComponent,
         EditorObjectInputComponent,
         EditorArrayInputComponent,
         EditorPrimitiveInputComponent,
@@ -24,6 +22,6 @@ import { CommonModule } from '@angular/common';
     imports: [BrowserModule, CommonModule],
     providers: [],
     bootstrap: [AppComponent],
-    schemas: [CUSTOM_ELEMENTS_SCHEMA],
+    schemas: [],
 })
 export class AppModule {}

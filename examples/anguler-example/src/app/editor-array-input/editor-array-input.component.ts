@@ -1,5 +1,6 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { EditorArrayInput, getEditorInputName } from 'openapi-definition-to-editor';
+import * as jp from 'jsonpath';
 
 @Component({
     selector: 'app-editor-array-input',
@@ -17,7 +18,7 @@ export class EditorArrayInputComponent implements OnInit {
     arrayPath: string;
     ngOnInit(): void {
         this.arrayPath = this.arrayInput.path.replace('[i]', ``);
-        this.items = this.value[this.arrayPath] || [];
+        this.items = (jp.query(this.value, '$.' + this.arrayPath) as any[]).map(() => ({})) || [];
         this.name = getEditorInputName(this.arrayInput).replace('[i]', ``);
     }
     deleteItem(index: number) {

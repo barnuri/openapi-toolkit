@@ -2,12 +2,7 @@
     <b>{{ name }}:</b><button (click)="addItem()">Add</button>
     <div *ngFor="let item of items; let i = index">
         <div *ngIf="!item['x-editorDeleted']">
-            <app-editor-input
-                [editorInput]="modifyIndex(i)"
-                [changes]="changes"
-                (setChanges)="setChanges.emit($event)"
-                [value]="value"
-            ></app-editor-input>
+            <app-editor-input [editorInput]="modifyIndex(i)" [changes]="changes" (setChanges)="setChanges.emit($event)" [value]="value"></app-editor-input>
             <button (click)="deleteItem(i)">Delete</button>
         </div>
     </div>

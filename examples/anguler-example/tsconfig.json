@@ -6,8 +6,6 @@
         "outDir": "./dist/out-tsc",
         "forceConsistentCasingInFileNames": true,
         "emitDecoratorMetadata": false,
-        // TODO(gkalpak): Fix the code and enable this.
-        // "strict": true,
         "noImplicitReturns": true,
         "noFallthroughCasesInSwitch": true,
         "sourceMap": true,
@@ -16,7 +14,7 @@
         "experimentalDecorators": true,
         "moduleResolution": "node",
         "importHelpers": true,
-        "target": "es2015",
+        "target": "es5",
         "module": "es2020",
         "resolveJsonModule": true,
         "allowSyntheticDefaultImports": true,
@@ -25,7 +23,6 @@
     "angularCompilerOptions": {
         "strictInjectionParameters": true,
         "strictInputAccessModifiers": true,
-        // TODO(gkalpak): Fix the code and enable this (i.e. switch from `fullTemplateTypeCheck` to `strictTemplates`).
         "fullTemplateTypeCheck": true // "strictTemplates": true
     }
 }

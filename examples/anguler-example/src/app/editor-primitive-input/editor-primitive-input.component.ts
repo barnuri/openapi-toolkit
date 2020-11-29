@@ -1,5 +1,6 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { EditorPrimitiveInput, getEditorInputName } from 'openapi-definition-to-editor';
+import * as jp from 'jsonpath';
 
 @Component({
     selector: 'app-editor-primitive-input',
@@ -18,7 +19,7 @@ export class EditorPrimitiveInputComponent implements OnInit {
     ngOnInit(): void {
         this.name = getEditorInputName(this.primitiveInput);
         this.value = this.value || {};
-        this.pathValue = this.changes[this.primitiveInput.path] || this.value[this.primitiveInput.path] || '';
+        this.pathValue = this.changes[this.primitiveInput.path] || jp.query(this.value, '$.' + this.primitiveInput.path) || '';
         this.enumOptions = this.primitiveInput.enumNames || this.primitiveInput.enumValues || [];
     }
     setValue(newVal) {

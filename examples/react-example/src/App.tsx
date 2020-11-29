@@ -1,8 +1,11 @@
 import './App.css';
-import openapiSchemaExample from 'openapi-definition-to-editor/src/openapiSchemaExample.json';
+import openapiSchemaExample from 'openapi-definition-to-editor/src/openapiSchemaExample2.json';
 import { getEditor, OpenApiDocument } from 'openapi-definition-to-editor';
 import EditorComponent from './components/EditorComponent';
-const editors = ['Order', 'User', 'Category', 'Tag', 'Pet', 'ApiResponse'].map(tabName => getEditor((openapiSchemaExample as any) as OpenApiDocument, tabName));
+
+const editors = ['DeepMappingSettings', 'User', 'Category', 'Tag', 'Pet', 'ApiResponse'].map(tabName =>
+    getEditor((openapiSchemaExample as any) as OpenApiDocument, tabName),
+);
 
 function App() {
     return (
