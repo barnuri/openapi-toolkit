@@ -1,6 +1,7 @@
 import { EditorPrimitiveInput, getEditorInputName } from 'openapi-definition-to-editor';
 import * as React from 'react';
 import EditorProps from './EditorProps';
+import * as jp from 'jsonpath';
 
 const EditorPrimitiveInputComponent = ({
     primitiveInput,
@@ -12,7 +13,7 @@ const EditorPrimitiveInputComponent = ({
 }) => {
     const onChange = (e: React.ChangeEvent<HTMLSelectElement> | React.ChangeEvent<HTMLInputElement>) =>
         setChanges({ ...changes, [primitiveInput.path]: e.target.value });
-    const pathValue = changes[primitiveInput.path] || value[primitiveInput.path];
+    const pathValue = changes[primitiveInput.path] || jp.query(value, '$.' + primitiveInput.path) || '';
     const requiredDot = primitiveInput.required ? <span style={{ color: 'red' }}>*</span> : <span />;
     let input = <div />;
     if (primitiveInput.type === 'enum') {

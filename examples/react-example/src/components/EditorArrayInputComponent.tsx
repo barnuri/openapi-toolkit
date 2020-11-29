@@ -2,6 +2,7 @@ import { EditorArrayInput, getEditorInputName } from 'openapi-definition-to-edit
 import * as React from 'react';
 import EditorInputComponent from './EditorInputComponent';
 import EditorProps from './EditorProps';
+import * as jp from 'jsonpath';
 
 const EditorArrayInputComponent = ({
     arrayInput,
@@ -12,7 +13,7 @@ const EditorArrayInputComponent = ({
     arrayInput: EditorArrayInput;
 }) => {
     const arrayPath = arrayInput.path.replace('[i]', ``);
-    const [items, setItems] = React.useState((value[arrayPath] as any[]) || ([] as any[]));
+    const [items, setItems] = React.useState(((jp.query(value, '$.' + arrayPath) as any[]).map(() => ({})) as any[]) || ([] as any[]));
     const modifyIndex = (i: number) => {
         const itemInput = Object.assign({}, arrayInput.itemInput);
         itemInput.path = itemInput.path.replace('[i]', `[${i}]`);
