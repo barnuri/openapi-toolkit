@@ -16,9 +16,12 @@ export class EditorArrayInputComponent implements OnInit {
     items: any[] = [];
     name: string;
     arrayPath: string;
+    originalItemCount: number;
     ngOnInit(): void {
         this.arrayPath = this.arrayInput.path.replace('[i]', ``);
-        this.items = (jp.query(this.value, '$.' + this.arrayPath) as any[]).map(() => ({})) || [];
+        const originalItems = (jp.query(this.value, '$.' + this.arrayPath) as any[]).map(() => ({}));
+        this.originalItemCount = originalItems.length;
+        this.items = originalItems || [];
         this.name = getEditorInputName(this.arrayInput).replace('[i]', ``);
     }
     deleteItem(index: number) {
@@ -29,6 +32,12 @@ export class EditorArrayInputComponent implements OnInit {
         Object.keys(changes)
             .filter(key => key.includes(prefixKey))
             .forEach(key => delete changes[key]);
+
+        // existing item
+        if (index <= this.originalItemCount - 1) {
+            changes[prefixKey + '.x-editorDeleted'] = true;
+        }
+
         this.setChanges.emit({ ...changes });
     }
     addItem() {
