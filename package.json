@@ -5,8 +5,9 @@
     "main": "./dist/index.js",
     "scripts": {
         "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx}\"",
-        "prepublish": "rimraf dist && tsc",
-        "postpublish": "npm version patch && git push"
+        "preversion": "rimraf dist && tsc",
+        "version": "npm publish",
+        "postversion": "npm version patch && git push"
     },
     "author": "Bar Nuri",
     "license": "ISC",
