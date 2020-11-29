@@ -3,7 +3,7 @@
     <div style="padding-left: '20px'">
         <app-editor-input
             *ngFor="let input of editor.inputs"
-            [value]="{}"
+            [value]="value"
             [changes]="getChanges()"
             (setChanges)="setChanges($event)"
             [editorInput]="input"

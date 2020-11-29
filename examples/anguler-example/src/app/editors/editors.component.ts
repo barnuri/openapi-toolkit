@@ -10,9 +10,11 @@ import openapiSchemaExample from 'openapi-definition-to-editor/src/openapiSchema
 export class EditorsComponent implements OnInit {
     constructor() {}
     editors: Editor[];
+    value: any;
     ngOnInit(): void {
         this.editors = ['Order', 'User', 'Category', 'Tag', 'Pet', 'ApiResponse'].map(tabName =>
             getEditor((openapiSchemaExample as any) as OpenApiDocument, tabName),
         );
+        this.value = {};
     }
 }

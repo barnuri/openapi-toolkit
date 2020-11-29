@@ -9,9 +9,11 @@ import { Editor } from 'openapi-definition-to-editor';
 export class EditorComponent implements OnInit {
     constructor() {}
     @Input() editor: Editor;
+    @Input() value: any;
     changes: any;
     ngOnInit(): void {
         this.changes = {};
+        this.value = this.value || {};
     }
     setChanges(val: any): void {
         val = val || {};
