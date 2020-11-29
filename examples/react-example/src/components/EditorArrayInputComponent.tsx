@@ -13,18 +13,40 @@ const EditorArrayInputComponent = ({
     arrayInput: EditorArrayInput;
 }) => {
     const arrayPath = arrayInput.path.replace('[i]', ``);
-    const [items, setItems] = React.useState(((jp.query(value, '$.' + arrayPath) as any[]).map(() => ({})) as any[]) || ([] as any[]));
+    const existingItems = (jp.query(value, '$.' + arrayPath) as any[]).map(() => ({})) as any[];
+    const originalItemsCount = existingItems.length;
+    const [items, setItems] = React.useState(existingItems || ([] as any[]));
     const modifyIndex = (i: number) => {
         const itemInput = Object.assign({}, arrayInput.itemInput);
-        itemInput.path = itemInput.path.replace('[i]', `[${i}]`);
+        itemInput.path = itemInput.path.replace('[i]', `.${i}`);
         return itemInput;
     };
     const deleteItem = (index: number) => {
         items[index]['x-editorDeleted'] = true;
-        const prefixKey = arrayInput.itemInput.path.replace('[i]', `[${index}]`);
-        Object.keys(changes)
-            .filter(key => key.includes(prefixKey))
-            .forEach(key => delete changes[key]);
+        const prefixKey = (i: number) => arrayInput.itemInput.path.replace('[i]', `.${i}`);
+
+        // cleanup
+        Object.keys(changes.$set)
+            .filter(key => key.includes(prefixKey(index)))
+            .forEach(key => delete changes.$set[key]);
+
+        // new item, reorganized indexes
+        if (index > originalItemsCount - 1) {
+            for (let minNewIndexToModify = index + 1; minNewIndexToModify < items.length; minNewIndexToModify++) {
+                Object.keys(changes.$set)
+                    .filter(key => key.includes(prefixKey(minNewIndexToModify)))
+                    .forEach(key => {
+                        changes.$set[key.replace(prefixKey(minNewIndexToModify), prefixKey(minNewIndexToModify - 1))] = changes.$set[key];
+                        delete changes.$set[key];
+                    });
+            }
+            items.splice(index, 1);
+        }
+        // existing item
+        else {
+            changes.$unset = { ...changes.$unset, [arrayPath]: '' };
+        }
+
         setChanges({ ...changes });
         setItems([...items]);
     };

@@ -14,38 +14,53 @@ export class EditorArrayInputComponent implements OnInit {
     @Input() value: any;
     @Input() arrayInput: EditorArrayInput;
     items: any[] = [];
-    name: string;
-    arrayPath: string;
-    originalItemCount: number;
+    originalItemsCount: number;
     ngOnInit(): void {
-        this.arrayPath = this.arrayInput.path.replace('[i]', ``);
-        const originalItems = (jp.query(this.value, '$.' + this.arrayPath) as any[]).map(() => ({}));
-        this.originalItemCount = originalItems.length;
+        const originalItems = (jp.query(this.value, '$.' + this.getArrayPath()) as any[]).map(() => ({}));
+        this.originalItemsCount = originalItems.length;
         this.items = originalItems || [];
-        this.name = getEditorInputName(this.arrayInput).replace('[i]', ``);
+    }
+    getName() {
+        return getEditorInputName(this.arrayInput).replace('[i]', ``);
+    }
+    getArrayPath() {
+        return this.arrayInput.path.replace('[i]', ``);
+    }
+    addItem() {
+        this.items.push({});
+    }
+    modifyIndex(i: number) {
+        const itemInput = Object.assign({}, this.arrayInput.itemInput);
+        itemInput.path = itemInput.path.replace('[i]', `.${i}`);
+        return itemInput;
     }
     deleteItem(index: number) {
         this.items[index] = this.items[index] || {};
         this.items[index]['x-editorDeleted'] = true;
-        const prefixKey = this.arrayInput.itemInput.path.replace('[i]', `[${index}]`);
-        const changes = this.changes;
-        Object.keys(changes)
-            .filter(key => key.includes(prefixKey))
-            .forEach(key => delete changes[key]);
+        const prefixKey = (i: number) => this.arrayInput.itemInput.path.replace('[i]', `.${i}`);
+        // cleanup
+        Object.keys(this.changes.$set)
+            .filter(key => key.includes(prefixKey(index)))
+            .forEach(key => delete this.changes.$set[key]);
 
-        // existing item
-        if (index <= this.originalItemCount - 1) {
-            changes[prefixKey + '.x-editorDeleted'] = true;
+        // new item, reorganized indexes
+        if (index > this.originalItemsCount - 1) {
+            for (let minNewIndexToModify = index + 1; minNewIndexToModify < this.items.length; minNewIndexToModify++) {
+                const oldKey = prefixKey(minNewIndexToModify);
+                const newKey = prefixKey(minNewIndexToModify - 1);
+                Object.keys(this.changes.$set)
+                    .filter(key => key.includes(oldKey))
+                    .forEach(key => {
+                        this.changes.$set[key.replace(oldKey, newKey)] = this.changes.$set[key];
+                        delete this.changes.$set[key];
+                    });
+            }
+            this.items.splice(index, 1);
         }
-
-        this.setChanges.emit({ ...changes });
-    }
-    addItem() {
-        this.items.push({ 'x-editorDeleted': false });
-    }
-    modifyIndex(i: number) {
-        const itemInput = Object.assign({}, this.arrayInput.itemInput);
-        itemInput.path = itemInput.path.replace('[i]', `[${i}]`);
-        return itemInput;
+        // existing item
+        else {
+            this.changes.$unset = { ...this.changes.$unset, [this.getArrayPath()]: '' };
+        }
+        this.setChanges.emit({ ...this.changes });
     }
 }

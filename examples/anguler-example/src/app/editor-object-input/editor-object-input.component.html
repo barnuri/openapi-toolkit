@@ -1,5 +1,5 @@
 <div style="padding-left: '20px'">
-    <b>{{ name }}</b> :
+    <b>{{ getName() }}</b> :
     <span *ngIf="objectInput.switchable">
         <b *ngIf="objectInput.switchable"><u>switchable:</u> </b>
         <button (click)="setSwitchableSelected('common')">common</button>

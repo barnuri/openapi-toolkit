@@ -11,26 +11,25 @@ const EditorPrimitiveInputComponent = ({
 }: EditorProps & {
     primitiveInput: EditorPrimitiveInput;
 }) => {
-    const onChange = (e: React.ChangeEvent<HTMLSelectElement> | React.ChangeEvent<HTMLInputElement>) =>
-        setChanges({ ...changes, [primitiveInput.path]: e.target.value });
-    const pathValue = changes[primitiveInput.path] || jp.query(value, '$.' + primitiveInput.path) || '';
+    const onChange = (newVal: any) => setChanges({ $set: { ...changes.$set, [primitiveInput.path]: newVal }, $unset: changes.$unset });
+    const pathValue = changes.$set[primitiveInput.path] ?? jp.query(value, '$.' + primitiveInput.path) ?? '';
     const requiredDot = primitiveInput.required ? <span style={{ color: 'red' }}>*</span> : <span />;
     let input = <div />;
     if (primitiveInput.type === 'enum') {
         const options: any[] = primitiveInput.enumNames || primitiveInput.enumValues || [];
         input = (
-            <select onChange={onChange} value={pathValue}>
+            <select onChange={e => onChange(e.target.value)} value={pathValue}>
                 {options.map(o => (
                     <option key={primitiveInput.path + o}>{o}</option>
                 ))}
             </select>
         );
     } else if (primitiveInput.type === 'boolean') {
-        input = <input onChange={e => setChanges({ ...changes, [primitiveInput.path]: e.target.checked })} checked={pathValue} type='checkbox' />;
+        input = <input onChange={e => onChange(e.target.checked)} checked={pathValue} type='checkbox' />;
     } else if (primitiveInput.type === 'string') {
-        input = <input onChange={onChange} value={pathValue} />;
+        input = <input onChange={e => onChange(e.target.value)} value={pathValue} />;
     } else {
-        input = <input onChange={onChange} value={pathValue} type={primitiveInput.type} />;
+        input = <input onChange={e => onChange(e.target.value)} value={pathValue} type={primitiveInput.type} />;
     }
     return (
         <div>

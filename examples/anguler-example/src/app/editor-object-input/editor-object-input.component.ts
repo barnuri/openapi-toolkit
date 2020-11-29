@@ -13,9 +13,7 @@ export class EditorObjectInputComponent implements OnInit {
     @Input() value: any;
     @Input() objectInput: EditorObjectInput;
     switchableSelected: string;
-    name: string;
     ngOnInit(): void {
-        this.name = getEditorInputName(this.objectInput);
         this.objectInput.properties = this.objectInput.properties || [];
         this.objectInput.switchableOptions = this.objectInput.switchableOptions || [];
         this.objectInput.switchableObjects = this.objectInput.switchableObjects || [];
@@ -26,5 +24,8 @@ export class EditorObjectInputComponent implements OnInit {
     }
     setSwitchableSelected(val: string) {
         this.switchableSelected = val;
+    }
+    getName() {
+        return getEditorInputName(this.objectInput);
     }
 }

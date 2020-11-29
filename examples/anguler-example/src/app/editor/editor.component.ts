@@ -12,16 +12,16 @@ export class EditorComponent implements OnInit {
     @Input() value: any;
     changes: any;
     ngOnInit(): void {
-        this.changes = {};
+        this.changes = { $set: {}, $unset: {} };
         this.value = this.value || {};
     }
     setChanges(val: any): void {
-        val = val || {};
+        val = val || { $set: {}, $unset: {} };
         this.changes = { ...val };
         console.log(this.changes);
     }
     getChanges() {
-        this.changes = this.changes || {};
+        this.changes = this.changes || { $set: {}, $unset: {} };
         return this.changes;
     }
 }

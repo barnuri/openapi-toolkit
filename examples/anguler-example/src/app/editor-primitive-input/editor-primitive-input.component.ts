@@ -13,16 +13,17 @@ export class EditorPrimitiveInputComponent implements OnInit {
     @Output() setChanges = new EventEmitter();
     @Input() value: any;
     @Input() primitiveInput: EditorPrimitiveInput;
-    name: string;
     pathValue: any;
     enumOptions: any[];
     ngOnInit(): void {
-        this.name = getEditorInputName(this.primitiveInput);
         this.value = this.value || {};
-        this.pathValue = this.changes[this.primitiveInput.path] || jp.query(this.value, '$.' + this.primitiveInput.path) || '';
+        this.pathValue = this.changes.$set[this.primitiveInput.path] ?? jp.query(this.value, '$.' + this.primitiveInput.path) ?? '';
         this.enumOptions = this.primitiveInput.enumNames || this.primitiveInput.enumValues || [];
     }
     setValue(newVal) {
-        this.setChanges.emit({ ...this.changes, [this.primitiveInput.path]: newVal });
+        this.setChanges.emit({ $set: { ...this.changes.$set, [this.primitiveInput.path]: newVal }, $unset: this.changes.$unset });
+    }
+    getName() {
+        return getEditorInputName(this.primitiveInput);
     }
 }

@@ -1,5 +1,5 @@
 <div>
-    <b>{{ name }}:</b> <span style="color: 'red'">*</span>
+    <b>{{ getName() }}:</b> <span style="color: 'red'">*</span>
     <select [value]="pathValue" *ngIf="primitiveInput.type === 'enum'" (change)="setValue($event.target.value)">
         <option *ngFor="let option of enumOptions">{{ option }}</option>
     </select>

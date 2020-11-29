@@ -4,7 +4,7 @@ import EditorInputComponent from './EditorInputComponent';
 
 const EditorComponent = ({ editor, value }: { value: any; editor: Editor }) => {
     const inputs = editor.inputs || [];
-    const [changes, setChanges] = React.useState({} as any);
+    const [changes, setChanges] = React.useState({ $set: {}, $unset: {} } as any);
     console.log(changes);
     return (
         <div>
