@@ -1,13 +1,13 @@
 {
     "name": "openapi-definition-to-editor",
-    "version": "1.0.10",
+    "version": "1.0.11",
     "description": "",
     "main": "./dist/index.js",
     "scripts": {
         "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx}\"",
-        "preversion": "rimraf dist && tsc",
-        "version": "npm publish",
-        "postversion": "npm version patch && git push"
+        "preupload": "rimraf dist && tsc",
+        "upload": "npm version patch && npm publish",
+        "postupload": "git push"
     },
     "author": "Bar Nuri",
     "license": "ISC",
