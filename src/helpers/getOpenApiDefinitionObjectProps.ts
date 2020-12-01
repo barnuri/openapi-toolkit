@@ -3,9 +3,8 @@ import { OpenApiDefinitionObject } from '../models/openapi/OpenApiDefinitionObje
 
 export function getOpenApiDefinitionObjectProps(definitionObj: OpenApiDefinitionObject): { [propName: string]: OpenApiDefinition } {
     definitionObj = definitionObj || {};
-    return (
-        definitionObj.properties ||
-        (((definitionObj.allOf || []).filter(x => Object.keys(x).includes('properties'))[0] as OpenApiDefinitionObject) || {}).properties ||
-        {}
-    );
+    return {
+        ...(definitionObj.properties || ({} as any)),
+        ...(((definitionObj.allOf || []).filter(x => Object.keys(x).includes('properties'))[0] as OpenApiDefinitionObject) || {}).properties,
+    };
 }
