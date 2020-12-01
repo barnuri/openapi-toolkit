@@ -1,3 +1,4 @@
+import { OpenApiDefinitionType } from './../models/openapi/OpenApiDefinitionType';
 import { EditorObjectInput } from './../models/editor/EditorObjectInput';
 import { OpenApiDefinition } from '../models/openapi/OpenApiDefinition';
 import { OpenApiDefinitionObject } from '../models/openapi/OpenApiDefinitionObject';
@@ -16,7 +17,9 @@ export function getEditor(openApiDocument: OpenApiDocument, definistionName: str
 
     const getEditorInput = (path: string, definition: OpenApiDefinition, parentDefinition?: OpenApiDefinitionObject): EditorInput => {
         let definitionObj = getOpenApiDefinitionObject(definition, definitions);
-
+        if (Array.isArray(definitionObj.type)) {
+            definitionObj.type = [...definitionObj.type, 'string'].filter(x => x != 'null')[0] as OpenApiDefinitionType;
+        }
         // primitive types
         const primitiveInput = getPrimitiveInput(path, definitionObj, parentDefinition);
         if (primitiveInput) {
