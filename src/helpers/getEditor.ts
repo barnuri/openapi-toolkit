@@ -9,6 +9,7 @@ import { OpenApiDocument } from '../models/openapi/OpenApiDocument';
 import { EditorArrayInput } from '../models/editor/EditorArrayInput';
 import { EditorInput } from '../models/editor/EditorInput';
 import { Editor } from '../models/editor/Editor';
+import { getEditorInputName } from './getEditorInputName';
 
 export function getEditor(openApiDocument: OpenApiDocument, definistionName: string): Editor {
     let definitions = openApiDocument.definitions || (openApiDocument.components || {}).schemas || {};
@@ -36,6 +37,7 @@ export function getEditor(openApiDocument: OpenApiDocument, definistionName: str
             arrayInput.openApiDefinition = definitionObj;
             arrayInput.openApiParentDefinition = parentDefinition;
             arrayInput.editorType = 'EditorArrayInput';
+            arrayInput.name = getEditorInputName(arrayInput);
             return arrayInput;
         }
         // is object
@@ -52,14 +54,17 @@ export function getEditor(openApiDocument: OpenApiDocument, definistionName: str
         objectEditor.properties = propsInputs;
         objectEditor.switchable = definitionObj.anyOf.length > 0;
         objectEditor.editorType = 'EditorObjectInput';
+        objectEditor.isAbstract = definitionObj['x-abstract'] == true;
+        objectEditor.switchableOptions = [];
+        objectEditor.switchableObjects = [];
         if (objectEditor.switchable) {
-            objectEditor.switchableOptions = definitionObj.anyOf!.map(x => getOpenApiDefinitionObject(x, definitions).title!);
-            objectEditor.switchableObjects = [];
+            objectEditor.switchableOptions = definitionObj.anyOf!.map(x => getOpenApiDefinitionObject(x, definitions).title!) || [];
             for (const switchable of definitionObj.anyOf!) {
                 definitions = { ...switchable.definitions, ...definitions };
                 objectEditor.switchableObjects.push(getEditorInput(path, switchable, parentDefinition));
             }
         }
+        objectEditor.name = getEditorInputName(objectEditor);
         return objectEditor;
     };
 

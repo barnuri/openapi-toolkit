@@ -3,6 +3,10 @@
     "version": "1.0.12",
     "description": "",
     "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "files": [
+        "dist"
+    ],
     "scripts": {
         "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx}\"",
         "preupload": "rimraf dist && tsc",

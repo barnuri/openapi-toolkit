@@ -1,5 +1,6 @@
 import { EditorPrimitiveInput } from './../models/editor/EditorPrimitiveInput';
 import { OpenApiDefinitionObject } from '../models/openapi/OpenApiDefinitionObject';
+import { getEditorInputName } from './getEditorInputName';
 
 export function getPrimitiveInput(
     path: string,
@@ -35,6 +36,7 @@ export function getPrimitiveInput(
     editor.maximum = definition.maximum;
     editor.minimum = definition.minimum;
     editor.editorType = 'EditorPrimitiveInput';
+    editor.name = getEditorInputName(editor);
     return editor;
 }
 
