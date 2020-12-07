@@ -27,8 +27,8 @@ export function getPrimitiveInput(
     editor.required = inputIsRequired(path, parentDefinition);
     editor.type = type;
     editor.description = definition.description;
-    editor.enumNames = definition['x-enumNames'];
-    editor.enumValues = definition.enum;
+    editor.enumNames = definition['x-enumNames'] || [];
+    editor.enumValues = definition.enum || [];
     editor.title = definition.title;
     editor.pattern = definition.pattern;
     editor.maxLength = definition.maxLength;
@@ -37,6 +37,7 @@ export function getPrimitiveInput(
     editor.minimum = definition.minimum;
     editor.editorType = 'EditorPrimitiveInput';
     editor.name = getEditorInputName(editor);
+    editor.enumsOptions = editor.enumNames || editor.enumValues || [];
     return editor;
 }
 

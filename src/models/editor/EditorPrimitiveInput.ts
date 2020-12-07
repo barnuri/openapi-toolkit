@@ -4,6 +4,7 @@ export class EditorPrimitiveInput extends EditorInput {
     type: 'number' | 'date' | 'string' | 'enum' | 'boolean';
     enumNames?: string[] = [];
     enumValues?: number[] = [];
+    enumsOptions?: string[] | number[] = [];
     description?: string;
     title?: string;
     maximum?: number;

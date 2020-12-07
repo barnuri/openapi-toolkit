@@ -1,5 +1,5 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
-import { EditorInput, EditorObjectInput, getEditorInputName } from 'openapi-definition-to-editor';
+import {  EditorObjectInput } from 'openapi-definition-to-editor';
 
 @Component({
     selector: 'app-editor-object-input',
@@ -18,14 +18,7 @@ export class EditorObjectInputComponent implements OnInit {
         this.objectInput.switchableOptions = this.objectInput.switchableOptions || [];
         this.objectInput.switchableObjects = this.objectInput.switchableObjects || [];
     }
-    fixIndexPath(x: EditorInput) {
-        x.path = `${this.objectInput.path}.${getEditorInputName(x)}`;
-        return x;
-    }
     setSwitchableSelected(val: string) {
         this.switchableSelected = val;
-    }
-    getName() {
-        return getEditorInputName(this.objectInput);
     }
 }

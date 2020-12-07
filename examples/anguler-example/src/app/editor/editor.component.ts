@@ -10,18 +10,7 @@ export class EditorComponent implements OnInit {
     constructor() {}
     @Input() editor: Editor;
     @Input() value: any;
-    changes: any;
+    @Input() changes: any;
     ngOnInit(): void {
-        this.changes = { $set: {}, $unset: {} };
-        this.value = this.value || {};
-    }
-    setChanges(val: any): void {
-        val = val || { $set: {}, $unset: {} };
-        this.changes = { ...val };
-        console.log(this.changes);
-    }
-    getChanges() {
-        this.changes = this.changes || { $set: {}, $unset: {} };
-        return this.changes;
     }
 }

@@ -11,10 +11,17 @@ export class EditorsComponent implements OnInit {
     constructor() {}
     editors: Editor[];
     value: any;
+    changes: any;
     ngOnInit(): void {
         this.editors = ['Pet', 'User', 'Category', 'Tag', 'Order', 'ApiResponse'].map(tabName =>
             getEditor((openapiSchemaExample as any) as OpenApiDocument, tabName),
         );
         this.value = {};
+        this.changes = { $set: {}, $unset: {} };
+    }
+    setChanges(val: any): void {
+        val = val || { $set: {}, $unset: {} };
+        this.changes = { ...val };
+        console.log(this.changes);
     }
 }
