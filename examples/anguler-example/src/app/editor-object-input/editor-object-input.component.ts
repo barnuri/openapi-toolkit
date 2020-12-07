@@ -1,10 +1,9 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
-import {  EditorObjectInput } from 'openapi-definition-to-editor';
+import { EditorObjectInput, objectGetSelectedSwitchable, objectSetSelectedSwitchable, arrayChildModifyIndex } from 'openapi-definition-to-editor';
 
 @Component({
     selector: 'app-editor-object-input',
     templateUrl: './editor-object-input.component.html',
-    styleUrls: ['./editor-object-input.component.css'],
 })
 export class EditorObjectInputComponent implements OnInit {
     constructor() {}
@@ -17,8 +16,9 @@ export class EditorObjectInputComponent implements OnInit {
         this.objectInput.properties = this.objectInput.properties || [];
         this.objectInput.switchableOptions = this.objectInput.switchableOptions || [];
         this.objectInput.switchableObjects = this.objectInput.switchableObjects || [];
+        this.switchableSelected = objectGetSelectedSwitchable(this.objectInput, this.value, this.changes);
     }
-    setSwitchableSelected(val: string) {
-        this.switchableSelected = val;
+    setSwitchableSelected(newVal) {
+        this.setChanges.emit(objectSetSelectedSwitchable(this.objectInput, this.changes, newVal));
     }
 }

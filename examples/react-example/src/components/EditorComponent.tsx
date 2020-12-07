@@ -1,11 +1,10 @@
 import { Editor } from 'openapi-definition-to-editor';
 import * as React from 'react';
 import EditorInputComponent from './EditorInputComponent';
+import EditorProps from './EditorProps';
 
-const EditorComponent = ({ editor, value }: { value: any; editor: Editor }) => {
+const EditorComponent = ({ editor, value, changes, setChanges }: EditorProps & { editor: Editor }) => {
     const inputs = editor.inputs || [];
-    const [changes, setChanges] = React.useState({ $set: {}, $unset: {} } as any);
-    console.log(changes);
     return (
         <div>
             <h1>{editor.name}</h1>

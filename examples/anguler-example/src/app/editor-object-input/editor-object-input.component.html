@@ -1,5 +1,5 @@
 <div style="padding-left: '20px'">
-    <b>{{ getName() }}</b> :
+    <b>{{ objectInput.name }}</b> :
     <span *ngIf="objectInput.switchable">
         <b *ngIf="objectInput.switchable"><u>switchable:</u> </b>
         <button (click)="setSwitchableSelected('common')">common</button>
@@ -11,7 +11,7 @@
         </b>
         <app-editor-input
             [changes]="changes"
-            [editorInput]="fixIndexPath(x)"
+            [editorInput]="x"
             (setChanges)="setChanges.emit($event)"
             [value]="value"
             *ngFor="let x of objectInput.properties"
@@ -24,7 +24,7 @@
                 </b>
                 <app-editor-input
                     [changes]="changes"
-                    [editorInput]="fixIndexPath(switchableObject)"
+                    [editorInput]="switchableObject"
                     (setChanges)="setChanges.emit($event)"
                     [value]="value"
                 ></app-editor-input>

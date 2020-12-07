@@ -1,4 +1,4 @@
-import { EditorPrimitiveInput, getEditorInputName } from 'openapi-definition-to-editor';
+import { EditorPrimitiveInput, getEditorInputName, primitiveGetValue, primitiveSetValue } from 'openapi-definition-to-editor';
 import * as React from 'react';
 import EditorProps from './EditorProps';
 import * as jp from 'jsonpath';
@@ -11,12 +11,12 @@ const EditorPrimitiveInputComponent = ({
 }: EditorProps & {
     primitiveInput: EditorPrimitiveInput;
 }) => {
-    const onChange = (newVal: any) => setChanges({ $set: { ...changes.$set, [primitiveInput.path]: newVal }, $unset: changes.$unset });
-    const pathValue = changes.$set[primitiveInput.path] ?? jp.query(value, '$.' + primitiveInput.path) ?? '';
+    const onChange = (newVal: any) => setChanges(primitiveSetValue(newVal, changes, primitiveInput));
+    const pathValue = primitiveGetValue(changes, value, primitiveInput);
     const requiredDot = primitiveInput.required ? <span style={{ color: 'red' }}>*</span> : <span />;
     let input = <div />;
     if (primitiveInput.type === 'enum') {
-        const options: any[] = primitiveInput.enumNames || primitiveInput.enumValues || [];
+        const options: any[] = primitiveInput.enumsOptions || [];
         input = (
             <select onChange={e => onChange(e.target.value)} value={pathValue}>
                 {options.map(o => (
@@ -33,7 +33,7 @@ const EditorPrimitiveInputComponent = ({
     }
     return (
         <div>
-            <b>{getEditorInputName(primitiveInput)}:</b> {requiredDot} {input}
+            <b>{primitiveInput.name}:</b> {requiredDot} {input}
         </div>
     );
 };

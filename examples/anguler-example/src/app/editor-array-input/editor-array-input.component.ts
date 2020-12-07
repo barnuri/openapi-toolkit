@@ -1,10 +1,9 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
-import { EditorArrayInput, getEditorInputName } from 'openapi-definition-to-editor';
+import { EditorArrayInput, arrayChildModifyIndex, arrayDeleteItem, arrayItemsCount, arrayIsItemDeleted } from 'openapi-definition-to-editor';
 
 @Component({
     selector: 'app-editor-array-input',
     templateUrl: './editor-array-input.component.html',
-    styleUrls: ['./editor-array-input.component.css'],
 })
 export class EditorArrayInputComponent implements OnInit {
     constructor() {}
@@ -12,11 +11,20 @@ export class EditorArrayInputComponent implements OnInit {
     @Output() setChanges = new EventEmitter();
     @Input() value: any;
     @Input() arrayInput: EditorArrayInput;
-    count: number;
+    indexes: number[];
     ngOnInit(): void {
-        this.count = [].length;
+        this.indexes = Array.from({ length: arrayItemsCount(this.arrayInput, this.value, this.changes) }, (x, i) => i);
     }
     addItem() {
-        this.count = this.count + 1;
+        this.indexes.push(this.indexes.length);
+    }
+    modifyIndex(index) {
+        return arrayChildModifyIndex(index, this.arrayInput);
+    }
+    deleteItem(index) {
+        this.setChanges.emit(arrayDeleteItem(index, this.changes, this.value, this.arrayInput));
+    }
+    isItemDeleted(index) {
+        return arrayIsItemDeleted(this.arrayInput, this.value, this.changes, index);
     }
 }

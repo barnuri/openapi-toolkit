@@ -1,19 +1,15 @@
-import { EditorInput, EditorObjectInput, getEditorInputName } from 'openapi-definition-to-editor';
+import { EditorInput, EditorObjectInput, getEditorInputName, objectGetSelectedSwitchable, objectSetSelectedSwitchable } from 'openapi-definition-to-editor';
 import * as React from 'react';
 import { useState } from 'react';
 import EditorInputComponent from './EditorInputComponent';
 import EditorProps from './EditorProps';
 
 const EditorObjectInputComponent = ({ objectInput, changes, setChanges, value }: EditorProps & { objectInput: EditorObjectInput }) => {
-    const [switchableSelected, setSwitchableSelected] = useState('' as string);
-    const fixIndexPath = (x: EditorInput) => {
-        x.path = `${objectInput.path}.${getEditorInputName(x)}`;
-        return x;
-    };
     objectInput.properties = objectInput.properties || [];
     const propsComponents = objectInput.properties.map((x, i) => (
-        <EditorInputComponent key={x.path + i} changes={changes} editorInput={fixIndexPath(x)} setChanges={setChanges} value={value} />
+        <EditorInputComponent key={x.path + i} changes={changes} editorInput={x} setChanges={setChanges} value={value} />
     ));
+    const switchableSelected = objectGetSelectedSwitchable(objectInput, value, changes);
     if (objectInput.switchable) {
         const commonProps = (
             <div style={{ paddingLeft: '20px' }}>
@@ -27,12 +23,12 @@ const EditorObjectInputComponent = ({ objectInput, changes, setChanges, value }:
         objectInput.switchableObjects = objectInput.switchableObjects || [];
         return (
             <div>
-                <b>{getEditorInputName(objectInput)}</b>:
+                <b>{objectInput.name}</b>:
                 <b>
                     <u>switchable:</u>
                 </b>
                 {['common', ...objectInput.switchableOptions].map(s => (
-                    <button key={s} onClick={() => setSwitchableSelected(s)}>
+                    <button key={s} onClick={() => setChanges(objectSetSelectedSwitchable(objectInput, changes, s))}>
                         {s}
                     </button>
                 ))}
@@ -44,7 +40,7 @@ const EditorObjectInputComponent = ({ objectInput, changes, setChanges, value }:
                                 <b>
                                     <u>{objectInput.switchableOptions![i]}</u>
                                 </b>
-                                {<EditorInputComponent changes={changes} editorInput={fixIndexPath(x)} setChanges={setChanges} value={value} />}
+                                {<EditorInputComponent changes={changes} editorInput={x} setChanges={setChanges} value={value} />}
                             </>
                         )}
                     </div>
@@ -54,7 +50,7 @@ const EditorObjectInputComponent = ({ objectInput, changes, setChanges, value }:
     }
     return (
         <div style={{ paddingLeft: '20px' }}>
-            <b>{getEditorInputName(objectInput)}</b>: <div style={{ paddingLeft: '20px' }}>{propsComponents}</div>
+            <b>{objectInput.name}</b>: <div style={{ paddingLeft: '20px' }}>{propsComponents}</div>
         </div>
     );
 };
