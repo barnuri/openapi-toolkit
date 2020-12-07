@@ -12,7 +12,7 @@ export class EditorPrimitiveInputComponent implements OnInit {
     @Input() primitiveInput: EditorPrimitiveInput;
     pathValue: any;
     ngOnInit(): void {
-        this.pathValue = primitiveGetValue(this.changes, this.value, this.primitiveInput);
+        this.pathValue = primitiveGetValue(this.changes, this.value, this.primitiveInput) || '';
     }
     setValue(newVal) {
         this.setChanges.emit(primitiveSetValue(newVal, this.changes, this.primitiveInput));

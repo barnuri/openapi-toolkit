@@ -19,6 +19,8 @@ export class EditorObjectInputComponent implements OnInit {
         this.switchableSelected = objectGetSelectedSwitchable(this.objectInput, this.value, this.changes);
     }
     setSwitchableSelected(newVal) {
-        this.setChanges.emit(objectSetSelectedSwitchable(this.objectInput, this.changes, newVal));
+        const newChanges = objectSetSelectedSwitchable(this.objectInput, this.changes, newVal);
+        this.switchableSelected = objectGetSelectedSwitchable(this.objectInput, this.value, newChanges);
+        this.setChanges.emit(newChanges);
     }
 }

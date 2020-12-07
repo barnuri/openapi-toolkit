@@ -11,18 +11,23 @@ export class EditorArrayInputComponent implements OnInit {
     @Output() setChanges = new EventEmitter();
     @Input() value: any;
     @Input() arrayInput: EditorArrayInput;
-    indexes: number[];
+    count: number;
     ngOnInit(): void {
-        this.indexes = Array.from({ length: arrayItemsCount(this.arrayInput, this.value, this.changes) }, (x, i) => i);
+        this.count = arrayItemsCount(this.arrayInput, this.value, this.changes);
+    }
+    getIndexes() {
+        return Array.from({ length: this.count }, (x, i) => i);
     }
     addItem() {
-        this.indexes.push(this.indexes.length);
+        this.count = this.count + 1;
     }
     modifyIndex(index) {
         return arrayChildModifyIndex(index, this.arrayInput);
     }
     deleteItem(index) {
-        this.setChanges.emit(arrayDeleteItem(index, this.changes, this.value, this.arrayInput));
+        const res = arrayDeleteItem(index, this.changes, this.value, this.arrayInput, this.count);
+        this.count = res.count;
+        this.setChanges.emit(res.changes);
     }
     isItemDeleted(index) {
         return arrayIsItemDeleted(this.arrayInput, this.value, this.changes, index);

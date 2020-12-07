@@ -40,18 +40,17 @@ export function arrayIsItemDeleted(arrayInput: EditorArrayInput, value: any, cha
     return changes.$unset[arrayKeyPrefix(index, arrayInput)] === '';
 }
 
-export function arrayDeleteItem(index: number, changes: ChangesModel, value: any, arrayInput: EditorArrayInput) {
+export function arrayDeleteItem(index: number, changes: ChangesModel, value: any, arrayInput: EditorArrayInput, itemsCount: number | undefined = undefined) {
     value = value || {};
     changes = changes || { $set: {}, $unset: {} };
 
     let changesModified = JSON.parse(JSON.stringify(changes));
     const originalItemsCount = arrayOriginalItemsCount(arrayInput, value);
-
+    let count = itemsCount || arrayItemsCount(arrayInput, value, changes);
     // cleanup
     Object.keys(changesModified.$set)
         .filter(key => key.includes(arrayKeyPrefix(index, arrayInput)))
         .forEach(key => delete changesModified.$set[key]);
-
     // new item, reorganized indexes
     if (index > originalItemsCount - 1) {
         for (let minNewIndexToModify = index + 1; minNewIndexToModify < originalItemsCount; minNewIndexToModify++) {
@@ -64,13 +63,14 @@ export function arrayDeleteItem(index: number, changes: ChangesModel, value: any
                     delete changesModified.$set[key];
                 });
         }
+        count = count - 1;
     }
     // existing item
     else {
         changesModified.$unset = { ...changesModified.$unset, [arrayKeyPrefix(index, arrayInput)]: '' };
     }
 
-    return changesModified;
+    return { changes: changesModified, count };
 }
 
 export function arrayItemsCount(arrayInput: EditorArrayInput, value: any, changes: ChangesModel) {
