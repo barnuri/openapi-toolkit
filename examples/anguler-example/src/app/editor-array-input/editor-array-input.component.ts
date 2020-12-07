@@ -1,12 +1,13 @@
-import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter, OnChanges, SimpleChanges } from '@angular/core';
 import { EditorArrayInput, arrayChildModifyIndex, arrayDeleteItem, arrayItemsCount, arrayIsItemDeleted } from 'openapi-definition-to-editor';
 
 @Component({
     selector: 'app-editor-array-input',
     templateUrl: './editor-array-input.component.html',
 })
-export class EditorArrayInputComponent implements OnInit {
+export class EditorArrayInputComponent implements OnInit, OnChanges {
     constructor() {}
+
     @Input() changes: any;
     @Output() setChanges = new EventEmitter();
     @Input() value: any;
@@ -31,5 +32,14 @@ export class EditorArrayInputComponent implements OnInit {
     }
     isItemDeleted(index) {
         return arrayIsItemDeleted(this.arrayInput, this.value, this.changes, index);
+    }
+    ngOnChanges(changes: any): void {
+        if (
+            changes.arrayInput.currentValue.name === this.arrayInput.name &&
+            this.value === changes.value.currentValue &&
+            changes.changes.currentValue === this.changes
+        ) {
+            return;
+        }
     }
 }
