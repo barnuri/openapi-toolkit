@@ -1,3 +1,4 @@
+import { ChangesModelDefaultValue } from './../models/editor/ChangesModel';
 import { EditorArrayInput, EditorObjectInput, EditorInput, ChangesModel } from '../models';
 import { JSONPath } from 'jsonpath-plus';
 
@@ -30,7 +31,7 @@ function modifyIndexChild(i: number, editor: EditorInput): EditorInput {
 
 export function arrayIsItemDeleted(arrayInput: EditorArrayInput, value: any, changes: ChangesModel, index: number): boolean {
     value = value || {};
-    changes = changes || { $set: {}, $unset: {} };
+    changes = changes || ChangesModelDefaultValue;
     const originalItemsCount = arrayOriginalItemsCount(arrayInput, value);
     // new item
     if (index >= originalItemsCount) {
@@ -40,13 +41,14 @@ export function arrayIsItemDeleted(arrayInput: EditorArrayInput, value: any, cha
     return changes.$unset[arrayKeyPrefix(index, arrayInput)] === '';
 }
 
-export function arrayDeleteItem(index: number, changes: ChangesModel, value: any, arrayInput: EditorArrayInput, itemsCount: number | undefined = undefined) {
+export function arrayDeleteItem(index: number, changes: ChangesModel, value: any, arrayInput: EditorArrayInput) {
     value = value || {};
-    changes = changes || { $set: {}, $unset: {} };
+    changes = changes || ChangesModelDefaultValue;
 
     let changesModified: ChangesModel = JSON.parse(JSON.stringify(changes));
     const originalItemsCount = arrayOriginalItemsCount(arrayInput, value);
-    let count = itemsCount || arrayItemsCount(arrayInput, value, changes);
+
+    let count = changesModified.newArrayItemsCount[arrayPath(arrayInput)] || arrayItemsCount(arrayInput, value, changesModified);
     // cleanup
     Object.keys(changesModified.$set)
         .filter(key => key.includes(arrayKeyPrefix(index, arrayInput)))
@@ -63,19 +65,23 @@ export function arrayDeleteItem(index: number, changes: ChangesModel, value: any
                     delete changesModified.$set[key];
                 });
         }
-        count = count - 1;
+        changesModified.newArrayItemsCount[arrayPath(arrayInput)] = count - 1;
     }
     // existing item
     else {
         changesModified.$unset = { ...changesModified.$unset, [arrayKeyPrefix(index, arrayInput)]: '' };
     }
 
-    return { changes: changesModified, count };
+    return changesModified;
 }
 
 export function arrayItemsCount(arrayInput: EditorArrayInput, value: any, changes: ChangesModel) {
+    let count = changes.newArrayItemsCount[arrayPath(arrayInput)];
+    if (!count) {
+        return count;
+    }
     value = value || {};
-    changes = changes || { $set: {}, $unset: {} };
+    changes = changes || ChangesModelDefaultValue;
 
     const originalItemsCount = arrayOriginalItemsCount(arrayInput, value);
     const regex = new RegExp(arrayPath(arrayInput) + '\\.(\\d+).*');
@@ -104,4 +110,16 @@ export function arrayOriginalItemsCount(arrayInput: EditorArrayInput, value: any
 
 export function arrayPath(arrayInput: EditorArrayInput) {
     return arrayInput.path.replace('[i]', ``);
+}
+
+export function arrayAddItem(arrayInput: EditorArrayInput, changes: ChangesModel, value: any) {
+    value = value || {};
+    changes = changes || ChangesModelDefaultValue;
+    changes.newArrayItemsCount[arrayPath(arrayInput)] = arrayItemsCount(arrayInput, value, changes) + 1;
+    return changes;
+}
+
+export function arrayGetIndexes(arrayInput: EditorArrayInput, changes: ChangesModel, value: any) {
+    const count = arrayItemsCount(arrayInput, value, changes);
+    return Array.from({ length: count }, (x, i) => i);
 }

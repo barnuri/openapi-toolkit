@@ -19,7 +19,7 @@ export class EditorsComponent implements OnInit {
         console.log(this.editors);
     }
     setChanges(val: any): void {
-        val = val || { $set: {}, $unset: {} };
+        val = val || ChangesModelDefaultValue;
         this.changes = { ...val };
         console.log(this.changes);
     }
