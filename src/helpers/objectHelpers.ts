@@ -12,7 +12,15 @@ export function objectGetSelectedSwitchable(objectInput: EditorObjectInput, valu
         value = value || {};
         changes = changes || { $set: {}, $unset: {} };
         const jpath = objectInput.path + '_t';
-        return changes.$set[jpath] ?? jp.query(value, jpath)[0] ?? '';
+        let pathValue = changes.$set[jpath];
+        if (pathValue !== undefined) {
+            return pathValue;
+        }
+        pathValue = jp.query(value, jpath)[0];
+        if (pathValue !== undefined) {
+            return pathValue;
+        }
+        return '';
     } catch {
         return '';
     }

@@ -5,9 +5,17 @@ export function primitiveGetValue(changes: ChangesModel, value: any, primitiveIn
     try {
         value = value || {};
         changes = changes || { $set: {}, $unset: {} };
-        return changes.$set[primitiveInput.path] ?? jp.query(value, '$.' + primitiveInput.path)[0] ?? '';
+        let pathValue = changes.$set[primitiveInput.path];
+        if (pathValue !== undefined) {
+            return pathValue;
+        }
+        pathValue = jp.query(value, '$.' + primitiveInput.path)[0];
+        if (pathValue !== undefined) {
+            return pathValue;
+        }
+        return '';
     } catch {
-        return undefined;
+        return '';
     }
 }
 
