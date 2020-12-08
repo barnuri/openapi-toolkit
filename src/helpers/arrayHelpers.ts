@@ -65,6 +65,7 @@ export function arrayDeleteItem(index: number, changes: ChangesModel, value: any
                     delete changesModified.$set[key];
                 });
         }
+        changesModified.newArrayItemsCount = changesModified.newArrayItemsCount || {};
         changesModified.newArrayItemsCount[arrayPath(arrayInput)] = count - 1;
     }
     // existing item
@@ -76,6 +77,7 @@ export function arrayDeleteItem(index: number, changes: ChangesModel, value: any
 }
 
 export function arrayItemsCount(arrayInput: EditorArrayInput, value: any, changes: ChangesModel) {
+    changes.newArrayItemsCount = changes.newArrayItemsCount || {};
     let count = changes.newArrayItemsCount[arrayPath(arrayInput)];
     if (!count) {
         return count;
@@ -115,6 +117,7 @@ export function arrayPath(arrayInput: EditorArrayInput) {
 export function arrayAddItem(arrayInput: EditorArrayInput, changes: ChangesModel, value: any) {
     value = value || {};
     changes = changes || ChangesModelDefaultValue;
+    changes.newArrayItemsCount = changes.newArrayItemsCount || {};
     changes.newArrayItemsCount[arrayPath(arrayInput)] = arrayItemsCount(arrayInput, value, changes) + 1;
     return changes;
 }
