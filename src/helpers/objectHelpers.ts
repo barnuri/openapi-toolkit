@@ -1,7 +1,7 @@
 import { EditorObjectInput, ChangesModel } from '../models';
 import { JSONPath } from 'jsonpath-plus';
 
-export function objectSetSelectedSwitchable(objectInput: EditorObjectInput, changes: ChangesModel, newSwitchableType: string) {
+export function objectSetSelectedSwitchable(objectInput: EditorObjectInput, changes: ChangesModel, newSwitchableType: string): ChangesModel {
     changes = changes || { $set: {}, $unset: {} };
     const jpath = objectInput.path + '_t';
     changes.$set[jpath] = newSwitchableType;

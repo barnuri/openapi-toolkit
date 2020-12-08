@@ -11,9 +11,9 @@ export function primitiveGetValue(changes: ChangesModel, value: any, primitiveIn
     }
 }
 
-export function primitiveSetValue(newVal: any, changes: ChangesModel, primitiveInput: EditorPrimitiveInput) {
+export function primitiveSetValue(newVal: any, changes: ChangesModel, primitiveInput: EditorPrimitiveInput): ChangesModel {
     changes = changes || { $set: {}, $unset: {} };
-    let changesModified = JSON.parse(JSON.stringify(changes));
+    let changesModified: ChangesModel = JSON.parse(JSON.stringify(changes));
     changesModified = { $set: { ...changesModified.$set, [primitiveInput.path]: newVal }, $unset: changesModified.$unset };
     return changesModified;
 }

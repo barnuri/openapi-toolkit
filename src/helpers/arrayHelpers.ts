@@ -5,7 +5,7 @@ export function arrayChildModifyIndex(index: number, arrayInput: EditorArrayInpu
     return modifyIndexChild(index, arrayInput.itemInput);
 }
 
-function modifyIndexChild(i: number, editor: EditorInput) {
+function modifyIndexChild(i: number, editor: EditorInput): EditorInput {
     let input = JSON.parse(JSON.stringify(editor));
     input.name = input.name.replace('[i]', `.${i}`);
     input.path = input.path.replace('[i]', `.${i}`);
@@ -28,7 +28,7 @@ function modifyIndexChild(i: number, editor: EditorInput) {
     return JSON.parse(JSON.stringify(input));
 }
 
-export function arrayIsItemDeleted(arrayInput: EditorArrayInput, value: any, changes: ChangesModel, index: number) {
+export function arrayIsItemDeleted(arrayInput: EditorArrayInput, value: any, changes: ChangesModel, index: number): boolean {
     value = value || {};
     changes = changes || { $set: {}, $unset: {} };
     const originalItemsCount = arrayOriginalItemsCount(arrayInput, value);
@@ -44,7 +44,7 @@ export function arrayDeleteItem(index: number, changes: ChangesModel, value: any
     value = value || {};
     changes = changes || { $set: {}, $unset: {} };
 
-    let changesModified = JSON.parse(JSON.stringify(changes));
+    let changesModified: ChangesModel = JSON.parse(JSON.stringify(changes));
     const originalItemsCount = arrayOriginalItemsCount(arrayInput, value);
     let count = itemsCount || arrayItemsCount(arrayInput, value, changes);
     // cleanup
