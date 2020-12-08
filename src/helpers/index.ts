@@ -8,3 +8,5 @@ export * from './getEditorInputName';
 export * from './getOpenApiDefinitionObject';
 export * from './getOpenApiDefinitionObjectProps';
 export * from './getPrimitiveInput';
+
+export * from './cloneHelper';

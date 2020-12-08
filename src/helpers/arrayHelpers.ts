@@ -1,13 +1,14 @@
 import { ChangesModelDefaultValue } from './../models/editor/ChangesModel';
 import { EditorArrayInput, EditorObjectInput, EditorInput, ChangesModel } from '../models';
 import { JSONPath } from 'jsonpath-plus';
+import { cloneHelper } from './cloneHelper';
 
 export function arrayChildModifyIndex(index: number, arrayInput: EditorArrayInput) {
     return modifyIndexChild(index, arrayInput.itemInput);
 }
 
 function modifyIndexChild(i: number, editor: EditorInput): EditorInput {
-    let input = JSON.parse(JSON.stringify(editor));
+    let input = cloneHelper(editor);
     input.name = input.name.replace('[i]', `.${i}`);
     input.path = input.path.replace('[i]', `.${i}`);
     if (input.editorType === 'EditorObjectInput') {
@@ -26,12 +27,13 @@ function modifyIndexChild(i: number, editor: EditorInput): EditorInput {
         arrInput.itemInput = modifyIndexChild(i, arrInput.itemInput);
         input = arrInput;
     }
-    return JSON.parse(JSON.stringify(input));
+    return cloneHelper(input);
 }
 
-export function arrayIsItemDeleted(arrayInput: EditorArrayInput, value: any, changes: ChangesModel, index: number): boolean {
-    value = value || {};
-    changes = changes || ChangesModelDefaultValue;
+export function arrayIsItemDeleted(_arrayInput: EditorArrayInput, _value: any, _changes: ChangesModel, index: number): boolean {
+    const arrayInput = cloneHelper(_arrayInput);
+    const value = cloneHelper(_value || {});
+    let changes: ChangesModel = cloneHelper(_changes || ChangesModelDefaultValue);
     const originalItemsCount = arrayOriginalItemsCount(arrayInput, value);
     // new item
     if (index >= originalItemsCount) {
@@ -41,42 +43,45 @@ export function arrayIsItemDeleted(arrayInput: EditorArrayInput, value: any, cha
     return changes.$unset[arrayKeyPrefix(index, arrayInput)] === '';
 }
 
-export function arrayDeleteItem(index: number, changes: ChangesModel, value: any, arrayInput: EditorArrayInput) {
-    value = value || {};
-    changes = changes || ChangesModelDefaultValue;
-
-    let changesModified: ChangesModel = JSON.parse(JSON.stringify(changes));
+export function arrayDeleteItem(index: number, _changes: ChangesModel, _value: any, _arrayInput: EditorArrayInput) {
+    const arrayInput = cloneHelper(_arrayInput);
+    const value = cloneHelper(_value || {});
+    let changes: ChangesModel = cloneHelper(_changes || ChangesModelDefaultValue);
     const originalItemsCount = arrayOriginalItemsCount(arrayInput, value);
 
-    let count = changesModified.newArrayItemsCount[arrayPath(arrayInput)] || arrayItemsCount(arrayInput, value, changesModified);
+    let count = changes.newArrayItemsCount[arrayPath(arrayInput)] || arrayItemsCount(arrayInput, value, changes);
     // cleanup
-    Object.keys(changesModified.$set)
+    Object.keys(changes.$set)
         .filter(key => key.includes(arrayKeyPrefix(index, arrayInput)))
-        .forEach(key => delete changesModified.$set[key]);
+        .forEach(key => delete changes.$set[key]);
     // new item, reorganized indexes
     if (index > originalItemsCount - 1) {
         for (let minNewIndexToModify = index + 1; minNewIndexToModify < originalItemsCount; minNewIndexToModify++) {
             const oldKey = arrayKeyPrefix(minNewIndexToModify, arrayInput);
             const newKey = arrayKeyPrefix(minNewIndexToModify - 1, arrayInput);
-            Object.keys(changesModified.$set)
+            Object.keys(changes.$set)
                 .filter(key => key.includes(oldKey))
                 .forEach(key => {
-                    changesModified.$set[key.replace(oldKey, newKey)] = changesModified.$set[key];
-                    delete changesModified.$set[key];
+                    changes.$set[key.replace(oldKey, newKey)] = changes.$set[key];
+                    delete changes.$set[key];
                 });
         }
-        changesModified.newArrayItemsCount = changesModified.newArrayItemsCount || {};
-        changesModified.newArrayItemsCount[arrayPath(arrayInput)] = count - 1;
+        changes.newArrayItemsCount = changes.newArrayItemsCount || {};
+        changes.newArrayItemsCount[arrayPath(arrayInput)] = count - 1;
     }
     // existing item
     else {
-        changesModified.$unset = { ...changesModified.$unset, [arrayKeyPrefix(index, arrayInput)]: '' };
+        changes.$unset = { ...changes.$unset, [arrayKeyPrefix(index, arrayInput)]: '' };
     }
 
-    return changesModified;
+    return changes;
 }
 
-export function arrayItemsCount(arrayInput: EditorArrayInput, value: any, changes: ChangesModel) {
+export function arrayItemsCount(_arrayInput: EditorArrayInput, _value: any, _changes: ChangesModel) {
+    let changes = cloneHelper(_changes);
+    const arrayInput = cloneHelper(_arrayInput);
+    let value = cloneHelper(_value);
+
     changes.newArrayItemsCount = changes.newArrayItemsCount || {};
     let count = changes.newArrayItemsCount[arrayPath(arrayInput)];
     if (count !== undefined) {
@@ -114,8 +119,10 @@ export function arrayPath(arrayInput: EditorArrayInput) {
     return arrayInput.path.replace('[i]', ``);
 }
 
-export function arrayAddItem(arrayInput: EditorArrayInput, changes: ChangesModel, value: any) {
-    value = value || {};
+export function arrayAddItem(_arrayInput: EditorArrayInput, _changes: ChangesModel, _value: any) {
+    const arrayInput = cloneHelper(_arrayInput);
+    const value = cloneHelper(_value || {});
+    let changes: ChangesModel = cloneHelper(_changes || ChangesModelDefaultValue);
     changes = changes || ChangesModelDefaultValue;
     changes.newArrayItemsCount = changes.newArrayItemsCount || {};
     changes.newArrayItemsCount[arrayPath(arrayInput)] = arrayItemsCount(arrayInput, value, changes) + 1;
