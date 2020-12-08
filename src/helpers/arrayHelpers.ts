@@ -79,7 +79,7 @@ export function arrayDeleteItem(index: number, changes: ChangesModel, value: any
 export function arrayItemsCount(arrayInput: EditorArrayInput, value: any, changes: ChangesModel) {
     changes.newArrayItemsCount = changes.newArrayItemsCount || {};
     let count = changes.newArrayItemsCount[arrayPath(arrayInput)];
-    if (!count) {
+    if (count !== undefined) {
         return count;
     }
     value = value || {};
