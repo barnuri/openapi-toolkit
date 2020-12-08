@@ -96,7 +96,7 @@ export function arrayKeyPrefix(i: number, arrayInput: EditorArrayInput) {
 
 export function arrayOriginalItemsCount(arrayInput: EditorArrayInput, value: any) {
     try {
-        return (JSONPath({ json: value, path: '$.' + arrayPath(arrayInput) }) as any[]).length;
+        return (JSONPath({ json: value, path: '$.' + arrayPath(arrayInput) })[0] as any[]).length;
     } catch {
         return 0;
     }
