@@ -1,37 +1,47 @@
-import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
-import { EditorInput } from 'openapi-definition-to-editor';
+import { Component, OnInit, OnChanges, Input, Output, EventEmitter, ChangeDetectionStrategy } from '@angular/core';
+import { EditorInput, ChangesModel } from 'openapi-definition-to-editor';
 
 @Component({
     selector: 'app-editor-input',
     template: `
         <app-editor-primitive-input
             [changes]="changes"
-            (setChanges)="setChanges.emit($event)"
+            [isChild]="isChild"
             [value]="value"
             *ngIf="editorInput.editorType === 'EditorPrimitiveInput'"
             [primitiveInput]="editorInput"
+            [id]="editorInput.path"
+            [customName]="customName"
+            (setChanges)="setChanges.emit($event)"
         ></app-editor-primitive-input>
         <app-editor-array-input
             [changes]="changes"
-            (setChanges)="setChanges.emit($event)"
+            [isChild]="isChild"
             [value]="value"
             *ngIf="editorInput.editorType === 'EditorArrayInput'"
             [arrayInput]="editorInput"
+            [id]="editorInput.path"
+            [customName]="customName"
+            (setChanges)="setChanges.emit($event)"
         ></app-editor-array-input>
         <app-editor-object-input
             [changes]="changes"
-            (setChanges)="setChanges.emit($event)"
+            [isChild]="isChild"
             [value]="value"
             *ngIf="editorInput.editorType === 'EditorObjectInput'"
             [objectInput]="editorInput"
+            [id]="editorInput.path"
+            [customName]="customName"
+            (setChanges)="setChanges.emit($event)"
         ></app-editor-object-input>
     `,
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class EditorInputComponent implements OnInit {
-    constructor() {}
+export class EditorInputComponent {
     @Input() editorInput: EditorInput;
-    @Input() changes: any;
-    @Output() setChanges = new EventEmitter();
+    @Input() changes: ChangesModel;
     @Input() value: any;
-    ngOnInit(): void {}
+    @Input() isChild: boolean;
+    @Input() customName: string;
+    @Output() setChanges = new EventEmitter();
 }

@@ -1,9 +1,72 @@
-<div>
-    <b>{{ arrayInput.name }}:</b><button (click)="addItem()">Add</button>
-    <div *ngFor="let i of getIndexes()">
-        <div *ngIf="!isItemDeleted(i)">
-            <app-editor-input [editorInput]="modifyIndex(i)" [changes]="changes" (setChanges)="setChanges.emit($event)" [value]="value"></app-editor-input>
-            <button (click)="deleteItem(i)">Delete</button>
+<div class="editor-array-input">
+    <div class="editor-array-details">
+        <i class="fas fa-list-ul"></i>
+        <span class="name">
+            {{ arrayInput.name }}
+        </span>
+    </div>
+    <div class="actions">
+        <span class="fas fa-history action-icon"></span>
+        <span class="fas fa-info-circle action-icon"></span>
+    </div>
+
+    <div class="input-container">
+        <ng-container *ngIf="arrayInput.itemInput.editorType === 'EditorObjectInput'">
+            <div class="editor-object-insert" (click)="addObjectItem()">
+                <span>Add new object</span>
+            </div>
+        </ng-container>
+        <ng-container *ngIf="arrayInput.itemInput.editorType !== 'EditorObjectInput'">
+            <div class="editor-array-insert-input">
+                <input type="text" placeholder="Insert a value to the list ..." (keyup.enter)="addItem($event)" />
+                <div class="icons">
+                    <i class="fas fa-check" *ngIf="insertText !== ''" (click)="addItem($event)"></i>
+                </div>
+            </div>
+        </ng-container>
+        <div class="editor-array-items">
+            <div
+                [ngClass]="{
+                    'config-primitive-list': arrayInput.itemInput.editorType === 'EditorPrimitiveInput',
+                    'config-object-list': arrayInput.itemInput.editorType === 'EditorObjectInput'
+                }"
+            >
+                <ng-container *ngFor="let i of getIndexes()">
+                    <ng-container *ngIf="!isItemDeleted(i)">
+                        <div class="config-string-list-item child" [ngClass]="{ newItem: isNewItem(i) }">
+                            <app-editor-object-input
+                                *ngIf="arrayInput.itemInput.editorType === 'EditorObjectInput'"
+                                [objectInput]="modifyIndex(i)"
+                                [changes]="changes"
+                                [value]="value"
+                                [isChild]="true"
+                                class="item"
+                                (onDelete)="deleteItem(i)"
+                                (setChanges)="setChanges.emit($event)"
+                            >
+                            </app-editor-object-input>
+                            <ng-container *ngIf="arrayInput.itemInput.editorType === 'EditorPrimitiveInput'">
+                                <div class="details" title="{{ i }}">
+                                    <span>{{ i }}</span>
+                                </div>
+                                <div class="content">
+                                    <app-editor-primitive-input
+                                        [primitiveInput]="modifyIndex(i)"
+                                        [changes]="changes"
+                                        [value]="value"
+                                        [isChild]="true"
+                                        class="input"
+                                        (setChanges)="setChanges.emit($event)"
+                                    ></app-editor-primitive-input>
+                                    <div class="add-element" (click)="deleteItem(i)">
+                                        <i class="fas fa-minus"></i>
+                                    </div>
+                                </div>
+                            </ng-container>
+                        </div>
+                    </ng-container>
+                </ng-container>
+            </div>
         </div>
     </div>
 </div>

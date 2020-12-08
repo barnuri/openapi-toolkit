@@ -1,34 +1,49 @@
-<div style="padding-left: '20px'">
-    <b>{{ objectInput.name }}</b> :
-    <span *ngIf="objectInput.switchable">
-        <b *ngIf="objectInput.switchable"><u>switchable:</u> </b>
-        <button (click)="setSwitchableSelected('common')">common</button>
-        <button (click)="setSwitchableSelected(switchableName)" *ngFor="let switchableName of objectInput.switchableOptions">{{ switchableName }}</button>
-    </span>
-    <div style="padding-left: '20px'">
-        <b *ngIf="objectInput.switchable">
-            <u>common:</u>
-        </b>
-        <app-editor-input
-            [changes]="changes"
-            [editorInput]="x"
-            (setChanges)="setChanges.emit($event)"
-            [value]="value"
-            *ngFor="let x of objectInput.properties"
-        ></app-editor-input>
+<div class="configuration-object-container">
+    <div class="heading">
+        <div class="details">
+            <i class="fas fa-layer-group"></i>
+            <span title="{{ objectInput.name }}">{{ objectInput.name }}</span>
+        </div>
+        <div class="actions">
+            <span class="fas fa-history action-icon"></span>
+            <span class="fas fa-info-circle action-icon"></span>
+        </div>
+        <div class="switch-container">
+            <ng-container *ngIf="objectInput.switchable">
+                <ng-container *ngIf="!objectInput.isAbstract">
+                    <div class="switch-button" [ngClass]="{ active: getSwitchableSelected() === '' }" (click)="setSwitchableSelected('common')">Common</div>
+                </ng-container>
+                <div
+                    class="switch-button"
+                    [ngClass]="{ active: getSwitchableSelected() === switchableName }"
+                    (click)="setSwitchableSelected(switchableName)"
+                    *ngFor="let switchableName of objectInput.switchableOptions"
+                >
+                    {{ switchableName }}
+                </div>
+            </ng-container>
+        </div>
+        <div class="remove-container" *ngIf="isChild" (click)="onDelete.emit()">
+            <i class="fas fa-minus"></i>
+        </div>
+    </div>
 
-        <div *ngFor="let switchableObject of objectInput.switchableObjects; let i = index">
-            <div *ngIf="switchableSelected == objectInput.switchableOptions![i]">
-                <b>
-                    <u>{{ objectInput.switchableOptions![i] }}</u>
-                </b>
+    <div class="content">
+        <ng-container *ngFor="let x of objectInput.properties">
+            <app-editor-input (setChanges)="setChanges.emit($event)" [changes]="changes" [editorInput]="x" [value]="value"></app-editor-input>
+        </ng-container>
+
+        <div *ngFor="let switchableObject of objectInput.switchableObjects; let i = index" class="switchable-content">
+            <ng-container *ngIf="getSwitchableSelected() == objectInput.switchableOptions![i]">
                 <app-editor-input
+                    (setChanges)="setChanges.emit($event)"
                     [changes]="changes"
                     [editorInput]="switchableObject"
-                    (setChanges)="setChanges.emit($event)"
                     [value]="value"
+                    [customName]="getSwitchableSelected()"
+                    class="sub-item"
                 ></app-editor-input>
-            </div>
+            </ng-container>
         </div>
     </div>
 </div>

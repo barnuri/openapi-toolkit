@@ -1,26 +1,31 @@
-import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
-import { EditorObjectInput, objectGetSelectedSwitchable, objectSetSelectedSwitchable, arrayChildModifyIndex } from 'openapi-definition-to-editor';
+import { Component, OnInit, Output, EventEmitter, Input, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+import { objectGetSelectedSwitchable, EditorObjectInput, objectSetSelectedSwitchable, ChangesModel } from 'openapi-definition-to-editor';
 
 @Component({
     selector: 'app-editor-object-input',
     templateUrl: './editor-object-input.component.html',
+    styleUrls: ['./editor-object-input.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EditorObjectInputComponent implements OnInit {
-    constructor() {}
-    @Input() changes: any;
-    @Output() setChanges = new EventEmitter();
-    @Input() value: any;
+    @Output() onDelete = new EventEmitter<void>();
     @Input() objectInput: EditorObjectInput;
-    switchableSelected: string;
-    ngOnInit(): void {
+    @Input() changes: ChangesModel;
+    @Input() value: any;
+    @Input() isChild: boolean;
+    @Input() customName: string;
+    @Output() setChanges = new EventEmitter();
+
+    ngOnInit() {
         this.objectInput.properties = this.objectInput.properties || [];
         this.objectInput.switchableOptions = this.objectInput.switchableOptions || [];
         this.objectInput.switchableObjects = this.objectInput.switchableObjects || [];
-        this.switchableSelected = objectGetSelectedSwitchable(this.objectInput, this.value, this.changes);
     }
-    setSwitchableSelected(newVal) {
-        const newChanges = objectSetSelectedSwitchable(this.objectInput, this.changes, newVal);
-        this.switchableSelected = objectGetSelectedSwitchable(this.objectInput, this.value, newChanges);
-        this.setChanges.emit(newChanges);
-    }
+
+    getSwitchableSelected = () => {
+        return objectGetSelectedSwitchable(this.objectInput, this.value, this.changes);
+    };
+    setSwitchableSelected = (val: string) => {
+        this.setChanges.emit(objectSetSelectedSwitchable(this.objectInput, this.changes, val));
+    };
 }

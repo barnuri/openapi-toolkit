@@ -1,10 +1,58 @@
-<div>
-    <b>{{ primitiveInput.name }}:</b> <span style="color: 'red'">*</span>
-    <select [value]="" *ngIf="primitiveInput.type === 'enum'" (change)="setValue($event.target.value)">
-        <option *ngFor="let option of primitiveInput.enumsOptions">{{ option }}</option>
-    </select>
-    <input [value]="pathValue" type="checkbox" *ngIf="primitiveInput.type === 'boolean'" (change)="setValue($event.target.checked)" />
-    <input [value]="pathValue" type="text" *ngIf="primitiveInput.type === 'string'" (change)="setValue($event.target.value)" />
-    <input [value]="pathValue" type="number" *ngIf="primitiveInput.type === 'number'" (change)="setValue($event.target.value)" />
-    <input [value]="pathValue" type="date" *ngIf="primitiveInput.type === 'date'" (change)="setValue($event.target.value)" />
-</div>
+<ng-container *ngIf="!isChild">
+    <div class="primitive-input-container">
+        <div class="details">
+            {{ primitiveInput.name }}
+        </div>
+        <div class="actions">
+            <span class="fas fa-history action-icon"></span>
+            <span class="fas fa-info-circle action-icon"></span>
+        </div>
+        <div class="input-container">
+            <select
+                [value]="pathValue"
+                *ngIf="primitiveInput.type === 'enum'"
+                (change)="setValue($event.target.value)"
+                class="primitive-input config-basic-dropdown"
+            >
+                <option *ngFor="let option of primitiveInput.enumsOptions">{{ option }}</option>
+            </select>
+
+            <input
+                [value]="pathValue"
+                class="primitive-input text-input"
+                type="text"
+                *ngIf="primitiveInput.type === 'string'"
+                (change)="setValue($event.target.value)"
+                placeholder="{{ primitiveInput.path }}"
+            />
+            <input
+                [value]="pathValue"
+                class="primitive-input number-input"
+                type="number"
+                *ngIf="primitiveInput.type === 'number'"
+                (change)="setValue($event.target.value)"
+            />
+            <input
+                [value]="pathValue"
+                class="primitive-input date-input"
+                type="date"
+                *ngIf="primitiveInput.type === 'date'"
+                (change)="setValue($event.target.value)"
+            />
+            <config-checkbox
+                [value]="pathValue"
+                class="primitive-input checkbox-input"
+                *ngIf="primitiveInput.type === 'boolean'"
+                (change)="setValue($event.target.value)"
+            ></config-checkbox>
+        </div>
+    </div>
+</ng-container>
+<ng-container *ngIf="isChild">
+    <ng-container *ngIf="primitiveInput.type === 'number'">
+        <input [value]="pathValue" class="transparent-input" type="number" (change)="setValue($event.target.value)" />
+    </ng-container>
+    <ng-container *ngIf="!primitiveInput.type || primitiveInput.type === 'string'">
+        <input [value]="pathValue" class="transparent-input" type="text" (change)="setValue($event.target.value)" />
+    </ng-container>
+</ng-container>

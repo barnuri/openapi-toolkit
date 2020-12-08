@@ -1,1 +1,3 @@
-<app-editor [value]="value" [editor]="editor" *ngFor="let editor of editors"></app-editor>
+<ng-container *ngFor="let editor of editors">
+    <app-editor [value]="value" [editor]="editor" [changes]="changes" (setChanges)="setChanges($event)"></app-editor>
+</ng-container>

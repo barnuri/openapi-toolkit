@@ -1,20 +1,26 @@
-import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
-import { EditorPrimitiveInput, primitiveGetValue, primitiveSetValue } from 'openapi-definition-to-editor';
+import { Component, OnInit, OnChanges, Input, EventEmitter, Output, ChangeDetectionStrategy } from '@angular/core';
+import { EditorPrimitiveInput, primitiveSetValue, primitiveGetValue, ChangesModel } from 'openapi-definition-to-editor';
 @Component({
     selector: 'app-editor-primitive-input',
     templateUrl: './editor-primitive-input.component.html',
+    styleUrls: ['./editor-primitive-input.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class EditorPrimitiveInputComponent implements OnInit {
-    constructor() {}
-    @Input() changes: any;
-    @Output() setChanges = new EventEmitter();
+    @Input() changes: ChangesModel;
     @Input() value: any;
-    @Input() primitiveInput: EditorPrimitiveInput;
+    @Input() isChild: boolean;
+    @Input() customName: string;
+    @Output() setChanges = new EventEmitter();
     pathValue: any;
-    ngOnInit(): void {
+    @Input() primitiveInput: EditorPrimitiveInput;
+    constructor() {}
+
+    ngOnInit() {
         this.pathValue = primitiveGetValue(this.changes, this.value, this.primitiveInput) || '';
     }
-    setValue(newVal) {
+
+    setValue = newVal => {
         this.setChanges.emit(primitiveSetValue(newVal, this.changes, this.primitiveInput));
     }
 }

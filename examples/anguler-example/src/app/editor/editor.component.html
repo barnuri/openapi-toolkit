@@ -1,12 +1,10 @@
 <div>
-    <h1>{{ editor.name }}</h1>
-    <div style="padding-left: '20px'">
+    <ng-container *ngFor="let input of editor.inputs">
         <app-editor-input
-            *ngFor="let input of editor.inputs"
             [value]="value"
             [changes]="changes"
             (setChanges)="setChanges.emit($event)"
             [editorInput]="input"
         ></app-editor-input>
-    </div>
+    </ng-container>
 </div>
