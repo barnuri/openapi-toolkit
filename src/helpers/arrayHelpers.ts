@@ -1,5 +1,5 @@
 import { EditorArrayInput, EditorObjectInput, EditorInput, ChangesModel } from '../models';
-import * as jp from 'jsonpath';
+import { JSONPath } from 'jsonpath-plus';
 
 export function arrayChildModifyIndex(index: number, arrayInput: EditorArrayInput) {
     return modifyIndexChild(index, arrayInput.itemInput);
@@ -96,7 +96,7 @@ export function arrayKeyPrefix(i: number, arrayInput: EditorArrayInput) {
 
 export function arrayOriginalItemsCount(arrayInput: EditorArrayInput, value: any) {
     try {
-        return (jp.query(value, '$.' + arrayPath(arrayInput)) as any[]).length;
+        return (JSONPath({ json: value, path: '$.' + arrayPath(arrayInput) }) as any[]).length;
     } catch {
         return 0;
     }

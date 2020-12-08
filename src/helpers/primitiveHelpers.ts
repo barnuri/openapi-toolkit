@@ -1,21 +1,13 @@
 import { EditorPrimitiveInput, ChangesModel } from '../models';
-import * as jp from 'jsonpath';
+import { JSONPath } from 'jsonpath-plus';
 
 export function primitiveGetValue(changes: ChangesModel, value: any, primitiveInput: EditorPrimitiveInput) {
     try {
         value = value || {};
         changes = changes || { $set: {}, $unset: {} };
-        let pathValue = changes.$set[primitiveInput.path];
-        if (pathValue !== undefined) {
-            return pathValue;
-        }
-        pathValue = jp.query(value, '$.' + primitiveInput.path)[0];
-        if (pathValue !== undefined) {
-            return pathValue;
-        }
-        return '';
+        return changes.$set[primitiveInput.path] ?? JSONPath({ json: value, path: '$.' + primitiveInput.path })[0] ?? '';
     } catch {
-        return '';
+        return undefined;
     }
 }
 

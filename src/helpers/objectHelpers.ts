@@ -1,5 +1,5 @@
 import { EditorObjectInput, ChangesModel } from '../models';
-import * as jp from 'jsonpath';
+import { JSONPath } from 'jsonpath-plus';
 
 export function objectSetSelectedSwitchable(objectInput: EditorObjectInput, changes: ChangesModel, newSwitchableType: string) {
     changes = changes || { $set: {}, $unset: {} };
@@ -12,15 +12,7 @@ export function objectGetSelectedSwitchable(objectInput: EditorObjectInput, valu
         value = value || {};
         changes = changes || { $set: {}, $unset: {} };
         const jpath = objectInput.path + '_t';
-        let pathValue = changes.$set[jpath];
-        if (pathValue !== undefined) {
-            return pathValue;
-        }
-        pathValue = jp.query(value, jpath)[0];
-        if (pathValue !== undefined) {
-            return pathValue;
-        }
-        return '';
+        return changes.$set[jpath] ?? JSONPath({ json: value, path: jpath })[0] ?? '';
     } catch {
         return '';
     }
