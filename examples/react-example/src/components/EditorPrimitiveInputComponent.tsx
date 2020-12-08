@@ -1,7 +1,6 @@
 import { EditorPrimitiveInput, getEditorInputName, primitiveGetValue, primitiveSetValue } from 'openapi-definition-to-editor';
 import * as React from 'react';
 import EditorProps from './EditorProps';
-import * as jp from 'jsonpath';
 
 const EditorPrimitiveInputComponent = ({
     primitiveInput,
