@@ -72,6 +72,7 @@ export function arrayDeleteItem(index: number, _changes: ChangesModel, _value: a
     // existing item
     else {
         changes.$unset = { ...changes.$unset, [arrayKeyPrefix(index, arrayInput)]: '' };
+        changes.$pull = { ...changes.$pull, [arrayPath(arrayInput)]: null };
     }
 
     return changes;
