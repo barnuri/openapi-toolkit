@@ -5,11 +5,10 @@ import EditorPrimitiveInputComponent from './EditorPrimitiveInputComponent';
 import EditorObjectInputComponent from './EditorObjectInputComponent';
 import EditorProps from './EditorProps';
 
-const EditorInputComponent = ({ editorInput, changes, setChanges, value }: EditorProps & { editorInput: EditorInput }) => {
+const EditorInputComponent: React.FC<EditorProps & { editorInput: EditorInput }> = ({ editorInput, changes, setChanges, value }) => {
     if (editorInput.editorType === 'EditorPrimitiveInput') {
         return <EditorPrimitiveInputComponent changes={changes} primitiveInput={editorInput as EditorPrimitiveInput} setChanges={setChanges} value={value} />;
-    }
-    if (editorInput.editorType === 'EditorArrayInput') {
+    } else if (editorInput.editorType === 'EditorArrayInput') {
         return <EditorArrayInputComponent changes={changes} arrayInput={editorInput as EditorArrayInput} setChanges={setChanges} value={value} />;
     }
     return <EditorObjectInputComponent changes={changes} objectInput={editorInput as EditorObjectInput} setChanges={setChanges} value={value} />;

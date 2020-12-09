@@ -1,29 +1,15 @@
-import {
-    arrayChildModifyIndex,
-    arrayDeleteItem,
-    arrayIsItemDeleted,
-    arrayItemsCount,
-    EditorArrayInput,
-    getEditorInputName,
-} from 'openapi-definition-to-editor';
+import { arrayAddItem, arrayChildModifyIndex, arrayDeleteItem, arrayGetIndexes, arrayIsItemDeleted, EditorArrayInput } from 'openapi-definition-to-editor';
 import * as React from 'react';
 import EditorInputComponent from './EditorInputComponent';
 import EditorProps from './EditorProps';
 
-const EditorArrayInputComponent = ({
-    arrayInput,
-    changes,
-    setChanges,
-    value,
-}: EditorProps & {
-    arrayInput: EditorArrayInput;
-}) => {
-    const [count, setCount] = React.useState(arrayItemsCount(arrayInput, value, changes));
-
+type CompType = React.FC<EditorProps & { arrayInput: EditorArrayInput }>;
+const EditorArrayInputComponent: CompType = ({ arrayInput, changes, setChanges, value }) => {
     return (
         <div>
-            {<b>{getEditorInputName(arrayInput).replace('[i]', ``)}:</b>} <button onClick={() => setCount(count + 1)}>Add</button>
-            {Array.from({ length: count }, (x, i) => i).map(index => (
+            {<b>{arrayInput.name.replace('[i]', ``).split('.')[0]}:</b>}{' '}
+            <button onClick={() => setChanges(arrayAddItem(arrayInput, changes, value))}>Add</button>
+            {arrayGetIndexes(arrayInput, changes, value).map(index => (
                 <div key={arrayInput.path + index}>
                     {!arrayIsItemDeleted(arrayInput, value, changes, index) && (
                         <>
@@ -33,7 +19,7 @@ const EditorArrayInputComponent = ({
                                 setChanges={setChanges}
                                 value={value}
                             />
-                            <button onClick={() => arrayDeleteItem(index, changes, value, arrayInput)}>Delete</button>
+                            <button onClick={() => setChanges(arrayDeleteItem(index, changes, value, arrayInput))}>Delete</button>
                         </>
                     )}
                 </div>

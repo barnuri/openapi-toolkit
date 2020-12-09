@@ -1,10 +1,9 @@
-import { EditorInput, EditorObjectInput, getEditorInputName, objectGetSelectedSwitchable, objectSetSelectedSwitchable } from 'openapi-definition-to-editor';
+import { EditorObjectInput, objectGetSelectedSwitchable, objectSetSelectedSwitchable } from 'openapi-definition-to-editor';
 import * as React from 'react';
-import { useState } from 'react';
 import EditorInputComponent from './EditorInputComponent';
 import EditorProps from './EditorProps';
 
-const EditorObjectInputComponent = ({ objectInput, changes, setChanges, value }: EditorProps & { objectInput: EditorObjectInput }) => {
+const EditorObjectInputComponent: React.FC<EditorProps & { objectInput: EditorObjectInput }> = ({ objectInput, changes, setChanges, value }) => {
     objectInput.properties = objectInput.properties || [];
     const propsComponents = objectInput.properties.map((x, i) => (
         <EditorInputComponent key={x.path + i} changes={changes} editorInput={x} setChanges={setChanges} value={value} />

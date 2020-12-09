@@ -1,15 +1,9 @@
-import { EditorPrimitiveInput, getEditorInputName, primitiveGetValue, primitiveSetValue } from 'openapi-definition-to-editor';
-import * as React from 'react';
+import { EditorPrimitiveInput, primitiveGetValue, primitiveSetValue } from 'openapi-definition-to-editor';
 import EditorProps from './EditorProps';
 
-const EditorPrimitiveInputComponent = ({
-    primitiveInput,
-    changes,
-    setChanges,
-    value,
-}: EditorProps & {
-    primitiveInput: EditorPrimitiveInput;
-}) => {
+type CompType = React.FC<EditorProps & { primitiveInput: EditorPrimitiveInput }>;
+
+const EditorPrimitiveInputComponent: CompType = ({ primitiveInput, changes, setChanges, value }) => {
     const onChange = (newVal: any) => setChanges(primitiveSetValue(newVal, changes, primitiveInput));
     const pathValue = primitiveGetValue(changes, value, primitiveInput);
     const requiredDot = primitiveInput.required ? <span style={{ color: 'red' }}>*</span> : <span />;

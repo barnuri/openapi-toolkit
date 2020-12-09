@@ -5,4 +5,4 @@ export class ChangesModel {
     newArrayItemsCount: { [key: string]: number };
 }
 
-export const ChangesModelDefaultValue = { $set: {}, $unset: {}, newArrayItemsCount: {} };
+export const ChangesModelDefaultValue: ChangesModel = { $set: {}, $unset: {}, $pull: {}, newArrayItemsCount: {} };
