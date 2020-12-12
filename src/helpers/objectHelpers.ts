@@ -46,6 +46,11 @@ export function objectDictonaryAddKey(key: string, objectInput: EditorObjectInpu
     if (currentKeys.includes(key)) {
         return;
     }
+
+    if (!key || (new RegExp('^[a-zA-Z](?=[a-zA-Z0-9._]{2,20}$)(?!.*[_.]{2})[^_.].*[^_.]$', 'gm').exec(key) || []).length <= 0) {
+        throw new Error('key is undefined or not match key regex : /^[a-zA-Z](?=[a-zA-Z0-9._]{2,20}$)(?!.*[_.]{2})[^_.].*[^_.]$/gm');
+    }
+
     changes.dictNewKeys[objectInput.path] = changes.dictNewKeys[objectInput.path] || [];
     changes.dictNewKeys[objectInput.path].push(key);
     delete changes.$unset[objectInput.path + '.' + key];
