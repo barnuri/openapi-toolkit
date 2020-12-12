@@ -13,3 +13,11 @@ export function getOpenApiDefinitionObject(definition: OpenApiDefinition, defini
     }
     return definition as OpenApiDefinitionObject;
 }
+
+export function getOpenApiDefinitionObjectProps(definitionObj: OpenApiDefinitionObject): { [propName: string]: OpenApiDefinition } {
+    definitionObj = definitionObj || {};
+    return {
+        ...(definitionObj.properties || ({} as any)),
+        ...(((definitionObj.allOf || []).filter(x => Object.keys(x).includes('properties'))[0] as OpenApiDefinitionObject) || {}).properties,
+    };
+}

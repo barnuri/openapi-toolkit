@@ -1,4 +1,3 @@
-import { getEditorInputName } from '../helpers/getEditorInputName';
 import { Editor, EditorArrayInput, EditorInput, EditorObjectInput, EditorPrimitiveInput } from '../models';
 
 export function editorInputToHtml(input: EditorInput | Editor | Editor[]) {
@@ -43,7 +42,7 @@ export function editorInputToHtml(input: EditorInput | Editor | Editor[]) {
         if (objectInput.switchable) {
             const commonProps = `<div style='padding-left:20px'> <b><u>common:</u></b>` + propsHtml + '</div>';
             return (
-                `<b>${getEditorInputName(objectInput)}</b>:  ` +
+                `<b>${objectInput.name}</b>:  ` +
                 `<b><u>switchable:</u></b> ${objectInput.switchableOptions.join(',')}` +
                 commonProps +
                 objectInput.switchableObjects

@@ -4,9 +4,7 @@ export * from './objectHelpers';
 export * from './primitiveHelpers';
 
 export * from './getEditor';
-export * from './getEditorInputName';
-export * from './getOpenApiDefinitionObject';
-export * from './getOpenApiDefinitionObjectProps';
+export * from './openApiHelper';
 
-export * from './cloneHelper';
-export * from './jsonPath';
+export * from './utilsHelper';
+export * from './changesHelper';

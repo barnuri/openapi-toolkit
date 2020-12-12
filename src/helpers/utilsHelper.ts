@@ -1,3 +1,7 @@
+export function cloneHelper<T>(value: T): T {
+    return JSON.parse(JSON.stringify(value));
+}
+
 export function jsonPath(json: any, path: string) {
     try {
         const JSONPath = require('jsonpath-plus');

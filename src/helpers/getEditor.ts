@@ -1,15 +1,18 @@
-import { EditorPrimitiveInput } from './../models';
-import { OpenApiDefinitionType } from './../models/openapi/OpenApiDefinitionType';
-import { EditorObjectInput } from './../models/editor/EditorObjectInput';
-import { OpenApiDefinition } from '../models/openapi/OpenApiDefinition';
-import { OpenApiDefinitionObject } from '../models/openapi/OpenApiDefinitionObject';
-import { getOpenApiDefinitionObject } from './getOpenApiDefinitionObject';
-import { getOpenApiDefinitionObjectProps } from './getOpenApiDefinitionObjectProps';
-import { OpenApiDocument } from '../models/openapi/OpenApiDocument';
-import { EditorArrayInput } from '../models/editor/EditorArrayInput';
-import { EditorInput } from '../models/editor/EditorInput';
-import { Editor } from '../models/editor/Editor';
-import { getEditorInputName } from './getEditorInputName';
+import { ChangesModelDefaultValue } from './../models/editor/ChangesModel';
+import { getOpenApiDefinitionObject, getOpenApiDefinitionObjectProps } from './openApiHelper';
+import {
+    EditorInput,
+    Editor,
+    EditorArrayInput,
+    OpenApiDocument,
+    EditorPrimitiveInput,
+    OpenApiDefinitionObject,
+    OpenApiDefinition,
+    EditorObjectInput,
+    OpenApiDefinitionType,
+    ChangesModel,
+} from '../models';
+import { cloneHelper } from './utilsHelper';
 
 export function getEditor(openApiDocument: OpenApiDocument, definistionName: string): Editor {
     let definitions = openApiDocument.definitions || (openApiDocument.components || {}).schemas || {};

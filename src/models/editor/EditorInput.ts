@@ -1,4 +1,3 @@
-import { getEditorInputName } from '../../helpers';
 import { OpenApiDefinitionObject } from './../openapi/OpenApiDefinitionObject';
 export class EditorInput {
     public path: string;

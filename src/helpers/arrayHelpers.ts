@@ -1,7 +1,7 @@
 import { ChangesModelDefaultValue } from './../models/editor/ChangesModel';
 import { EditorArrayInput, EditorObjectInput, EditorInput, ChangesModel } from '../models';
-import { cloneHelper } from './cloneHelper';
-import { jsonPath } from './jsonPath';
+import { cloneHelper } from './utilsHelper';
+import { jsonPath } from './utilsHelper';
 
 export function arrayChildModifyIndex(index: number, arrayInput: EditorArrayInput) {
     return modifyIndexChild(index, arrayInput.itemInput);
@@ -52,7 +52,7 @@ export function arrayDeleteItem(index: number, _changes: ChangesModel, _value: a
     let count = changes.newArrayItemsCount[arrayPath(arrayInput)] || arrayItemsCount(arrayInput, value, changes);
     // cleanup
     Object.keys(changes.$set)
-        .filter(key => key.includes(arrayKeyPrefix(index, arrayInput)))
+        .filter(key => key.startsWith(arrayKeyPrefix(index, arrayInput)))
         .forEach(key => delete changes.$set[key]);
     // new item, reorganized indexes
     if (index > originalItemsCount - 1) {
@@ -60,7 +60,7 @@ export function arrayDeleteItem(index: number, _changes: ChangesModel, _value: a
             const oldKey = arrayKeyPrefix(minNewIndexToModify, arrayInput);
             const newKey = arrayKeyPrefix(minNewIndexToModify - 1, arrayInput);
             Object.keys(changes.$set)
-                .filter(key => key.includes(oldKey))
+                .filter(key => key.startsWith(oldKey))
                 .forEach(key => {
                     changes.$set[key.replace(oldKey, newKey)] = changes.$set[key];
                     delete changes.$set[key];
@@ -109,11 +109,7 @@ export function arrayKeyPrefix(i: number, arrayInput: EditorArrayInput) {
 }
 
 export function arrayOriginalItemsCount(arrayInput: EditorArrayInput, value: any) {
-    try {
-        return (jsonPath(value, '$.' + arrayPath(arrayInput))[0] as any[]).length;
-    } catch {
-        return 0;
-    }
+    return ((jsonPath(value, '$.' + arrayPath(arrayInput))[0] as any[]) || []).length;
 }
 
 export function arrayPath(arrayInput: EditorArrayInput) {
