@@ -38,3 +38,7 @@ export function chagesGetPathValue(_changes: ChangesModel, _value: any, _editorI
     }
     return res;
 }
+
+export function chagesIsUnset(_changes: ChangesModel, _value: any, _editorInput: EditorInput) {
+    return chagesGetPathValue(_changes, _value, _editorInput).isUnset;
+}
