@@ -8,7 +8,7 @@ export function arrayChildModifyIndex(index: number, arrayInput: EditorArrayInpu
 }
 
 function modifyIndexChild(i: number, editor: EditorInput): EditorInput {
-    let input = cloneHelper(editor);
+    let input = cloneHelper(editor || {});
     input.name = input.name.replace('[i]', `.${i}`);
     input.path = input.path.replace('[i]', `.${i}`);
     if (input.editorType === 'EditorObjectInput') {
@@ -31,7 +31,7 @@ function modifyIndexChild(i: number, editor: EditorInput): EditorInput {
 }
 
 export function arrayIsItemDeleted(_arrayInput: EditorArrayInput, _value: any, _changes: ChangesModel, index: number): boolean {
-    const arrayInput = cloneHelper(_arrayInput);
+    const arrayInput = cloneHelper(_arrayInput || {});
     const value = cloneHelper(_value || {});
     let changes: ChangesModel = cloneHelper(_changes || ChangesModelDefaultValue);
     const originalItemsCount = arrayOriginalItemsCount(arrayInput, value);
@@ -44,7 +44,7 @@ export function arrayIsItemDeleted(_arrayInput: EditorArrayInput, _value: any, _
 }
 
 export function arrayDeleteItem(index: number, _changes: ChangesModel, _value: any, _arrayInput: EditorArrayInput) {
-    const arrayInput = cloneHelper(_arrayInput);
+    const arrayInput = cloneHelper(_arrayInput || {});
     const value = cloneHelper(_value || {});
     let changes: ChangesModel = cloneHelper(_changes || ChangesModelDefaultValue);
     const originalItemsCount = arrayOriginalItemsCount(arrayInput, value);
@@ -79,9 +79,9 @@ export function arrayDeleteItem(index: number, _changes: ChangesModel, _value: a
 }
 
 export function arrayItemsCount(_arrayInput: EditorArrayInput, _value: any, _changes: ChangesModel) {
-    let changes = cloneHelper(_changes);
-    const arrayInput = cloneHelper(_arrayInput);
-    let value = cloneHelper(_value);
+    let changes = cloneHelper(_changes || ChangesModelDefaultValue);
+    const arrayInput = cloneHelper(_arrayInput || {});
+    let value = cloneHelper(_value || {});
 
     changes.newArrayItemsCount = changes.newArrayItemsCount || {};
     let count = changes.newArrayItemsCount[arrayPath(arrayInput)];
@@ -117,7 +117,7 @@ export function arrayPath(arrayInput: EditorArrayInput) {
 }
 
 export function arrayAddItem(_arrayInput: EditorArrayInput, _changes: ChangesModel, _value: any) {
-    const arrayInput = cloneHelper(_arrayInput);
+    const arrayInput = cloneHelper(_arrayInput || {});
     const value = cloneHelper(_value || {});
     let changes: ChangesModel = cloneHelper(_changes || ChangesModelDefaultValue);
     changes = changes || ChangesModelDefaultValue;

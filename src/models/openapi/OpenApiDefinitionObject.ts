@@ -1,3 +1,4 @@
+import { OpenApiDocument } from './OpenApiDocument';
 import { OpenApiDefinitionType } from './OpenApiDefinitionType';
 import { OpenApiDefinition } from './OpenApiDefinition';
 import { OpenApiDefinitionsDictionary } from './OpenApiDefinitionsDictionary';
@@ -5,8 +6,10 @@ import { OpenApiDefinitionsDictionary } from './OpenApiDefinitionsDictionary';
 export class OpenApiDefinitionObject {
     required?: string[];
     enum?: any[];
-    'x-enumNames': string[];
-    'x-abstract': boolean;
+    'x-enumNames'?: string[];
+    'x-abstract'?: boolean;
+    'x-nullable'?: boolean;
+    'x-deprecated'?: boolean;
     format?: string;
     description?: string;
     type?: OpenApiDefinitionType;
@@ -15,8 +18,6 @@ export class OpenApiDefinitionObject {
     items?: OpenApiDefinition;
     anyOf?: OpenApiDefinitionObject[];
     properties?: { [propName: string]: OpenApiDefinition };
-    definitions?: OpenApiDefinitionsDictionary;
-    // not importent right now
     nullable?: boolean;
     additionalProperties?: OpenApiDefinition | boolean;
     title?: string;
@@ -55,4 +56,9 @@ export class OpenApiDefinitionObject {
         description?: string;
         url: string;
     };
+
+    // support version 2
+    definitions?: OpenApiDefinitionsDictionary;
+    // support version 3
+    components?: { schemas: OpenApiDefinitionsDictionary };
 }

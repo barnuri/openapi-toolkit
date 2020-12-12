@@ -3,15 +3,19 @@ import { OpenApiDefinitionReference } from '../models/openapi/OpenApiDefinitionR
 import { OpenApiDefinitionObject } from '../models/openapi/OpenApiDefinitionObject';
 import { OpenApiDefinitionsDictionary } from '../models/openapi/OpenApiDefinitionsDictionary';
 
-export function getOpenApiDefinitionObject(definition: OpenApiDefinition, definitions: OpenApiDefinitionsDictionary): OpenApiDefinitionObject {
+export function getOpenApiDefinitionObject(
+    definition: OpenApiDefinition,
+    definitions: OpenApiDefinitionsDictionary,
+): { def: OpenApiDefinitionObject; refName: string | undefined } {
     if (Object.keys(definition).includes('$ref')) {
-        return definitions[(definition as OpenApiDefinitionReference).$ref.split('/').splice(-1)[0]];
+        const refName = (definition as OpenApiDefinitionReference).$ref.split('/').splice(-1)[0];
+        return { def: definitions[refName], refName };
     }
     if (Object.keys(definition).includes('oneOf')) {
-        const def = (definition as OpenApiDefinitionObject).oneOf!.filter((x: any) => x.type != 'null')[0];
-        return getOpenApiDefinitionObject(def, definitions);
+        const openApiDefinitionObject = (definition as OpenApiDefinitionObject).oneOf!.filter((x: any) => x.type != 'null')[0];
+        return getOpenApiDefinitionObject(openApiDefinitionObject, definitions);
     }
-    return definition as OpenApiDefinitionObject;
+    return { def: definition as OpenApiDefinitionObject, refName: undefined };
 }
 
 export function getOpenApiDefinitionObjectProps(definitionObj: OpenApiDefinitionObject): { [propName: string]: OpenApiDefinition } {

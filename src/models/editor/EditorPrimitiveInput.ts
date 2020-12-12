@@ -11,7 +11,7 @@ export class EditorPrimitiveInput extends EditorInput {
     public readonly maxLength: number | undefined;
     public readonly minLength: number | undefined;
     public readonly pattern: string | undefined;
-    public readonly default: any;
+    public readonly default: any | undefined;
 
     constructor(
         type: 'number' | 'date' | 'string' | 'enum' | 'boolean',
@@ -27,7 +27,7 @@ export class EditorPrimitiveInput extends EditorInput {
         this.minLength = openApiDefinition.minLength;
         this.maximum = openApiDefinition.maximum;
         this.minimum = openApiDefinition.minimum;
-        this.enumsOptions = this.enumNames || this.enumValues || [];
+        this.enumsOptions = this.enumNames.length > 0 ? this.enumNames : this.enumValues;
         this.default = openApiDefinition.default;
         this.type = type;
     }

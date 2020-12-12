@@ -13,7 +13,7 @@ export function changesSetValue(newVal: any, _changes: ChangesModel, path: strin
 }
 
 export function changesDeletePathValue(_changes: ChangesModel, _editorInput: EditorInput) {
-    const editorInput = cloneHelper(_editorInput);
+    const editorInput = cloneHelper(_editorInput || {});
     let changes: ChangesModel = cloneHelper(_changes || ChangesModelDefaultValue);
 
     // cleanup
@@ -27,12 +27,12 @@ export function changesDeletePathValue(_changes: ChangesModel, _editorInput: Edi
 }
 
 export function chagesGetPathValue(_changes: ChangesModel, _value: any, _editorInput: EditorInput): { pathValue: any; isUnset: boolean } {
-    const editorInput = cloneHelper(_editorInput);
+    const editorInput = cloneHelper(_editorInput || {});
     let value = cloneHelper(_value || {});
     let changes: ChangesModel = cloneHelper(_changes || ChangesModelDefaultValue);
     value = value || {};
     changes = changes || ChangesModelDefaultValue;
-    const res = { pathValue: changes.$set[editorInput.path] ?? jsonPath(value, '$.' + editorInput.path)[0], isUnset: false };
+    const res = { pathValue: changes.$set[editorInput.path] ?? jsonPath(value, '$.' + editorInput.path)[0] ?? (editorInput as any).default, isUnset: false };
     if (res.pathValue === undefined || Object.keys(changes.$unset).filter(x => x === editorInput.path).length > 0) {
         return { pathValue: '', isUnset: true };
     }

@@ -5,7 +5,7 @@ import { jsonPath } from './utilsHelper';
 import { changesSetValue } from './changesHelper';
 
 export function primitiveGetValue(_changes: ChangesModel, _value: any, _primitiveInput: EditorPrimitiveInput) {
-    const primitiveInput = cloneHelper(_primitiveInput);
+    const primitiveInput = cloneHelper(_primitiveInput || {});
     let value = cloneHelper(_value || {});
     let changes: ChangesModel = cloneHelper(_changes || ChangesModelDefaultValue);
     value = value || {};
@@ -14,7 +14,7 @@ export function primitiveGetValue(_changes: ChangesModel, _value: any, _primitiv
 }
 
 export function primitiveSetValue(newVal: string | number | boolean | Date, _changes: ChangesModel, _primitiveInput: EditorPrimitiveInput): ChangesModel {
-    const primitiveInput = cloneHelper(_primitiveInput);
+    const primitiveInput = cloneHelper(_primitiveInput || {});
     let changes: ChangesModel = cloneHelper(_changes || ChangesModelDefaultValue);
     changes = changes || ChangesModelDefaultValue;
     switch (primitiveInput.type) {
