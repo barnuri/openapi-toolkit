@@ -18,3 +18,19 @@ export function objectGetSelectedSwitchable(objectInput: EditorObjectInput, _val
     const jpath = objectInput.path + '._t';
     return changes.$set[jpath] ?? jsonPath(value, jpath)[0] ?? '';
 }
+export function objectGetDictionaryKeys(objectInput: EditorObjectInput, _value: any, _changes: ChangesModel): string[] {
+    let changes = cloneHelper(_changes || ChangesModelDefaultValue);
+    let value = cloneHelper(_value || {});
+    value = value || {};
+    changes = changes || ChangesModelDefaultValue;
+    const existingKeys = Object.keys(jsonPath(value, objectInput.path)[0] || {});
+    const newKeys = Object.keys(changes.$set)
+        .filter(x => x.startsWith(objectInput.path + '.'))
+        .map(x => x.split('.').splice(-1)[0]);
+
+    const deletedKeys = Object.keys(changes.$unset)
+        .filter(x => x.startsWith(objectInput.path + '.'))
+        .map(x => x.split('.').splice(-1)[0]);
+
+    return [...existingKeys, ...newKeys].filter(x => !deletedKeys.includes(x));
+}
