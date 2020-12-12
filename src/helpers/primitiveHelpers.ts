@@ -1,16 +1,10 @@
 import { ChangesModelDefaultValue } from './../models/editor/ChangesModel';
 import { EditorPrimitiveInput, ChangesModel } from '../models';
 import { cloneHelper } from './utilsHelper';
-import { jsonPath } from './utilsHelper';
-import { changesSetValue } from './changesHelper';
+import { chagesGetPathValue, changesSetValue } from './changesHelper';
 
 export function primitiveGetValue(_changes: ChangesModel, _value: any, _primitiveInput: EditorPrimitiveInput) {
-    const primitiveInput = cloneHelper(_primitiveInput || {});
-    let value = cloneHelper(_value || {});
-    let changes: ChangesModel = cloneHelper(_changes || ChangesModelDefaultValue);
-    value = value || {};
-    changes = changes || ChangesModelDefaultValue;
-    return changes.$set[primitiveInput.path] ?? jsonPath(value, '$.' + primitiveInput.path)[0] ?? '';
+    return chagesGetPathValue(_changes, _value, _primitiveInput).pathValue;
 }
 
 export function primitiveSetValue(newVal: string | number | boolean | Date, _changes: ChangesModel, _primitiveInput: EditorPrimitiveInput): ChangesModel {

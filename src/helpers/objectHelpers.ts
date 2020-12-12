@@ -19,25 +19,48 @@ export function objectGetSelectedSwitchable(objectInput: EditorObjectInput, _val
     const jpath = objectInput.path + '._t';
     return changes.$set[jpath] ?? jsonPath(value, jpath)[0] ?? '';
 }
+
 export function objectGetDictionaryKeys(objectInput: EditorObjectInput, _value: any, _changes: ChangesModel): string[] {
     let changes = cloneHelper(_changes || ChangesModelDefaultValue);
     let value = cloneHelper(_value || {});
     value = value || {};
     changes = changes || ChangesModelDefaultValue;
     const existingKeys = Object.keys(jsonPath(value, objectInput.path)[0] || {});
-    const newKeys = Object.keys(changes.$set)
-        .filter(x => x.startsWith(objectInput.path + '.'))
-        .map(x => x.split('.').splice(-1)[0]);
-
+    const newKeys = changes.dictNewKeys[objectInput.path] || [];
     const deletedKeys = Object.keys(changes.$unset)
         .filter(x => x.startsWith(objectInput.path + '.'))
         .map(x => x.split('.').splice(-1)[0]);
-
     return [...existingKeys, ...newKeys].filter(x => !deletedKeys.includes(x));
 }
 
 export function objectDictonaryInputModify(key: string, objectInput: EditorObjectInput) {
     return modifyDictionaryInput(key, objectInput.dictionaryInput!, objectInput.path);
+}
+
+export function objectDictonaryAddKey(key: string, objectInput: EditorObjectInput, _value: any, _changes: ChangesModel) {
+    let changes = cloneHelper(_changes || ChangesModelDefaultValue);
+    let value = cloneHelper(_value || {});
+    value = value || {};
+    changes = changes || ChangesModelDefaultValue;
+    const currentKeys = objectGetDictionaryKeys(objectInput, value, changes);
+    if (currentKeys.includes(key)) {
+        return;
+    }
+    changes.dictNewKeys[objectInput.path] = changes.dictNewKeys[objectInput.path] || [];
+    changes.dictNewKeys[objectInput.path].push(key);
+    delete changes.$unset[objectInput.path + '.' + key];
+    return changes;
+}
+
+export function objectDictonaryDeleteKey(key: string, objectInput: EditorObjectInput, _value: any, _changes: ChangesModel) {
+    let changes = cloneHelper(_changes || ChangesModelDefaultValue);
+    let value = cloneHelper(_value || {});
+    value = value || {};
+    changes = changes || ChangesModelDefaultValue;
+    changes.dictNewKeys[objectInput.path] = changes.dictNewKeys[objectInput.path] || [];
+    changes.dictNewKeys[objectInput.path] = changes.dictNewKeys[objectInput.path].filter(x => x !== key);
+    changes.$unset[objectInput.path + '.' + key] = '';
+    return changes;
 }
 
 function modifyDictionaryInput(key: string, editor: EditorInput, parentPath: string): EditorInput {
