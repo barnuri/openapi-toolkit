@@ -18,7 +18,6 @@
         "importHelpers": true,
         "downlevelIteration": true,
         "strict": true,
-        "strictPropertyInitialization": false,
         "alwaysStrict": true,
         "charset": "utf8",
         "newLine": "LF",

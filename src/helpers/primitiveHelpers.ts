@@ -1,7 +1,7 @@
 import { ChangesModelDefaultValue } from './../models/editor/ChangesModel';
 import { EditorPrimitiveInput, ChangesModel } from '../models';
-import { JSONPath } from 'jsonpath-plus';
 import { cloneHelper } from './cloneHelper';
+import { jsonPath } from './jsonPath';
 
 export function primitiveGetValue(_changes: ChangesModel, _value: any, _primitiveInput: EditorPrimitiveInput) {
     try {
@@ -10,16 +10,27 @@ export function primitiveGetValue(_changes: ChangesModel, _value: any, _primitiv
         let changes: ChangesModel = cloneHelper(_changes || ChangesModelDefaultValue);
         value = value || {};
         changes = changes || ChangesModelDefaultValue;
-        return changes.$set[primitiveInput.path] ?? JSONPath({ json: value, path: '$.' + primitiveInput.path })[0] ?? '';
+        return changes.$set[primitiveInput.path] ?? jsonPath(value, '$.' + primitiveInput.path)[0] ?? '';
     } catch {
         return undefined;
     }
 }
 
-export function primitiveSetValue(newVal: any, _changes: ChangesModel, _primitiveInput: EditorPrimitiveInput): ChangesModel {
+export function primitiveSetValue(newVal: string | number | boolean | Date, _changes: ChangesModel, _primitiveInput: EditorPrimitiveInput): ChangesModel {
     const primitiveInput = cloneHelper(_primitiveInput);
     let changes: ChangesModel = cloneHelper(_changes || ChangesModelDefaultValue);
     changes = changes || ChangesModelDefaultValue;
+    switch (primitiveInput.type) {
+        case 'boolean':
+            newVal = newVal === true || newVal === 'true' || newVal === 1;
+            break;
+        case 'date':
+            newVal = new Date(newVal as any);
+            break;
+        case 'number':
+            newVal = +newVal;
+            break;
+    }
     changes = changesSetValue(newVal, changes, primitiveInput.path);
     return changes;
 }

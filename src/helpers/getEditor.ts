@@ -1,10 +1,10 @@
+import { EditorPrimitiveInput } from './../models';
 import { OpenApiDefinitionType } from './../models/openapi/OpenApiDefinitionType';
 import { EditorObjectInput } from './../models/editor/EditorObjectInput';
 import { OpenApiDefinition } from '../models/openapi/OpenApiDefinition';
 import { OpenApiDefinitionObject } from '../models/openapi/OpenApiDefinitionObject';
 import { getOpenApiDefinitionObject } from './getOpenApiDefinitionObject';
 import { getOpenApiDefinitionObjectProps } from './getOpenApiDefinitionObjectProps';
-import { getPrimitiveInput, inputIsRequired } from './getPrimitiveInput';
 import { OpenApiDocument } from '../models/openapi/OpenApiDocument';
 import { EditorArrayInput } from '../models/editor/EditorArrayInput';
 import { EditorInput } from '../models/editor/EditorInput';
@@ -14,65 +14,63 @@ import { getEditorInputName } from './getEditorInputName';
 export function getEditor(openApiDocument: OpenApiDocument, definistionName: string): Editor {
     let definitions = openApiDocument.definitions || (openApiDocument.components || {}).schemas || {};
     const tabContainers = getOpenApiDefinitionObjectProps(definitions[definistionName]);
-    const inputs: EditorInput[] = [];
 
-    const getEditorInput = (path: string, definition: OpenApiDefinition, parentDefinition?: OpenApiDefinitionObject): EditorInput => {
+    const getEditorInput = (path: string, definition: OpenApiDefinition, parentDefinition: OpenApiDefinitionObject | undefined): EditorInput => {
         let definitionObj = getOpenApiDefinitionObject(definition, definitions);
         if (Array.isArray(definitionObj.type)) {
             definitionObj.type = [...definitionObj.type, 'string'].filter(x => x != 'null')[0] as OpenApiDefinitionType;
         }
-        // primitive types
-        const primitiveInput = getPrimitiveInput(path, definitionObj, parentDefinition);
-        if (primitiveInput) {
-            return primitiveInput;
+        if (isPrimitive(definitionObj)) {
+            return new EditorPrimitiveInput(getPrimitiveType(definitionObj)!, path, definitionObj, parentDefinition);
         }
         if (definitionObj.type == 'array') {
-            const itemsObj = getOpenApiDefinitionObject(definitionObj.items!, definitions);
             path = path + '[i]';
-            const itemPrimitiveInput = getPrimitiveInput(path, itemsObj, parentDefinition);
-            const arrayInput = new EditorArrayInput();
-            arrayInput.path = path;
-            arrayInput.required = inputIsRequired(path, parentDefinition);
-            arrayInput.itemInput = itemPrimitiveInput || getEditorInput(path, getOpenApiDefinitionObject(definitionObj.items!, definitions), parentDefinition);
-            arrayInput.openApiDefinition = definitionObj;
-            arrayInput.openApiParentDefinition = parentDefinition;
-            arrayInput.editorType = 'EditorArrayInput';
-            arrayInput.name = getEditorInputName(arrayInput);
-            return arrayInput;
+            const itemInput = getEditorInput(path, getOpenApiDefinitionObject(definitionObj.items!, definitions), parentDefinition);
+            return new EditorArrayInput(itemInput, path, definitionObj, parentDefinition);
         }
-        // is object
+
         const props = getOpenApiDefinitionObjectProps(definitionObj);
-        const propsInputs: EditorInput[] = [];
-        for (const propContainerName of Object.keys(props)) {
-            propsInputs.push(getEditorInput(`${path}.${propContainerName}`, props[propContainerName], definitionObj));
-        }
+        const propsInputs: EditorInput[] =
+            Object.keys(props).map(propContainerName => getEditorInput(`${path}.${propContainerName}`, props[propContainerName], definitionObj)) || [];
+
         definitionObj.anyOf = definitionObj.anyOf || [];
-        const objectEditor = new EditorObjectInput();
-        objectEditor.path = path;
-        objectEditor.openApiDefinition = definitionObj;
-        objectEditor.openApiParentDefinition = parentDefinition;
-        objectEditor.properties = propsInputs;
-        objectEditor.switchable = definitionObj.anyOf.length > 0;
-        objectEditor.editorType = 'EditorObjectInput';
-        objectEditor.isAbstract = definitionObj['x-abstract'] == true;
-        objectEditor.switchableOptions = [];
-        objectEditor.switchableObjects = [];
-        if (objectEditor.switchable) {
-            objectEditor.switchableOptions = definitionObj.anyOf!.map(x => getOpenApiDefinitionObject(x, definitions).title!) || [];
-            for (const switchable of definitionObj.anyOf!) {
-                definitions = { ...switchable.definitions, ...definitions };
-                objectEditor.switchableObjects.push(getEditorInput(path, switchable, parentDefinition));
-            }
+        const switchableOptions = definitionObj.anyOf.map(x => getOpenApiDefinitionObject(x, definitions).title!) || [];
+        const switchableObjects: EditorInput[] = [];
+        for (const switchable of definitionObj.anyOf) {
+            definitions = { ...switchable.definitions, ...definitions };
+            switchableObjects.push(getEditorInput(path, switchable, parentDefinition));
         }
-        objectEditor.name = getEditorInputName(objectEditor);
-        return objectEditor;
+        let dictionaryInput: EditorInput | undefined = undefined;
+        if (!!definitionObj.additionalProperties) {
+            try {
+                dictionaryInput = getEditorInput(path, getOpenApiDefinitionObject(definitionObj.additionalProperties as any, definitions), definitionObj);
+            } catch {
+                dictionaryInput = new EditorPrimitiveInput('string', path, definitionObj, parentDefinition);
+            }
+            dictionaryInput.name = 'value';
+        }
+        return new EditorObjectInput(propsInputs, switchableObjects, switchableOptions, path, definitionObj, parentDefinition, dictionaryInput);
     };
 
-    for (const containerName of Object.keys(tabContainers)) {
-        inputs.push(getEditorInput(containerName, tabContainers[containerName]));
-    }
     const editor = new Editor();
     editor.name = definistionName;
-    editor.inputs = inputs;
+    editor.inputs = Object.keys(tabContainers).map(containerName => getEditorInput(containerName, tabContainers[containerName], undefined));
     return editor;
+}
+
+function getPrimitiveType(definition: OpenApiDefinitionObject): 'number' | 'date' | 'string' | 'enum' | 'boolean' | undefined {
+    if (definition.type == 'boolean') {
+        return 'boolean';
+    } else if ((definition.enum || []).length > 0 || (definition['x-enumNames'] || []).length > 0) {
+        return 'enum';
+    } else if (definition.type == 'integer' || definition.type == 'number') {
+        return 'number';
+    } else if (definition.type == 'string') {
+        return definition.format == 'date-time' ? 'date' : 'string';
+    }
+    return undefined;
+}
+
+function isPrimitive(definition: OpenApiDefinitionObject) {
+    return getPrimitiveType(definition) !== undefined;
 }

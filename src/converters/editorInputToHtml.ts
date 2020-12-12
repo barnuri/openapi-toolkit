@@ -15,7 +15,7 @@ export function editorInputToHtml(input: EditorInput | Editor | Editor[]) {
 
     if (input.editorType == 'EditorArrayInput') {
         const arrayInput = input as EditorArrayInput;
-        return `<b>${getEditorInputName(arrayInput)}</b>:  array of <div style='padding-left:20px'>${editorInputToHtml(arrayInput.itemInput)}</div>`;
+        return `<b>${arrayInput.name}</b>:  array of <div style='padding-left:20px'>${arrayInput.name}</div>`;
     }
 
     if (input.editorType == 'EditorPrimitiveInput') {
@@ -23,7 +23,7 @@ export function editorInputToHtml(input: EditorInput | Editor | Editor[]) {
         const requiredDot = primitiveInput.required ? `<span style="color:red">*</span>` : '';
         let html = '';
         if (primitiveInput.type == 'enum') {
-            const options: any[] = primitiveInput.enumNames || primitiveInput.enumValues || [];
+            const options: any[] = primitiveInput.enumNames.length > 0 ? primitiveInput.enumNames : primitiveInput.enumValues;
             html = `<select >` + options.map(o => `<option>${o}</option>`).join('') + '</select>';
         } else if (primitiveInput.type == 'boolean') {
             html = `<input type='checkbox' />`;
@@ -32,7 +32,7 @@ export function editorInputToHtml(input: EditorInput | Editor | Editor[]) {
         } else {
             html = `<input type='${primitiveInput.type}' />`;
         }
-        html = `<div><b>${getEditorInputName(primitiveInput)}:<b> ${requiredDot} ${html}</div>`;
+        html = `<div><b>${primitiveInput.name}:<b> ${requiredDot} ${html}</div>`;
         return html;
     }
 
@@ -42,8 +42,6 @@ export function editorInputToHtml(input: EditorInput | Editor | Editor[]) {
         const propsHtml = objectInput.properties.map(x => editorInputToHtml(x)).join('');
         if (objectInput.switchable) {
             const commonProps = `<div style='padding-left:20px'> <b><u>common:</u></b>` + propsHtml + '</div>';
-            objectInput.switchableOptions = objectInput.switchableOptions || [];
-            objectInput.switchableObjects = objectInput.switchableObjects || [];
             return (
                 `<b>${getEditorInputName(objectInput)}</b>:  ` +
                 `<b><u>switchable:</u></b> ${objectInput.switchableOptions.join(',')}` +
@@ -53,7 +51,10 @@ export function editorInputToHtml(input: EditorInput | Editor | Editor[]) {
                     .join('')
             );
         }
-        return `<b>${getEditorInputName(objectInput)}</b>: <div style='padding-left:20px'>${propsHtml}</div>`;
+        if (objectInput.isDictionary) {
+            return `<b>${objectInput.name}</b> Dictionary: <div>key: <input type='text' />${editorInputToHtml(objectInput.dictionaryInput!)}</div>`;
+        }
+        return `<b>${objectInput.name}</b>: <div style='padding-left:20px'>${propsHtml}</div>`;
     }
 
     throw new Error('bad type');

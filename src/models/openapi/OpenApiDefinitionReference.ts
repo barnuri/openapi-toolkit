@@ -1,3 +1,3 @@
 export class OpenApiDefinitionReference {
-    $ref: string;
+    $ref!: string;
 }

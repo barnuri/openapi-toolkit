@@ -1,7 +1,7 @@
 import { ChangesModelDefaultValue } from './../models/editor/ChangesModel';
 import { EditorObjectInput, ChangesModel } from '../models';
-import { JSONPath } from 'jsonpath-plus';
 import { cloneHelper } from './cloneHelper';
+import { jsonPath } from './jsonPath';
 
 export function objectSetSelectedSwitchable(objectInput: EditorObjectInput, _changes: ChangesModel, newSwitchableType: string): ChangesModel {
     let changes = cloneHelper(_changes);
@@ -17,7 +17,7 @@ export function objectGetSelectedSwitchable(objectInput: EditorObjectInput, _val
         value = value || {};
         changes = changes || ChangesModelDefaultValue;
         const jpath = objectInput.path + '._t';
-        return changes.$set[jpath] ?? JSONPath({ json: value, path: jpath })[0] ?? '';
+        return changes.$set[jpath] ?? jsonPath(value, jpath)[0] ?? '';
     } catch {
         return '';
     }
