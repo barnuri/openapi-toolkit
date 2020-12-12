@@ -21,6 +21,9 @@ function modifyIndexChild(i: number, editor: EditorInput): EditorInput {
         for (let j = 0; j < objInput.switchableObjects.length; j++) {
             objInput.switchableObjects[j] = modifyIndexChild(i, objInput.switchableObjects[j]);
         }
+        if (objInput.dictionaryInput) {
+            objInput.dictionaryInput = modifyIndexChild(i, objInput.dictionaryInput);
+        }
         input = objInput;
     } else if (input.editorType === 'EditorArrayInput') {
         const arrInput = input as EditorArrayInput;

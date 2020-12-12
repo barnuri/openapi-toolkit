@@ -77,6 +77,9 @@ function modifyDictionaryInput(key: string, editor: EditorInput, parentPath: str
         for (let j = 0; j < objInput.switchableObjects.length; j++) {
             objInput.switchableObjects[j] = modifyDictionaryInput(key, objInput.switchableObjects[j], parentPath);
         }
+        if (objInput.dictionaryInput) {
+            objInput.dictionaryInput = modifyDictionaryInput(key, objInput.dictionaryInput, parentPath);
+        }
         input = objInput;
     } else if (input.editorType === 'EditorArrayInput') {
         const arrInput = input as EditorArrayInput;
