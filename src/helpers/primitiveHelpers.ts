@@ -11,16 +11,18 @@ export function primitiveSetValue(newVal: string | number | boolean | Date, _cha
     const primitiveInput = cloneHelper(_primitiveInput || {});
     let changes: ChangesModel = cloneHelper(_changes || ChangesModelDefaultValue);
     changes = changes || ChangesModelDefaultValue;
-    switch (primitiveInput.type) {
-        case 'boolean':
-            newVal = newVal === true || newVal === 'true' || newVal === 1;
-            break;
-        case 'date':
-            newVal = new Date(newVal as any);
-            break;
-        case 'number':
-            newVal = +newVal;
-            break;
+    if (newVal !== null) {
+        switch (primitiveInput.type) {
+            case 'boolean':
+                newVal = newVal === true || newVal === 'true' || newVal === 1;
+                break;
+            case 'date':
+                newVal = new Date(newVal as any);
+                break;
+            case 'number':
+                newVal = +newVal;
+                break;
+        }
     }
     changes = changesSetValue(newVal, changes, primitiveInput.path);
     return changes;
