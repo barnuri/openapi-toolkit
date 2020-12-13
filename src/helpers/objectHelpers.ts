@@ -65,6 +65,7 @@ export function objectDictonaryDeleteKey(key: string, objectInput: EditorObjectI
     changes.dictNewKeys[objectInput.path] = changes.dictNewKeys[objectInput.path] || [];
     changes.dictNewKeys[objectInput.path] = changes.dictNewKeys[objectInput.path].filter(x => x !== key);
     changes.$unset[objectInput.path + '.' + key] = '';
+    delete changes.$set[objectInput.path + '.' + key];
     return changes;
 }
 
