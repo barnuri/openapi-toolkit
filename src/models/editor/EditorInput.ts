@@ -1,4 +1,4 @@
-import { cloneHelper } from '../../helpers';
+import { cloneHelper, editorNameByPath } from '../../helpers';
 import { OpenApiDefinitionObject } from './../openapi/OpenApiDefinitionObject';
 export class EditorInput {
     public path: string;
@@ -24,7 +24,7 @@ export class EditorInput {
         this.required = inputIsRequired(path, openApiParentDefinition);
         this.description = openApiDefinition.description;
         this.title = openApiDefinition.title;
-        this.name = (this.path || '').split('.').splice(-1)[0];
+        this.name = editorNameByPath(this.path || '');
         this.deprecated = openApiDefinition.deprecated || openApiDefinition['x-deprecated'];
         const parentClone = cloneHelper(openApiParentDefinition || ({} as OpenApiDefinitionObject));
         parentClone.properties = parentClone.properties || {};

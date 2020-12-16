@@ -11,6 +11,7 @@ import {
     EditorObjectInput,
     OpenApiDefinitionType,
 } from '../models';
+import { modifyInputPath } from './editorHelpers';
 
 export function getEditor(openApiDocument: OpenApiDocument, editorName: string): Editor {
     let definitions = getDefinisions(openApiDocument);
@@ -46,7 +47,7 @@ export function getEditor(openApiDocument: OpenApiDocument, editorName: string):
         if (objectInput.definistionName) {
             const existingObjectInput = existingObjectEditorInputs[objectInput.definistionName];
             if (existingObjectInput) {
-                return { ...existingObjectInput, path, name: objectInput.name };
+                return modifyInputPath(existingObjectInput, existingObjectInput.path, path);
             }
             existingObjectEditorInputs[objectInput.definistionName] = objectInput;
         }

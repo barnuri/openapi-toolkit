@@ -3,6 +3,7 @@ import { ChangesModelDefaultValue } from './../models/editor/ChangesModel';
 import { EditorObjectInput, ChangesModel, EditorArrayInput } from '../models';
 import { cloneHelper } from './utilsHelper';
 import { jsonPath } from './utilsHelper';
+import { modifyInputPath } from './editorHelpers';
 
 export function objectSetSelectedSwitchable(objectInput: EditorObjectInput, _changes: ChangesModel, newSwitchableType: string): ChangesModel {
     let changes = cloneHelper(_changes || ChangesModelDefaultValue);
@@ -34,7 +35,7 @@ export function objectGetDictionaryKeys(objectInput: EditorObjectInput, _value: 
 }
 
 export function objectDictonaryInputModify(key: string, objectInput: EditorObjectInput) {
-    return modifyDictionaryInput(key, objectInput.dictionaryInput!, objectInput.path);
+    return modifyInputPath(objectInput.dictionaryInput!, objectInput.path, objectInput.path + '.' + key);
 }
 
 export function objectDictonaryAddKey(key: string, objectInput: EditorObjectInput, _value: any, _changes: ChangesModel) {
@@ -69,28 +70,3 @@ export function objectDictonaryDeleteKey(key: string, objectInput: EditorObjectI
     return changes;
 }
 
-function modifyDictionaryInput(key: string, editor: EditorInput, parentPath: string): EditorInput {
-    let input = cloneHelper(editor || {});
-    input.name = input.name.replace(parentPath, parentPath + '.' + key);
-    input.path = input.path.replace(parentPath, parentPath + '.' + key);
-    if (input.editorType === 'EditorObjectInput') {
-        const objInput = input as EditorObjectInput;
-        objInput.properties = objInput.properties || [];
-        for (let j = 0; j < objInput.properties.length; j++) {
-            objInput.properties[j] = modifyDictionaryInput(key, objInput.properties[j], parentPath);
-        }
-        objInput.switchableObjects = objInput.switchableObjects || [];
-        for (let j = 0; j < objInput.switchableObjects.length; j++) {
-            objInput.switchableObjects[j] = modifyDictionaryInput(key, objInput.switchableObjects[j], parentPath);
-        }
-        if (objInput.dictionaryInput) {
-            objInput.dictionaryInput = modifyDictionaryInput(key, objInput.dictionaryInput, parentPath);
-        }
-        input = objInput;
-    } else if (input.editorType === 'EditorArrayInput') {
-        const arrInput = input as EditorArrayInput;
-        arrInput.itemInput = modifyDictionaryInput(key, arrInput.itemInput, parentPath);
-        input = arrInput;
-    }
-    return cloneHelper(input);
-}

@@ -1,36 +1,11 @@
 import { ChangesModelDefaultValue } from './../models/editor/ChangesModel';
-import { EditorArrayInput, EditorObjectInput, EditorInput, ChangesModel } from '../models';
+import { EditorArrayInput, ChangesModel } from '../models';
 import { cloneHelper } from './utilsHelper';
 import { jsonPath } from './utilsHelper';
+import { modifyInputPath } from './editorHelpers';
 
 export function arrayChildModifyIndex(index: number, arrayInput: EditorArrayInput) {
-    return modifyIndexChild(index, arrayInput.itemInput);
-}
-
-function modifyIndexChild(i: number, editor: EditorInput): EditorInput {
-    let input = cloneHelper(editor || {});
-    input.name = input.name.replace('[i]', `.${i}`);
-    input.path = input.path.replace('[i]', `.${i}`);
-    if (input.editorType === 'EditorObjectInput') {
-        const objInput = input as EditorObjectInput;
-        objInput.properties = objInput.properties || [];
-        for (let j = 0; j < objInput.properties.length; j++) {
-            objInput.properties[j] = modifyIndexChild(i, objInput.properties[j]);
-        }
-        objInput.switchableObjects = objInput.switchableObjects || [];
-        for (let j = 0; j < objInput.switchableObjects.length; j++) {
-            objInput.switchableObjects[j] = modifyIndexChild(i, objInput.switchableObjects[j]);
-        }
-        if (objInput.dictionaryInput) {
-            objInput.dictionaryInput = modifyIndexChild(i, objInput.dictionaryInput);
-        }
-        input = objInput;
-    } else if (input.editorType === 'EditorArrayInput') {
-        const arrInput = input as EditorArrayInput;
-        arrInput.itemInput = modifyIndexChild(i, arrInput.itemInput);
-        input = arrInput;
-    }
-    return cloneHelper(input);
+    return modifyInputPath(arrayInput.itemInput, arrayInput.itemInput.path, arrayInput.itemInput.path.replace('[i]', `.${index}`));
 }
 
 export function arrayIsItemDeleted(_arrayInput: EditorArrayInput, _value: any, _changes: ChangesModel, index: number): boolean {
