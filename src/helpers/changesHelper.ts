@@ -26,19 +26,28 @@ export function changesDeletePathValue(_changes: ChangesModel, _editorInput: Edi
     return changes;
 }
 
-export function chagesGetPathValue(_changes: ChangesModel, _value: any, _editorInput: EditorInput): { pathValue: any; isUnset: boolean } {
+export function changesGetPathValue(_changes: ChangesModel, _value: any, _editorInput: EditorInput) {
     const editorInput = cloneHelper(_editorInput || {});
+    return changesGetPathValueByPath(_changes, _value, editorInput.path, (editorInput as any).default);
+}
+
+export function changesGetPathValueByPath(
+    _changes: ChangesModel,
+    _value: any,
+    path: string,
+    defaultValue: any = undefined,
+): { pathValue: any; isUnset: boolean } {
     let value = cloneHelper(_value || {});
     let changes: ChangesModel = cloneHelper(_changes || ChangesModelDefaultValue);
     value = value || {};
     changes = changes || ChangesModelDefaultValue;
-    const res = { pathValue: changes.$set[editorInput.path] ?? jsonPath(value, '$.' + editorInput.path)[0] ?? (editorInput as any).default, isUnset: false };
-    if (res.pathValue === undefined || Object.keys(changes.$unset).filter(x => x === editorInput.path).length > 0) {
+    const res = { pathValue: changes.$set[path] ?? jsonPath(value, '$.' + path)[0] ?? defaultValue, isUnset: false };
+    if (res.pathValue === undefined || Object.keys(changes.$unset).filter(x => x === path).length > 0) {
         return { pathValue: '', isUnset: true };
     }
     return res;
 }
 
 export function chagesIsUnset(_changes: ChangesModel, _value: any, _editorInput: EditorInput) {
-    return chagesGetPathValue(_changes, _value, _editorInput).isUnset;
+    return changesGetPathValue(_changes, _value, _editorInput).isUnset;
 }

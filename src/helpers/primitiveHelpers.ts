@@ -1,10 +1,10 @@
 import { ChangesModelDefaultValue } from './../models/editor/ChangesModel';
 import { EditorPrimitiveInput, ChangesModel } from '../models';
 import { cloneHelper } from './utilsHelper';
-import { chagesGetPathValue, changesSetValue } from './changesHelper';
+import { changesGetPathValue, changesSetValue } from './changesHelper';
 
 export function primitiveGetValue(_changes: ChangesModel, _value: any, _primitiveInput: EditorPrimitiveInput) {
-    return chagesGetPathValue(_changes, _value, _primitiveInput).pathValue;
+    return changesGetPathValue(_changes, _value, _primitiveInput).pathValue;
 }
 
 export function primitiveSetValue(newVal: string | number | boolean | Date, _changes: ChangesModel, _primitiveInput: EditorPrimitiveInput): ChangesModel {
