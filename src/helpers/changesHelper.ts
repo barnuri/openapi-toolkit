@@ -51,3 +51,34 @@ export function changesGetPathValueByPath(
 export function chagesIsUnset(_changes: ChangesModel, _value: any, _editorInput: EditorInput) {
     return changesGetPathValue(_changes, _value, _editorInput).isUnset;
 }
+
+export type bulkEntry = { updateOne: { filter: any; update: any } };
+
+export function getBulkWrite(_changes: ChangesModel, filter: any): bulkEntry[] {
+    const bulkWrite: bulkEntry[] = [];
+    const changes = cloneHelper(_changes);
+    filter = filter || {};
+    if (Object.keys(changes.$set || {}).length > 0) {
+        const arrayRegex = new RegExp('\\.\\d+\\.', 'g');
+        const keysWithArrays = Object.keys(changes.$set).filter(key => arrayRegex.test(key));
+        for (const key of keysWithArrays) {
+            let path = '';
+            const arrayPaths = key.split('.');
+            for (const subPath of arrayPaths) {
+                if (Number.isInteger(+subPath)) {
+                    bulkWrite.push({ updateOne: { filter: { ...filter, [path]: { $exists: false } }, update: { $set: { [path]: [] } } } });
+                }
+                path += !path ? subPath : `.${subPath}`;
+            }
+        }
+        bulkWrite.push({ updateOne: { filter, update: { $set: changes.$set } } });
+    }
+    if (Object.keys(changes.$unset || {}).length > 0) {
+        bulkWrite.push({ updateOne: { filter, update: { $unset: changes.$unset } } });
+    }
+    if (Object.keys(changes.$pull || {}).length > 0) {
+        bulkWrite.push({ updateOne: { filter, update: { $pull: changes.$pull } } });
+    }
+
+    return bulkWrite;
+}
