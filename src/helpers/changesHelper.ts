@@ -48,7 +48,7 @@ export function changesGetPathValueByPath(
     return res;
 }
 
-export function chagesIsUnset(_changes: ChangesModel, _value: any, _editorInput: EditorInput) {
+export function changesIsUnset(_changes: ChangesModel, _value: any, _editorInput: EditorInput) {
     return changesGetPathValue(_changes, _value, _editorInput).isUnset;
 }
 
