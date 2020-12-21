@@ -8,11 +8,17 @@ export function changesSetValue(newVal: any, _changes: ChangesModel, path: strin
     changes.$set[path] = newVal;
     // cleanup
     delete changes.$unset[path];
+    const subPathes = path.split('.');
+    let pathToDel = '';
+    for (const subPath of subPathes) {
+        pathToDel += !pathToDel ? subPath : `.${subPath}`;
+        delete changes.$unset[pathToDel];
+    }
     delete changes.$pull[path];
     return changes;
 }
 
-export function changesDeletePathValue(_changes: ChangesModel, _editorInput: EditorInput) {
+export function changesUnsetPathValue(_changes: ChangesModel, _editorInput: EditorInput) {
     const editorInput = cloneHelper(_editorInput || {});
     let changes: ChangesModel = cloneHelper(_changes || ChangesModelDefaultValue);
 
@@ -28,24 +34,20 @@ export function changesDeletePathValue(_changes: ChangesModel, _editorInput: Edi
 
 export function changesGetPathValue(_changes: ChangesModel, _value: any, _editorInput: EditorInput) {
     const editorInput = cloneHelper(_editorInput || {});
-    return changesGetPathValueByPath(_changes, _value, editorInput.path, (editorInput as any).default);
+    return changesGetPathValueByPath(_changes, _value, editorInput.path, editorInput.default);
 }
 
-export function changesGetPathValueByPath(
-    _changes: ChangesModel,
-    _value: any,
-    path: string,
-    defaultValue: any = undefined,
-): { pathValue: any; isUnset: boolean } {
+export function changesGetPathValueByPath(_changes: ChangesModel, _value: any, path: string, defaultValue: any = undefined) {
     let value = cloneHelper(_value || {});
     let changes: ChangesModel = cloneHelper(_changes || ChangesModelDefaultValue);
     value = value || {};
     changes = changes || ChangesModelDefaultValue;
-    const res = { pathValue: changes.$set[path] ?? jsonPath(value, '$.' + path)[0] ?? defaultValue, isUnset: false };
-    if (res.pathValue === undefined || Object.keys(changes.$unset).filter(x => x === path).length > 0) {
-        return { pathValue: '', isUnset: true };
-    }
-    return res;
+    const pathValue = changes.$set[path] ?? jsonPath(value, '$.' + path)[0];
+    // object dont have props or array dont have new items
+    let isUnset = Object.keys(changes.$set).filter(key => key.startsWith(path)).length <= 0;
+    // value is empty or unset in changes
+    isUnset &&= pathValue === undefined || Object.keys(changes.$unset).filter(x => x === path).length > 0;
+    return { pathValue: pathValue ?? defaultValue ?? '', isUnset };
 }
 
 export function changesIsUnset(_changes: ChangesModel, _value: any, _editorInput: EditorInput) {

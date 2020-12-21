@@ -11,7 +11,6 @@ export class EditorPrimitiveInput extends EditorInput {
     public readonly maxLength: number | undefined;
     public readonly minLength: number | undefined;
     public readonly pattern: string | undefined;
-    public readonly default: any | undefined;
 
     constructor(
         type: 'number' | 'date' | 'string' | 'enum' | 'boolean',

@@ -11,6 +11,7 @@ export class EditorInput {
     public readonly editorType: 'EditorArrayInput' | 'EditorObjectInput' | 'EditorPrimitiveInput';
     public readonly openApiDefinition: OpenApiDefinitionObject;
     public readonly openApiParentDefinition: OpenApiDefinitionObject | undefined;
+    public default: any | undefined;
 
     constructor(
         path: string,

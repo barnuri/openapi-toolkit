@@ -16,5 +16,6 @@ export class EditorArrayInput extends EditorInput {
         this.itemInput = itemInput;
         this.maxItems = openApiDefinition.maxItems;
         this.minItems = openApiDefinition.minItems;
+        this.default = [];
     }
 }

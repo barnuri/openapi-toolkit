@@ -25,5 +25,6 @@ export class EditorObjectInput extends EditorInput {
         this.isAbstract = openApiDefinition['x-abstract'] == true;
         this.switchableOptions = !this.switchable ? [] : switchableOptions || [];
         this.isDictionary = !!openApiDefinition.additionalProperties;
+        this.default = {};
     }
 }
