@@ -1,5 +1,4 @@
-import { EditorArrayInput } from 'openapi-definition-to-editor';
-import { EditorInput } from './../models/editor/EditorInput';
+import { EditorInput, EditorArrayInput } from './../models';
 import { ChangesModel, ChangesModelDefaultValue } from '../models';
 import { cloneHelper, jsonPath } from './utilsHelper';
 import { arrayPath } from './arrayHelpers';
