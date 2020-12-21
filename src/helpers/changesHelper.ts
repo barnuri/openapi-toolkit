@@ -23,6 +23,10 @@ export function changesUnsetPathValue(_changes: ChangesModel, _editorInput: Edit
     const editorInput = cloneHelper(_editorInput || {});
     let changes: ChangesModel = cloneHelper(_changes || ChangesModelDefaultValue);
 
+    if (editorInput.editorType === 'EditorArrayInput') {
+        editorInput.path = arrayPath(editorInput as EditorArrayInput);
+    }
+
     // cleanup
     Object.keys(changes.$set)
         .filter(key => key.startsWith(editorInput.path))
@@ -46,6 +50,18 @@ export function changesGetPathValueByPath(_changes: ChangesModel, _value: any, p
     let changes: ChangesModel = cloneHelper(_changes || ChangesModelDefaultValue);
     value = value || {};
     changes = changes || ChangesModelDefaultValue;
+
+    const subPathes = path.split('.');
+    let pathToCheck = '';
+    let unsetFromChanges = false;
+    for (const subPath of subPathes) {
+        pathToCheck += !pathToCheck ? subPath : `.${subPath}`;
+        unsetFromChanges ||= Object.keys(changes.$unset).filter(x => x === pathToCheck).length > 0;
+    }
+    if (unsetFromChanges) {
+        return { pathValue: defaultValue ?? '', isUnset: true };
+    }
+
     const pathValue = changes.$set[path] ?? jsonPath(value, '$.' + path)[0];
     // object dont have props or array dont have new items
     let isUnset = Object.keys(changes.$set).filter(key => key.startsWith(path)).length <= 0;
