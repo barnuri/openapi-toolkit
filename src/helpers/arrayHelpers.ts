@@ -3,6 +3,7 @@ import { EditorArrayInput, ChangesModel } from '../models';
 import { cloneHelper } from './utilsHelper';
 import { jsonPath } from './utilsHelper';
 import { modifyInputPath } from './editorHelpers';
+import { changesGetPathValueByPath } from './changesHelper';
 
 export function arrayChildModifyIndex(index: number, arrayInput: EditorArrayInput) {
     return modifyInputPath(arrayInput.itemInput, arrayInput.itemInput.path, arrayInput.itemInput.path.replace('[i]', `.${index}`));
@@ -17,8 +18,8 @@ export function arrayIsItemDeleted(_arrayInput: EditorArrayInput, _value: any, _
     if (index >= originalItemsCount) {
         return false;
     }
-    // existing item
-    return changes.$unset[arrayKeyPrefix(index, arrayInput)] === '';
+    // is unset
+    return changesGetPathValueByPath(changes, value, arrayKeyPrefix(index, arrayInput), '').isUnset;
 }
 
 export function arrayDeleteItem(index: number, _changes: ChangesModel, _value: any, _arrayInput: EditorArrayInput) {

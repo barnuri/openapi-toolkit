@@ -1,7 +1,7 @@
 import { EditorInput, EditorArrayInput } from './../models';
 import { ChangesModel, ChangesModelDefaultValue } from '../models';
 import { cloneHelper, jsonPath } from './utilsHelper';
-import { arrayPath } from './arrayHelpers';
+import { arrayItemsCount, arrayPath } from './arrayHelpers';
 
 export function changesSetValue(newVal: any, _changes: ChangesModel, path: string): ChangesModel {
     let changes: ChangesModel = cloneHelper(_changes || ChangesModelDefaultValue);
@@ -33,7 +33,9 @@ export function changesUnsetPathValue(_changes: ChangesModel, _editorInput: Edit
         .forEach(key => delete changes.$set[key]);
 
     changes.$unset = { ...changes.$unset, [editorInput.path]: '' };
-
+    if (editorInput.editorType === 'EditorArrayInput') {
+        delete changes.newArrayItemsCount[arrayPath(editorInput as EditorArrayInput)];
+    }
     return changes;
 }
 
