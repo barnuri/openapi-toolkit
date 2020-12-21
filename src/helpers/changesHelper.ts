@@ -1,6 +1,8 @@
+import { EditorArrayInput } from 'openapi-definition-to-editor';
 import { EditorInput } from './../models/editor/EditorInput';
 import { ChangesModel, ChangesModelDefaultValue } from '../models';
 import { cloneHelper, jsonPath } from './utilsHelper';
+import { arrayPath } from './arrayHelpers';
 
 export function changesSetValue(newVal: any, _changes: ChangesModel, path: string): ChangesModel {
     let changes: ChangesModel = cloneHelper(_changes || ChangesModelDefaultValue);
@@ -34,6 +36,9 @@ export function changesUnsetPathValue(_changes: ChangesModel, _editorInput: Edit
 
 export function changesGetPathValue(_changes: ChangesModel, _value: any, _editorInput: EditorInput) {
     const editorInput = cloneHelper(_editorInput || {});
+    if (editorInput.editorType === 'EditorArrayInput') {
+        editorInput.path = arrayPath(editorInput as EditorArrayInput);
+    }
     return changesGetPathValueByPath(_changes, _value, editorInput.path, editorInput.default);
 }
 
