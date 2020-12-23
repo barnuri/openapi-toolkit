@@ -1,30 +1,25 @@
-try {
-    if (JSON && !(JSON as any).dateParser) {
-        const reISO = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2}(?:\.\d*))(?:Z|(\+|-)([\d|:]*))?$/;
-        const reMsAjax = /^\/Date\((d|-|.*)\)[\/|\\]$/;
-        (JSON as any).dateParser = function (key, value) {
-            try {
-                if (typeof value === 'string') {
-                    var a = reISO.exec(value);
-                    if (a) return new Date(value);
-                    a = reMsAjax.exec(value);
-                    if (a) {
-                        var b = a[1].split(/[-+,.]/);
-                        return new Date(b[0] ? +b[0] : 0 - +b[1]);
-                    }
-                }
-                return value;
-            } catch {
-                return value;
+const reISO = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2}(?:\.\d*))(?:Z|(\+|-)([\d|:]*))?$/;
+const reMsAjax = /^\/Date\((d|-|.*)\)[\/|\\]$/;
+const dateParser = function (key, value) {
+    try {
+        if (typeof value === 'string') {
+            if (reISO.exec(value)) {
+                return new Date(value);
             }
-        };
+            const match = reMsAjax.exec(value);
+            if (match) {
+                var matchSplit = match[1].split(/[-+,.]/);
+                return new Date(matchSplit[0] ? +matchSplit[0] : 0 - +matchSplit[1]);
+            }
+        }
+        return value;
+    } catch {
+        return value;
     }
-} catch (e) {
-    console.log(e);
-}
+};
 
 export function cloneHelper<T>(value: T): T {
-    return JSON.parse(JSON.stringify(value, (JSON as any).dateParser));
+    return JSON.parse(JSON.stringify(value), dateParser);
 }
 
 export function jsonPath(json: any, path: string) {
