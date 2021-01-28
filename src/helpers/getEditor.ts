@@ -43,8 +43,7 @@ export function getEditor(openApiDocument: OpenApiDocument, editorName: string):
         }
 
         definitionObj.anyOf = definitionObj.anyOf || [];
-        const switchableOptions = definitionObj.anyOf.map(x => getOpenApiDefinitionObject(x, definitions).def.title!) || [];
-        const objectInput = new EditorObjectInput(switchableOptions, path, defAndRefName.refName || '', definitionObj, parentDefinition);
+        const objectInput = new EditorObjectInput([], path, defAndRefName.refName || '', definitionObj, parentDefinition);
         if (objectInput.definistionName) {
             const existingObjectInput = existingObjectEditorInputs[objectInput.definistionName];
             if (existingObjectInput) {
@@ -55,11 +54,20 @@ export function getEditor(openApiDocument: OpenApiDocument, editorName: string):
         const props = getOpenApiDefinitionObjectProps(definitionObj, true, definitions);
         const propsInputs: EditorInput[] =
             Object.keys(props).map(propContainerName => getEditorInput(`${path}.${propContainerName}`, props[propContainerName], definitionObj)) || [];
-
+        const propsNames = propsInputs.map(x => x.name);
         const switchableObjects: EditorInput[] = [];
         for (const switchable of definitionObj.anyOf) {
+            if (!switchable.title || switchable.title === definitionObj.title || switchable.title === defAndRefName.refName) {
+                continue;
+            }
             definitions = { ...getDefinisions(switchable), ...definitions };
-            switchableObjects.push(getEditorInput(path, switchable, parentDefinition, switchable.title));
+            const switchableObject = getEditorInput(path, switchable, parentDefinition, switchable.title);
+            if (switchableObject.editorType === 'EditorObjectInput') {
+                (switchableObject as EditorObjectInput).properties = (switchableObject as EditorObjectInput).properties.filter(
+                    x => !propsNames.includes(x.name),
+                );
+            }
+            switchableObjects.push(switchableObject);
         }
         let dictionaryInput: EditorInput | undefined = undefined;
         if (!!definitionObj.additionalProperties) {
@@ -72,6 +80,7 @@ export function getEditor(openApiDocument: OpenApiDocument, editorName: string):
         }
         objectInput.properties = propsInputs;
         objectInput.switchableObjects = !objectInput.switchable ? [] : switchableObjects || [];
+        objectInput.switchableOptions = !objectInput.switchable ? [] : switchableObjects.map(x => x.openApiDefinition.title!) || [];
         objectInput.dictionaryInput = dictionaryInput;
         return objectInput;
     };

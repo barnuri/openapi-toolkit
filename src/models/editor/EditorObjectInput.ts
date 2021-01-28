@@ -5,7 +5,7 @@ export class EditorObjectInput extends EditorInput {
     public properties!: EditorInput[];
     public readonly isAbstract: boolean;
     public readonly switchable: boolean;
-    public readonly switchableOptions: string[];
+    public switchableOptions: string[];
     public switchableObjects!: EditorInput[];
     public readonly isDictionary: boolean;
     public dictionaryInput: EditorInput | undefined;
