@@ -32,7 +32,7 @@
     },
     "dependencies": {
         "jsonpath": "^1.0.2",
-        "jsonpath-plus": "git+https://github.com/JSONPath-Plus/JSONPath.git#builds-node-browser",
+        "jsonpath-plus": "^5.0.2",
         "simple-jsonpath": "^1.0.1"
     }
 }
