@@ -15,7 +15,7 @@ import { modifyInputPath } from './editorHelpers';
 
 export function getEditor(openApiDocument: OpenApiDocument, editorName: string): Editor {
     let definitions = getDefinisions(openApiDocument);
-    const tabContainers = getOpenApiDefinitionObjectProps(definitions[editorName]);
+    const tabContainers = getOpenApiDefinitionObjectProps(definitions[editorName], false, definitions);
     const existingObjectEditorInputs: { [inputName: string]: EditorObjectInput } = {};
 
     const getEditorInput = (
@@ -26,6 +26,7 @@ export function getEditor(openApiDocument: OpenApiDocument, editorName: string):
     ): EditorInput => {
         const defAndRefName = getOpenApiDefinitionObject(definition, definitions);
         let definitionObj = defAndRefName.def;
+        definitionObj.anyOf = definitionObj.anyOf?.filter(x => x.title != definitionObj.title);
         if ((definitionObj.allOf || []).length > 0) {
             defAndRefName.refName = defAndRefName.refName || switchableRefName;
         }
@@ -51,7 +52,7 @@ export function getEditor(openApiDocument: OpenApiDocument, editorName: string):
             }
             existingObjectEditorInputs[objectInput.definistionName] = objectInput;
         }
-        const props = getOpenApiDefinitionObjectProps(definitionObj);
+        const props = getOpenApiDefinitionObjectProps(definitionObj, true, definitions);
         const propsInputs: EditorInput[] =
             Object.keys(props).map(propContainerName => getEditorInput(`${path}.${propContainerName}`, props[propContainerName], definitionObj)) || [];
 

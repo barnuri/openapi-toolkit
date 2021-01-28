@@ -18,10 +18,24 @@ export function getOpenApiDefinitionObject(
     return { def: definition as OpenApiDefinitionObject, refName: undefined };
 }
 
-export function getOpenApiDefinitionObjectProps(definitionObj: OpenApiDefinitionObject): { [propName: string]: OpenApiDefinition } {
+export function getOpenApiDefinitionObjectProps(
+    definitionObj: OpenApiDefinitionObject,
+    includeInheritProps: boolean,
+    definitions: OpenApiDefinitionsDictionary,
+): { [propName: string]: OpenApiDefinition } {
     definitionObj = definitionObj || {};
+    const props = definitionObj.properties || ({} as any);
+    const props2 = (((definitionObj.allOf || []).filter(x => Object.keys(x).includes('properties'))[0] as OpenApiDefinitionObject) || {}).properties;
+    let inheritProps = {};
+    if (includeInheritProps) {
+        const refsObjs = (definitionObj.allOf || []).filter(x => Object.keys(x).includes('$ref')).map(x => getOpenApiDefinitionObject(x, definitions));
+        for (const x of refsObjs) {
+            inheritProps = { ...getOpenApiDefinitionObjectProps(x.def, false, definitions) };
+        }
+    }
     return {
-        ...(definitionObj.properties || ({} as any)),
-        ...(((definitionObj.allOf || []).filter(x => Object.keys(x).includes('properties'))[0] as OpenApiDefinitionObject) || {}).properties,
+        ...props,
+        ...props2,
+        ...inheritProps,
     };
 }
