@@ -52,15 +52,15 @@ export function findPropsByValue(val: any, search: string | number | boolean | D
     let res: string[] = [];
     if (Array.isArray(val)) {
         for (let i = 0; i < val.length; i++) {
-            res = [...res, ...findPropsByValue(val[i], search, `${prefix}[${i}].`)];
+            res = [...res, ...findPropsByValue(val[i], search, `${prefix}[${i}]`)];
         }
     } else if (typeof val === 'object' && val !== null) {
         for (const key of Object.keys(val)) {
-            prefix = !prefix ? '' : `${prefix}.`;
-            res = [...res, ...findPropsByValue(val[key], search, `${prefix}${key}.`)];
+            res = [...res, ...findPropsByValue(val[key], search, `${!prefix ? '' : `${prefix}.`}${key}`)];
         }
-    } else if (isMatch(val, search)) {
+    } else if (isMatch(val, search) && prefix && prefix.length > 0) {
         res = [...res, prefix];
     }
     return res;
 }
+

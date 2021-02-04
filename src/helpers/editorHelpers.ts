@@ -45,9 +45,9 @@ export function getAllEditorInputsByEditors(editors: Editor[]): EditorInput[] {
     return allEditors;
 }
 
-export function getAllEditorInputsByInput(editor: EditorInput): EditorInput[] {
+export function getAllEditorInputsByInput(editorInput: EditorInput): EditorInput[] {
     let allEditors: EditorInput[] = [];
-    let input = cloneHelper(editor || {});
+    let input = cloneHelper(editorInput || {});
     if (input.editorType === 'EditorObjectInput') {
         const objInput = input as EditorObjectInput;
         objInput.properties = objInput.properties || [];
@@ -71,4 +71,9 @@ export function getAllEditorInputsByInput(editor: EditorInput): EditorInput[] {
     return allEditors;
 }
 
-
+export function editorHavePath(editor: Editor, path: string): boolean {
+    const inputs = getAllEditorInputsByEditors([editor]);
+    path = path.replace(/[\d]/g, '[i]').trim();
+    const pathes = inputs.map(x => x.path.replace(/[\d]/g, '[i]').trim());
+    return pathes.includes(path);
+}
