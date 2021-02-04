@@ -1,6 +1,4 @@
-import { EditorArrayInput } from './../models/editor/EditorArrayInput';
-import { EditorObjectInput } from './../models/editor/EditorObjectInput';
-import { EditorInput } from '../models/editor/EditorInput';
+import { EditorInput, Editor, EditorObjectInput, EditorArrayInput } from '../models';
 import { cloneHelper } from './utilsHelper';
 
 export function modifyInputPath(editor: EditorInput, parentPath: string, newParentPath: string): EditorInput {
@@ -36,3 +34,41 @@ export function editorNameByInput(editor: EditorInput): string {
 export function editorNameByPath(editorPath: string): string {
     return (editorPath || '').split('.').splice(-1)[0];
 }
+
+export function getAllEditorInputsByEditors(editors: Editor[]): EditorInput[] {
+    let allEditors: EditorInput[] = [];
+    for (const editor of editors) {
+        for (const input of editor.inputs) {
+            allEditors = [...allEditors, ...getAllEditorInputsByInput(input)];
+        }
+    }
+    return allEditors;
+}
+
+export function getAllEditorInputsByInput(editor: EditorInput): EditorInput[] {
+    let allEditors: EditorInput[] = [];
+    let input = cloneHelper(editor || {});
+    if (input.editorType === 'EditorObjectInput') {
+        const objInput = input as EditorObjectInput;
+        objInput.properties = objInput.properties || [];
+        for (let j = 0; j < objInput.properties.length; j++) {
+            allEditors = [...allEditors, ...getAllEditorInputsByInput(objInput.properties[j])];
+        }
+        objInput.switchableObjects = objInput.switchableObjects || [];
+        for (let j = 0; j < objInput.switchableObjects.length; j++) {
+            allEditors = [...allEditors, ...getAllEditorInputsByInput(objInput.switchableObjects[j])];
+        }
+        if (objInput.dictionaryInput) {
+            allEditors = [...allEditors, ...getAllEditorInputsByInput(objInput.dictionaryInput)];
+        }
+        input = objInput;
+    } else if (input.editorType === 'EditorArrayInput') {
+        const arrInput = input as EditorArrayInput;
+        allEditors = [...allEditors, ...getAllEditorInputsByInput(arrInput.itemInput)];
+        input = arrInput;
+    }
+    allEditors = [...allEditors, cloneHelper(input)];
+    return allEditors;
+}
+
+

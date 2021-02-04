@@ -36,3 +36,21 @@ export function jsonPath(json: any, path: string) {
         }
     }
 }
+
+export function findPropsByValue(val: any, search: string | number | boolean | Date | any, prefix: string = ''): string[] {
+    prefix = prefix || '';
+    let res: string[] = [];
+    if (val.isArray()) {
+        for (let i = 0; i < val.length; i++) {
+            res = [...res, ...findPropsByValue(val[i], search, `${prefix}[${i}].`)];
+        }
+    } else if (typeof val === 'object' && val !== null) {
+        for (const key of Object.keys(val)) {
+            prefix = !prefix ? '' : `${prefix}.`;
+            res = [...res, ...findPropsByValue(val[key], search, `${prefix}${key}.`)];
+        }
+    } else {
+        res = [...res, prefix];
+    }
+    return res;
+}
