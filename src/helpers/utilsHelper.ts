@@ -37,6 +37,16 @@ export function jsonPath(json: any, path: string) {
     }
 }
 
+const isMatch = (val, search) => {
+    try {
+        const valStr = val.toString().trim().toLowerCase();
+        const searchStr = search.toString().trim().toLowerCase();
+        return val == search || searchStr == valStr || valStr.includes(searchStr);
+    } catch {
+        return val == search;
+    }
+};
+
 export function findPropsByValue(val: any, search: string | number | boolean | Date | any, prefix: string = ''): string[] {
     prefix = prefix || '';
     let res: string[] = [];
@@ -49,7 +59,7 @@ export function findPropsByValue(val: any, search: string | number | boolean | D
             prefix = !prefix ? '' : `${prefix}.`;
             res = [...res, ...findPropsByValue(val[key], search, `${prefix}${key}.`)];
         }
-    } else {
+    } else if (isMatch(val, search)) {
         res = [...res, prefix];
     }
     return res;
