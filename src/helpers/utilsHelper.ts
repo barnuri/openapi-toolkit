@@ -50,7 +50,7 @@ const isMatch = (val, search) => {
 export function findPropsByValue(val: any, search: string | number | boolean | Date | any, prefix: string = ''): string[] {
     prefix = prefix || '';
     let res: string[] = [];
-    if (val.isArray()) {
+    if (Array.isArray(val)) {
         for (let i = 0; i < val.length; i++) {
             res = [...res, ...findPropsByValue(val[i], search, `${prefix}[${i}].`)];
         }
