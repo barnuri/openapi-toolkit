@@ -71,9 +71,10 @@ export function getAllEditorInputsByInput(editorInput: EditorInput): EditorInput
     return allEditors;
 }
 
-export function editorHavePath(editor: Editor, path: string): boolean {
+export function editorFilterUnkownPaths(editor: Editor, pathesToCheck: string[]): string[] {
     const inputs = getAllEditorInputsByEditors([editor]);
-    path = path.replace(/[\d]/g, '[i]').trim();
-    const pathes = inputs.map(x => x.path.replace(/[\d]/g, '[i]').trim());
-    return pathes.includes(path);
+    pathesToCheck = pathesToCheck.map(x => x.replace(/\[\d+\]/g, '[i]'));
+    const existingPathes = inputs.map(x => x.path.replace(/\[\d+\]/g, '[i]').trim());
+    const existBoth = pathesToCheck.filter(value => existingPathes.includes(value));
+    return existBoth;
 }
