@@ -83,7 +83,7 @@ export function getBulkWrite(_changes: ChangesModel, filter: any): bulkEntry[] {
     const changes = cloneHelper(_changes);
     filter = filter || {};
     if (Object.keys(changes.$set || {}).length > 0) {
-        const arrayRegex = new RegExp('\\.\\d+\\.', 'g');
+        const arrayRegex = new RegExp('\\.\\d+', 'g');
         const keysWithArrays = Object.keys(changes.$set).filter(key => arrayRegex.test(key));
         for (const key of keysWithArrays) {
             let path = '';
