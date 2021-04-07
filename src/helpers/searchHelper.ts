@@ -1,19 +1,24 @@
 import { Editor, editorFilterUnkownPaths, findPropsByValue, getAllEditorInputsByEditors } from '../index';
 
-export interface SearchFinalResult {
+export interface SearchResult {
+    searchResults: SearchMatch[];
+    resultsCount: number;
+}
+
+export interface SearchMatch {
     tab: string;
     results: string[][];
 }
 
-interface SearchResult {
+interface SearchPartialMatch {
     [editorName: string]: string[];
 }
 
-export function searchValueInEditors(searchText: string, editors: Editor[], configValue: any) {
+export function searchValueInEditors(searchText: string, editors: Editor[], configValue: any): SearchResult {
     if (!searchText) {
-        return;
+        return { resultsCount: 0, searchResults: [] };
     }
-    const results: SearchFinalResult[] = [];
+    const results: SearchMatch[] = [];
     const resByPropName = searchByPropName(searchText, editors);
     const resByPropValue = searchByPropValue(searchText, editors, configValue);
     const mergedRes = mergeSearchResults(resByPropName, resByPropValue);
@@ -27,8 +32,8 @@ export function searchValueInEditors(searchText: string, editors: Editor[], conf
     return { searchResults: results, resultsCount: results.reduce((acc, current) => acc + current.results.length, 0) };
 }
 
-function searchByPropName(propName: string, editors: Editor[]): SearchResult {
-    const res: SearchResult = {};
+function searchByPropName(propName: string, editors: Editor[]): SearchPartialMatch {
+    const res: SearchPartialMatch = {};
     const propNameSearch = propName.trim().toLowerCase();
     for (const editor of editors) {
         const inputs = getAllEditorInputsByEditors([editor]);
@@ -38,18 +43,18 @@ function searchByPropName(propName: string, editors: Editor[]): SearchResult {
     return res;
 }
 
-function searchByPropValue(valueToFind: any, editors: Editor[], configValue: any): SearchResult {
+function searchByPropValue(valueToFind: any, editors: Editor[], configValue: any): SearchPartialMatch {
     const propsPaths = findPropsByValue(configValue, valueToFind);
-    const res: SearchResult = {};
+    const res: SearchPartialMatch = {};
     for (const editor of editors) {
         res[editor.name] = editorFilterUnkownPaths(editor, propsPaths).map(x => `by value: ${x}`);
     }
     return res;
 }
 
-function mergeSearchResults(res1: SearchResult, res2: SearchResult) {
+function mergeSearchResults(res1: SearchPartialMatch, res2: SearchPartialMatch) {
     const editorNames = [...Object.keys(res1), ...Object.keys(res2)];
-    const res: SearchResult = {};
+    const res: SearchPartialMatch = {};
     for (const editorName of editorNames) {
         res[editorName] = [...(res1[editorName] || []), ...(res2[editorName] || [])];
     }
