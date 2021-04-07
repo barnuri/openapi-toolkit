@@ -45,14 +45,14 @@ export function arrayDeleteItem(index: number, _changes: ChangesModel, _value: a
                     delete changes.$set[key];
                 });
         }
+        changes.newArrayItemsCount = changes.newArrayItemsCount || {};
+        changes.newArrayItemsCount[arrayPath(arrayInput)] = count - 1;
     }
     // existing item
     else {
         changes.$unset = { ...changes.$unset, [arrayKeyPrefix(index, arrayInput)]: '' };
         changes.$pull = { ...changes.$pull, [arrayPath(arrayInput)]: null };
     }
-    changes.newArrayItemsCount = changes.newArrayItemsCount || {};
-    changes.newArrayItemsCount[arrayPath(arrayInput)] = count - 1;
 
     return changes;
 }
