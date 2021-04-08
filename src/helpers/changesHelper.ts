@@ -1,11 +1,26 @@
-import { EditorInput, EditorArrayInput } from './../models';
+import { EditorInput, EditorArrayInput, EditorPrimitiveInput } from './../models';
 import { ChangesModel, ChangesModelDefaultValue } from '../models';
 import { cloneHelper, jsonPath } from './utilsHelper';
-import { arrayItemsCount, arrayPath } from './arrayHelpers';
+import { arrayPath } from './arrayHelpers';
 
-export function changesSetValue(newVal: any, _changes: ChangesModel, path: string): ChangesModel {
+export function changesSetValue(newVal: any, _changes: ChangesModel, path: string, editorInput?: EditorInput): ChangesModel {
     let changes: ChangesModel = cloneHelper(_changes || ChangesModelDefaultValue);
     changes.$set = changes.$set || {};
+
+    if (newVal !== null && editorInput && editorInput.editorType === 'EditorPrimitiveInput') {
+        switch ((editorInput as EditorPrimitiveInput).type) {
+            case 'boolean':
+                newVal = newVal === true || newVal === 'true' || newVal === 1;
+                break;
+            case 'date':
+                newVal = new Date(newVal as any);
+                break;
+            case 'number':
+                newVal = +newVal;
+                break;
+        }
+    }
+
     changes.$set[path] = newVal;
     // cleanup
     delete changes.$unset[path];
