@@ -93,7 +93,7 @@ export function changesIsUnset(_changes: ChangesModel, _value: any, _editorInput
 
 export type bulkEntry = { updateOne: { filter: any; update: any } };
 
-function getPrepreBulkForArray(changes: ChangesModel, filter: any): bulkEntry[] {
+function getPrepreBulkForArrayAndObjects(changes: ChangesModel, filter: any): bulkEntry[] {
     let bulkWrite: bulkEntry[] = [];
     const keys = Object.keys(changes.$set || {});
     if (keys.length <= 0) {
@@ -107,11 +107,32 @@ function getPrepreBulkForArray(changes: ChangesModel, filter: any): bulkEntry[] 
         const arrayPaths = key.split('.');
         for (const subPath of arrayPaths) {
             if (Number.isInteger(+subPath)) {
-                bulkWrite.push({ updateOne: { filter: { ...filter, [path]: { $exists: false } }, update: { $set: { [path]: [] } } } });
+                const update = { updateOne: { filter: { ...filter, [path]: { $exists: false } }, update: { $set: { [path]: [] } } } };
+                if (!bulkWrite.find(x => JSON.stringify(x) === JSON.stringify(update))) {
+                    bulkWrite.push(update);
+                }
             }
             path += !path ? subPath : `.${subPath}`;
         }
     }
+
+    // create objects if new
+    const objectRegex = new RegExp('.([^.0-9][^.]*)', 'g');
+    const keysWithObjects = Object.keys(changes.$set).filter(key => objectRegex.test(key));
+    for (const key of keysWithObjects) {
+        let path = '';
+        const objectPaths = key.split('.');
+        for (const subPath of objectPaths) {
+            if (!Number.isInteger(+subPath) && path.includes('.') && path !== key) {
+                const update = { updateOne: { filter: { ...filter, [path]: { $exists: false } }, update: { $set: { [path]: {} } } } };
+                if (!bulkWrite.find(x => JSON.stringify(x) === JSON.stringify(update))) {
+                    bulkWrite.push(update);
+                }
+            }
+            path += !path ? subPath : `.${subPath}`;
+        }
+    }
+
     // clean duplicate
     const distinctBulkWrite: bulkEntry[] = [];
     for (const update of bulkWrite) {
@@ -150,7 +171,7 @@ export function getBulkWrite(_changes: ChangesModel, filter: any): bulkEntry[] {
     let bulkWrite: bulkEntry[] = [];
     const changes = cloneHelper(_changes);
     filter = filter || {};
-    bulkWrite.push(...getPrepreBulkForArray(changes, filter));
+    bulkWrite.push(...getPrepreBulkForArrayAndObjects(changes, filter));
     bulkWrite.push(...splitBulk(changes, filter, '$set'));
     bulkWrite.push(...splitBulk(changes, filter, '$unset'));
     bulkWrite.push(...splitBulk(changes, filter, '$pull'));
