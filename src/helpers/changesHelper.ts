@@ -93,31 +93,66 @@ export function changesIsUnset(_changes: ChangesModel, _value: any, _editorInput
 
 export type bulkEntry = { updateOne: { filter: any; update: any } };
 
-export function getBulkWrite(_changes: ChangesModel, filter: any): bulkEntry[] {
+function getPrepreBulkForArray(changes: ChangesModel, filter: any): bulkEntry[] {
+    let bulkWrite: bulkEntry[] = [];
+    const keys = Object.keys(changes.$set || {});
+    if (keys.length <= 0) {
+        return bulkWrite;
+    }
+    // make sure created array insted of object
+    const arrayRegex = new RegExp('\\.\\d+', 'g');
+    const keysWithArrays = Object.keys(changes.$set).filter(key => arrayRegex.test(key));
+    for (const key of keysWithArrays) {
+        let path = '';
+        const arrayPaths = key.split('.');
+        for (const subPath of arrayPaths) {
+            if (Number.isInteger(+subPath)) {
+                bulkWrite.push({ updateOne: { filter: { ...filter, [path]: { $exists: false } }, update: { $set: { [path]: [] } } } });
+            }
+            path += !path ? subPath : `.${subPath}`;
+        }
+    }
+    // clean duplicate
+    const distinctBulkWrite: bulkEntry[] = [];
+    for (const update of bulkWrite) {
+        if (distinctBulkWrite.find(x => JSON.stringify(x) === JSON.stringify(update))) {
+            continue;
+        }
+        distinctBulkWrite.push(update);
+    }
+    return distinctBulkWrite;
+}
+
+function splitBulk(changes: ChangesModel, filter: any, opartion: '$set' | '$unset' | '$pull'): bulkEntry[] {
     const bulkWrite: bulkEntry[] = [];
+    const keys = Object.keys(changes[opartion] || {});
+    if (keys.length <= 0) {
+        return bulkWrite;
+    }
+    const chunk = 5;
+    const splitLen = Math.ceil((keys.length * 1.0) / chunk);
+    for (let i = 0; i < splitLen; i++) {
+        let data = {};
+        for (const key of paginate(keys, chunk, i)) {
+            data[key] = changes[opartion][key];
+        }
+        bulkWrite.push({ updateOne: { filter, update: { [opartion]: data } } });
+    }
+    return bulkWrite;
+}
+
+function paginate(array: any[], page_size: number, page_index: number) {
+    // human-readable page numbers usually start with 1, so we reduce 1 in the first argument
+    return array.slice(page_index * page_size, (page_index + 1) * page_size);
+}
+
+export function getBulkWrite(_changes: ChangesModel, filter: any): bulkEntry[] {
+    let bulkWrite: bulkEntry[] = [];
     const changes = cloneHelper(_changes);
     filter = filter || {};
-    if (Object.keys(changes.$set || {}).length > 0) {
-        const arrayRegex = new RegExp('\\.\\d+', 'g');
-        const keysWithArrays = Object.keys(changes.$set).filter(key => arrayRegex.test(key));
-        for (const key of keysWithArrays) {
-            let path = '';
-            const arrayPaths = key.split('.');
-            for (const subPath of arrayPaths) {
-                if (Number.isInteger(+subPath)) {
-                    bulkWrite.push({ updateOne: { filter: { ...filter, [path]: { $exists: false } }, update: { $set: { [path]: [] } } } });
-                }
-                path += !path ? subPath : `.${subPath}`;
-            }
-        }
-        bulkWrite.push({ updateOne: { filter, update: { $set: changes.$set } } });
-    }
-    if (Object.keys(changes.$unset || {}).length > 0) {
-        bulkWrite.push({ updateOne: { filter, update: { $unset: changes.$unset } } });
-    }
-    if (Object.keys(changes.$pull || {}).length > 0) {
-        bulkWrite.push({ updateOne: { filter, update: { $pull: changes.$pull } } });
-    }
-
+    bulkWrite.push(...getPrepreBulkForArray(changes, filter));
+    bulkWrite.push(...splitBulk(changes, filter, '$set'));
+    bulkWrite.push(...splitBulk(changes, filter, '$unset'));
+    bulkWrite.push(...splitBulk(changes, filter, '$pull'));
     return bulkWrite;
 }
