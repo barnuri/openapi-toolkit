@@ -12,6 +12,7 @@ import {
     OpenApiDefinitionType,
 } from '../models';
 import { modifyInputPath } from './editorHelpers';
+import { cloneHelper } from './utilsHelper';
 
 export function getEditor(openApiDocument: OpenApiDocument, editorName: string): Editor {
     let definitions = getDefinisions(openApiDocument);
@@ -47,24 +48,23 @@ export function getEditor(openApiDocument: OpenApiDocument, editorName: string):
         if (objectInput.definistionName) {
             const existingObjectInput = existingObjectEditorInputs[objectInput.definistionName];
             if (existingObjectInput) {
-                return modifyInputPath(existingObjectInput, existingObjectInput.path, path);
+                return modifyInputPath(cloneHelper(existingObjectInput), existingObjectInput.path, path);
             }
             existingObjectEditorInputs[objectInput.definistionName] = objectInput;
         }
         const props = getOpenApiDefinitionObjectProps(definitionObj, true, definitions);
         const propsInputs: EditorInput[] =
             Object.keys(props).map(propContainerName => getEditorInput(`${path}.${propContainerName}`, props[propContainerName], definitionObj)) || [];
-        const propsNames = propsInputs.map(x => x.name);
         const switchableObjects: EditorInput[] = [];
         for (const switchable of definitionObj.anyOf) {
             if (!switchable.title || switchable.title === definitionObj.title || switchable.title === defAndRefName.refName) {
                 continue;
             }
             definitions = { ...getDefinisions(switchable), ...definitions };
-            const switchableObject = getEditorInput(path, switchable, parentDefinition, switchable.title);
+            const switchableObject = cloneHelper(getEditorInput(path, switchable, parentDefinition, switchable.title));
             if (switchableObject.editorType === 'EditorObjectInput') {
                 (switchableObject as EditorObjectInput).properties = (switchableObject as EditorObjectInput).properties.filter(
-                    x => !propsNames.includes(x.name),
+                    x => !propsInputs.map(x => x.name).includes(x.name),
                 );
             }
             switchableObjects.push(switchableObject);

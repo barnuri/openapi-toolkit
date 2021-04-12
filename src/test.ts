@@ -1,7 +1,7 @@
 import { ChangesModelDefaultValue } from './models';
 import { writeFileSync } from 'fs';
 import openapiSchemaExample from './openapiSchemaExample.json';
-import value from './value.json';
+// import value from './value.json';
 
 import { editorInputToHtml, getEditor, OpenApiDocument, getDefinisions } from './index';
 import { changesGetPathValue, changesUnsetPathValue, editorFilterUnkownPaths, findPropsByValue, getBulkWrite } from './helpers';
@@ -22,8 +22,7 @@ const editors = [
     // 'WebDriverRequestSettings',
     // 'CrawlerSelectors',
 ].map(tabName => getEditor(openApiDoc, tabName));
-
-
+const keySelector = editors.find(x => x.name === 'DeepMappingSettings')?.inputs.find(x => x.path === 'topicKeySelector');
 const ccb = 1;
 
 // let res = {};
