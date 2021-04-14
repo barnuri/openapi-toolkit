@@ -1,4 +1,5 @@
-import { EditorInput, Editor, EditorObjectInput, EditorArrayInput } from '../models';
+import { EditorInput, Editor, EditorObjectInput, EditorArrayInput, OpenApiDocument } from '../models';
+import { getDefinisions, getEditor } from './getEditor';
 import { cloneHelper } from './utilsHelper';
 
 export function modifyInputPath(editor: EditorInput, parentPath: string, newParentPath: string): EditorInput {
@@ -33,6 +34,12 @@ export function editorNameByInput(editor: EditorInput): string {
 
 export function editorNameByPath(editorPath: string): string {
     return (editorPath || '').split('.').splice(-1)[0];
+}
+
+export function getAllEditors(openApiDocument: OpenApiDocument) {
+    let definitions = getDefinisions(openApiDocument);
+    const allEditors = Object.keys(definitions).map(x => getEditor(openApiDocument, x, true));
+    return allEditors;
 }
 
 export function getAllEditorInputsByEditors(editors: Editor[]): EditorInput[] {

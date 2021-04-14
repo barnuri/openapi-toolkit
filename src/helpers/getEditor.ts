@@ -14,7 +14,7 @@ import {
 import { modifyInputPath } from './editorHelpers';
 import { cloneHelper } from './utilsHelper';
 
-export function getEditor(openApiDocument: OpenApiDocument, editorName: string): Editor {
+export function getEditor(openApiDocument: OpenApiDocument, editorName: string, includeInheritProps: boolean = false): Editor {
     let definitions = getDefinisions(openApiDocument);
     const tabContainers = getOpenApiDefinitionObjectProps(definitions[editorName], false, definitions);
     const existingObjectEditorInputs: { [inputName: string]: EditorObjectInput } = {};

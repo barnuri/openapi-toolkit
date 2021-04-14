@@ -1,7 +1,6 @@
-import { OpenApiDefinition } from '../models/openapi/OpenApiDefinition';
-import { OpenApiDefinitionReference } from '../models/openapi/OpenApiDefinitionReference';
-import { OpenApiDefinitionObject } from '../models/openapi/OpenApiDefinitionObject';
-import { OpenApiDefinitionsDictionary } from '../models/openapi/OpenApiDefinitionsDictionary';
+import { OpenApiPathParamInVals } from './../models/openapi/OpenApiDocument';
+import { ApiPathParam } from './../models/ApiPathParam';
+import { OpenApiDefinition, OpenApiDocument, OpenApiDefinitionReference, OpenApiDefinitionObject, OpenApiDefinitionsDictionary, ApiPath } from '../models';
 
 export function getOpenApiDefinitionObject(
     definition: OpenApiDefinition,
@@ -38,4 +37,36 @@ export function getOpenApiDefinitionObjectProps(
         ...props2,
         ...inheritProps,
     };
+}
+
+export function getApiPaths(openApiDocument: OpenApiDocument): ApiPath[] {
+    const paths: ApiPath[] = [];
+    const docPaths = openApiDocument.paths || {};
+    for (const path of Object.keys(docPaths)) {
+        const pathMethods = docPaths[path] || {};
+        for (const method of Object.keys(pathMethods)) {
+            const methodDetails = pathMethods[method];
+            const parameters = methodDetails.parameters || [];
+            const getParamsByType = (type: OpenApiPathParamInVals) =>
+                parameters.filter(x => x.in === type).map(x => ({ name: x.name, schema: x.schema, require: x.required }));
+            const oldBody = getParamsByType('body').find(_ => true);
+            const body = methodDetails.requestBody;
+            let response = (methodDetails.responses || {})['200'] || {};
+            paths.push({
+                controller: (methodDetails.tags || []).find(_ => true) || 'Default',
+                method,
+                path,
+                body: {
+                    schema: Object.values(body?.content || {}).find(_ => true)?.schema || oldBody?.schema || {},
+                    required: body?.required || oldBody?.require || false,
+                },
+                queryParams: getParamsByType('query'),
+                headerParams: getParamsByType('header'),
+                cookieParams: getParamsByType('cookie'),
+                pathParams: getParamsByType('path'),
+                response: Object.values(response.content || {}).find(_ => true)?.schema || response.schema || {},
+            });
+        }
+    }
+    return paths;
 }
