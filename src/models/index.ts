@@ -12,5 +12,3 @@ export * from './openapi/OpenApiDefinitionsDictionary';
 export * from './openapi/OpenApiDocument';
 export * from './ApiPath';
 export * from './ApiPathParam';
-export * from './GeneratorAbstract';
-export * from './generators';

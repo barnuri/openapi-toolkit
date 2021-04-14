@@ -1,7 +1,7 @@
 #!/usr/bin/env node
-import { getSwaggerJson } from './generator/generatorHelpers';
-import { GeneratorAbstract, OpenApiDocument } from './models';
-import { TypescriptAxiosGenerator } from './models/generators/TypescriptAxiosGenerator';
+import { GeneratorAbstract, TypescriptAxiosGenerator } from './generators';
+import { getSwaggerJson } from './helpers/generatorHelpers';
+import { OpenApiDocument } from './models';
 
 const [, , ...args] = process.argv;
 if (args.length % 2 !== 0) {

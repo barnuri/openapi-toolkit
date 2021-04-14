@@ -1,8 +1,8 @@
+import { ApiPath } from './../models/ApiPath';
 import { join } from 'path';
-import { makeDirIfNotExist } from '../../generator/generatorHelpers';
-import { ApiPath } from '../ApiPath';
-import { Editor } from '../editor/Editor';
-import { GeneratorAbstract } from '../GeneratorAbstract';
+import { makeDirIfNotExist } from '../helpers';
+import { Editor } from '../models';
+import { GeneratorAbstract } from './GeneratorAbstract';
 
 export class TypescriptAxiosGenerator extends GeneratorAbstract {
     async generateModel(editors: Editor): Promise<void> {

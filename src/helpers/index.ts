@@ -11,3 +11,4 @@ export * from './utilsHelper';
 export * from './changesHelper';
 
 export * from './searchHelper';
+export * from './generatorHelpers';

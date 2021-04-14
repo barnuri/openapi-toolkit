@@ -1,7 +1,7 @@
-import { fixPath, makeDirIfNotExist } from '../generator/generatorHelpers';
+import { fixPath, makeDirIfNotExist } from '../helpers/generatorHelpers';
 import { getAllEditors, getApiPaths } from '../helpers';
-import { TypescriptAxiosGenerator } from './generators/TypescriptAxiosGenerator';
-import { OpenApiDocument, Editor, ApiPath } from './index';
+import { OpenApiDocument, Editor, ApiPath } from '../models/index';
+
 export abstract class GeneratorAbstract {
     editors: Editor[];
     apiPaths: ApiPath[];
