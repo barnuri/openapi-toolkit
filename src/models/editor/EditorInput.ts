@@ -12,7 +12,7 @@ export class EditorInput {
     public readonly openApiDefinition: OpenApiDefinitionObject;
     public readonly openApiParentDefinition: OpenApiDefinitionObject | undefined;
     public default: any | undefined;
-
+    public className?: string;
     constructor(
         path: string,
         editorType: 'EditorArrayInput' | 'EditorObjectInput' | 'EditorPrimitiveInput',

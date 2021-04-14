@@ -10,6 +10,7 @@ export class EditorObjectInput extends EditorInput {
     public readonly isDictionary: boolean;
     public dictionaryInput: EditorInput | undefined;
     public readonly definistionName: string;
+    public implements: string[];
 
     constructor(
         switchableOptions: string[],
@@ -26,5 +27,6 @@ export class EditorObjectInput extends EditorInput {
         this.switchableOptions = !this.switchable ? [] : switchableOptions || [];
         this.isDictionary = !!openApiDefinition.additionalProperties;
         this.default = {};
+        this.implements = [];
     }
 }

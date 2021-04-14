@@ -12,7 +12,7 @@ import {
     OpenApiDefinitionType,
 } from '../models';
 import { modifyInputPath } from './editorHelpers';
-import { cloneHelper } from './utilsHelper';
+import { cloneHelper, distinct } from './utilsHelper';
 
 export function getEditor(openApiDocument: OpenApiDocument, editorName: string, includeInheritProps: boolean = false): Editor {
     let definitions = getDefinisions(openApiDocument);
@@ -35,16 +35,21 @@ export function getEditor(openApiDocument: OpenApiDocument, editorName: string, 
             definitionObj.type = [...definitionObj.type, 'string'].filter(x => x != 'null')[0] as OpenApiDefinitionType;
         }
         if (isPrimitive(definitionObj)) {
-            return new EditorPrimitiveInput(getPrimitiveType(definitionObj)!, path, definitionObj, parentDefinition);
+            const primitive = new EditorPrimitiveInput(getPrimitiveType(definitionObj)!, path, definitionObj, parentDefinition);
+            primitive.className = defAndRefName.refName;
+            return primitive;
         }
         if (definitionObj.type == 'array') {
             path = path + '[i]';
-            const itemInput = getEditorInput(path, getOpenApiDefinitionObject(definitionObj.items!, definitions).def, parentDefinition);
+            const itemOpenApiObj = getOpenApiDefinitionObject(definitionObj.items!, definitions);
+            const itemInput = getEditorInput(path, itemOpenApiObj.def, parentDefinition);
+            itemInput.className = itemOpenApiObj.refName;
             return new EditorArrayInput(itemInput, path, definitionObj, parentDefinition);
         }
 
         definitionObj.anyOf = definitionObj.anyOf || [];
         const objectInput = new EditorObjectInput([], path, defAndRefName.refName || '', definitionObj, parentDefinition);
+        objectInput.className = defAndRefName.refName || switchableRefName;
         if (objectInput.definistionName) {
             const existingObjectInput = existingObjectEditorInputs[objectInput.definistionName];
             if (existingObjectInput) {
@@ -54,7 +59,9 @@ export function getEditor(openApiDocument: OpenApiDocument, editorName: string, 
         }
         const props = getOpenApiDefinitionObjectProps(definitionObj, true, definitions);
         const propsInputs: EditorInput[] =
-            Object.keys(props).map(propContainerName => getEditorInput(`${path}.${propContainerName}`, props[propContainerName], definitionObj)) || [];
+            Object.keys(props).map(propContainerName =>
+                getEditorInput(`${path}.${propContainerName}`, props[propContainerName], definitionObj, propContainerName),
+            ) || [];
         const switchableObjects: EditorInput[] = [];
         for (const switchable of definitionObj.anyOf) {
             if (!switchable.title || switchable.title === definitionObj.title || switchable.title === defAndRefName.refName) {
@@ -66,13 +73,20 @@ export function getEditor(openApiDocument: OpenApiDocument, editorName: string, 
                 (switchableObject as EditorObjectInput).properties = (switchableObject as EditorObjectInput).properties.filter(
                     x => !propsInputs.map(x => x.name).includes(x.name),
                 );
+                (switchableObject as EditorObjectInput).implements = distinct([
+                    ...(switchableObject as EditorObjectInput).implements,
+                    objectInput.definistionName,
+                    ...(objectInput.openApiDefinition.anyOf?.map(x => x.type || x['$ref']?.split('/')[-1]) || []),
+                ]).filter(x => x);
             }
             switchableObjects.push(switchableObject);
         }
         let dictionaryInput: EditorInput | undefined = undefined;
         if (!!definitionObj.additionalProperties) {
             try {
-                dictionaryInput = getEditorInput(path, getOpenApiDefinitionObject(definitionObj.additionalProperties as any, definitions).def, definitionObj);
+                const dictOpenApiObj = getOpenApiDefinitionObject(definitionObj.additionalProperties as any, definitions);
+                dictionaryInput = getEditorInput(path, dictOpenApiObj.def, definitionObj);
+                dictionaryInput.className = dictOpenApiObj.refName;
             } catch {
                 dictionaryInput = new EditorPrimitiveInput('string', path, definitionObj, parentDefinition);
             }

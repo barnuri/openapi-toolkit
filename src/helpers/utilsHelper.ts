@@ -64,3 +64,10 @@ export function findPropsByValue(val: any, search: string | number | boolean | D
     return res;
 }
 
+export function distinct<T>(arr: T[]) {
+    return [...new Set(arr)];
+}
+
+export function capitalize(s: string) {
+    return s.charAt(0).toUpperCase() + s.slice(1);
+}

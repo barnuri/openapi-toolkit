@@ -7,7 +7,7 @@
         "emitDecoratorMetadata": true,
         "experimentalDecorators": true,
         "sourceMap": true,
-        "outDir": "./dist",
+        "outDir": "./dist-test",
         "declaration": true,
         "declarationMap": true,
         "noImplicitAny": false,
@@ -30,8 +30,8 @@
         "strictNullChecks": true,
         "skipLibCheck": true,
         "lib": ["es2015", "dom"],
-        "rootDir": "src"
+        "rootDir": "test"
     },
-    "include": ["src"],
+    "include": ["test"],
     "exclude": ["node_modules", "dist", "dist-test"]
 }
