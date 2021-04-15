@@ -5,7 +5,7 @@ import { ApiPath } from './../models/ApiPath';
 import { join } from 'path';
 import { capitalize, getEditorInput2, makeDirIfNotExist } from '../helpers';
 import { GeneratorAbstract } from './GeneratorAbstract';
-import { EditorObjectInput, EditorPrimitiveInput } from '../models';
+import { EditorObjectInput, EditorPrimitiveInput, OpenApiDefinition } from '../models';
 
 export class TypescriptAxiosGenerator extends GeneratorAbstract {
     modelsFolder = join(this.outputPath, 'models');
@@ -54,7 +54,8 @@ ${objectInput.properties.map(x => `\t${x.name.replace(/\[i\]/g, '')}${x.nullable
         const name = editorInput.className || (editorInput as any).definistionName || editorInput.title;
         return name;
     }
-    getPropDesc(editorInput: EditorInput) {
+    getPropDesc(obj: EditorInput | OpenApiDefinition) {
+        const editorInput = (obj as EditorInput)?.editorType ? (obj as EditorInput) : getEditorInput2(this.swagger, obj as OpenApiDefinition);
         const fileName = this.getFileName(editorInput);
         if (editorInput.editorType === 'EditorPrimitiveInput') {
             const primitiveInput = editorInput as EditorPrimitiveInput;
@@ -113,23 +114,34 @@ ${Object.keys(enumVals)
         controllerContent += `export class ${controllerName} extends ControllerBase {\n`;
         for (const controlerPath of controlerPaths) {
             console.log(`\t${controlerPath.method} - ${controlerPath.path}`);
-            const pathFixed = controlerPath.path.replace(/\/|-/g, '');
+            const pathFixed = controlerPath.path.replace(/\/|-|{|}/g, '');
             const methodName = controlerPath.method.toLowerCase() + capitalize(pathFixed);
-            let requestType = this.getPropDesc(getEditorInput2(this.swagger, controlerPath.body.schema));
+            let requestType = this.getPropDesc(controlerPath.body.schema);
             const haveBody = !controlerPath.body;
-            const responseType = this.getPropDesc(getEditorInput2(this.swagger, controlerPath.response));
+            const responseType = this.getPropDesc(controlerPath.response);
             const bodyParam = haveBody ? `body: ${requestType}${!controlerPath.body.required ? `?` : ''}, ` : '';
-            const haveHeaderParams = controlerPath.cookieParams.length + controlerPath.headerParams.length > 0;
-            const headersParams = haveHeaderParams ? `headers: any,` : ``;
-            //controlerPath.queryParams;
-            //controlerPath.pathParams;
+            const headers = [...controlerPath.cookieParams, ...controlerPath.headerParams];
+            const haveHeaderParams = headers.length > 0;
+            const headersParams = haveHeaderParams ? `headers: {${headers.map(x => `${x.name}${x.required ? '' : '?'}: string`)}}, ` : ``;
+            const pathParams =
+                controlerPath.pathParams.length > 0
+                    ? `pathParams: {${controlerPath.pathParams.map(x => `${x.name}${x.required ? '' : '?'}: ${this.getPropDesc(x.schema!)}`)}}, `
+                    : ``;
             let url = controlerPath.path;
-            controllerContent += `\tasync ${methodName}(${bodyParam}${headersParams}customConfig?: AxiosRequestConfig): Promise<${responseType}> {\n`;
+            for (const pathParam of controlerPath.pathParams) {
+                url = url.replace('{' + pathParam.name + '}', "${pathParams['" + pathParam.name + "']}");
+            }
+            const haveQueryParams = controlerPath.queryParams.length > 0;
+            url += !haveQueryParams ? '' : '?' + controlerPath.queryParams.map(x => `${x.name}=\${queryParams['${x.name}']}`).join('&');
+            const queryParams = haveQueryParams
+                ? `queryParams: {${controlerPath.queryParams.map(x => `${x.name}${x.required ? '' : '?'}: ${this.getPropDesc(x.schema!)}`)}}, `
+                : ``;
+            controllerContent += `\tasync ${methodName}(${bodyParam}${pathParams}${queryParams}${headersParams}customConfig?: AxiosRequestConfig): Promise<${responseType}> {\n`;
             controllerContent += `\t\treturn this.method<${requestType},${responseType}>(\n`;
             controllerContent += `\t\t\t'${controlerPath.method.toLowerCase()}',\n`;
-            controllerContent += `\t\t\t'${url}',\n`;
+            controllerContent += `\t\t\t\`${url}\`,\n`;
             controllerContent += `\t\t\t${haveBody ? 'body' : 'undefined'},\n`;
-            controllerContent += `\t\t\t{},\n`;
+            controllerContent += `\t\t\t${haveHeaderParams ? 'headers' : 'undefined'},\n`;
             controllerContent += `\t\t\tcustomConfig\n`;
             controllerContent += `\t\t);\n`;
             controllerContent += `\t}\n`;
