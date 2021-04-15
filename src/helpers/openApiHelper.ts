@@ -5,6 +5,8 @@ export function getOpenApiDefinitionObject(
     definition: OpenApiDefinition,
     definitions: OpenApiDefinitionsDictionary,
 ): { def: OpenApiDefinitionObject; refName: string | undefined } {
+    definition = definition || {};
+    definitions = definitions || {};
     if (Object.keys(definition).includes('$ref')) {
         const refName = (definition as OpenApiDefinitionReference).$ref.split('/').splice(-1)[0];
         return { def: definitions[refName], refName };

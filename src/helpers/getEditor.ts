@@ -31,7 +31,7 @@ export function getEditor(openApiDocument: OpenApiDocument, editorName: string, 
 }
 
 export function getEditorInput2(openApiDocument: OpenApiDocument, definition: OpenApiDefinition): EditorInput {
-    return getEditorInput(getDefinisions(openApiDocument), '', definition, undefined, undefined, {});
+    return getEditorInput(getDefinisions(openApiDocument || {}), '', definition || {}, undefined, undefined, {});
 }
 
 export function getEditorInput(
