@@ -1,5 +1,6 @@
-import { GeneratorAbstract, getSwaggerJson, TypescriptAxiosGenerator } from '..';
+import { GeneratorAbstract, getSwaggerJson } from '../index';
 import { OpenApiDocument } from '../models';
+import { TypescriptAxiosGenerator } from './TypescriptAxiosGenerator';
 
 export * from './TypescriptAxiosGenerator';
 export * from './GeneratorAbstract';

@@ -3,7 +3,7 @@ import { EditorInput } from './../models/editor/EditorInput';
 import { appendFileSync, existsSync, writeFileSync } from 'fs';
 import { ApiPath } from './../models/ApiPath';
 import { join } from 'path';
-import { capitalize, makeDirIfNotExist } from '../helpers';
+import { capitalize, getEditorInput2, makeDirIfNotExist } from '../helpers';
 import { GeneratorAbstract } from './GeneratorAbstract';
 import { EditorObjectInput, EditorPrimitiveInput } from '../models';
 
@@ -55,6 +55,7 @@ ${objectInput.properties.map(x => `\t${x.name.replace(/\[i\]/g, '')}${x.nullable
         return name;
     }
     getPropDesc(editorInput: EditorInput) {
+        const fileName = this.getFileName(editorInput);
         if (editorInput.editorType === 'EditorPrimitiveInput') {
             const primitiveInput = editorInput as EditorPrimitiveInput;
             switch (primitiveInput.type) {
@@ -65,7 +66,10 @@ ${objectInput.properties.map(x => `\t${x.name.replace(/\[i\]/g, '')}${x.nullable
                 case 'date':
                     return 'Date';
                 case 'enum':
-                    return `models.${this.getFileName(primitiveInput)}`;
+                    if (!fileName) {
+                        return 'any';
+                    }
+                    return `models.${fileName}`;
             }
         }
         if (editorInput.editorType === 'EditorArrayInput') {
@@ -75,7 +79,10 @@ ${objectInput.properties.map(x => `\t${x.name.replace(/\[i\]/g, '')}${x.nullable
         if (editorInput.editorType === 'EditorObjectInput') {
             const objectInput = editorInput as EditorObjectInput;
             if (!objectInput.isDictionary) {
-                return `models.${this.getFileName(objectInput)}`;
+                if (!fileName) {
+                    return 'any';
+                }
+                return `models.${fileName}`;
             }
             return `{ [key: string]: ${objectInput.dictionaryInput ? this.getPropDesc(objectInput.dictionaryInput) : 'any'} }`;
         }
@@ -108,13 +115,20 @@ ${Object.keys(enumVals)
             console.log(`\t${controlerPath.method} - ${controlerPath.path}`);
             const pathFixed = controlerPath.path.replace(/\/|-/g, '');
             const methodName = controlerPath.method.toLowerCase() + capitalize(pathFixed);
-            const responseType = 'any';
-            const requestType = 'any';
-            controllerContent += `\tasync ${methodName}(body: ${requestType}, customConfig?: AxiosRequestConfig): Promise<${responseType}> {\n`;
+            let requestType = this.getPropDesc(getEditorInput2(this.swagger, controlerPath.body.schema));
+            const haveBody = !controlerPath.body;
+            const responseType = this.getPropDesc(getEditorInput2(this.swagger, controlerPath.response));
+            const bodyParam = haveBody ? `body: ${requestType}${!controlerPath.body.required ? `?` : ''}, ` : '';
+            const haveHeaderParams = controlerPath.cookieParams.length + controlerPath.headerParams.length > 0;
+            const headersParams = haveHeaderParams ? `headers: any,` : ``;
+            //controlerPath.queryParams;
+            //controlerPath.pathParams;
+            let url = controlerPath.path;
+            controllerContent += `\tasync ${methodName}(${bodyParam}${headersParams}customConfig?: AxiosRequestConfig): Promise<${responseType}> {\n`;
             controllerContent += `\t\treturn this.method<${requestType},${responseType}>(\n`;
             controllerContent += `\t\t\t'${controlerPath.method.toLowerCase()}',\n`;
-            controllerContent += `\t\t\t'${pathFixed}',\n`;
-            controllerContent += `\t\t\tbody,\n`;
+            controllerContent += `\t\t\t'${url}',\n`;
+            controllerContent += `\t\t\t${haveBody ? 'body' : 'undefined'},\n`;
             controllerContent += `\t\t\t{},\n`;
             controllerContent += `\t\t\tcustomConfig\n`;
             controllerContent += `\t\t);\n`;
