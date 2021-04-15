@@ -5,7 +5,7 @@ import axios from 'axios';
 
 export async function getSwaggerJson(pathOrUrl: string): Promise<OpenApiDocument> {
     let swaggerJson = {};
-    if (pathOrUrl.indexOf('http') === 0) {
+    if (pathOrUrl.toLowerCase().startsWith('http')) {
         swaggerJson = await axios.get(pathOrUrl).then(res => res.data);
     } else {
         swaggerJson = JSON.parse(readFileSync(pathOrUrl, 'utf8'));
