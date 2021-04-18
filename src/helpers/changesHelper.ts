@@ -34,7 +34,7 @@ export function changesSetValue(newVal: any, _changes: ChangesModel, path: strin
     return changes;
 }
 
-export function changesUnsetPathValue(_changes: ChangesModel, _editorInput: EditorInput) {
+export function changesUnsetPathValue(_changes: ChangesModel, _editorInput: EditorInput): ChangesModel {
     const editorInput = cloneHelper(_editorInput || {});
     let changes: ChangesModel = cloneHelper(_changes || ChangesModelDefaultValue);
 
@@ -54,7 +54,12 @@ export function changesUnsetPathValue(_changes: ChangesModel, _editorInput: Edit
     return changes;
 }
 
-export function changesGetPathValue(_changes: ChangesModel, _value: any, _editorInput: EditorInput) {
+export type pathValue = {
+    pathValue: any;
+    isUnset: boolean;
+};
+
+export function changesGetPathValue(_changes: ChangesModel, _value: any, _editorInput: EditorInput): pathValue {
     const editorInput = cloneHelper(_editorInput || {});
     if (editorInput.editorType === 'EditorArrayInput') {
         editorInput.path = arrayPath(editorInput as EditorArrayInput);
@@ -62,7 +67,7 @@ export function changesGetPathValue(_changes: ChangesModel, _value: any, _editor
     return changesGetPathValueByPath(_changes, _value, editorInput.path, editorInput.default);
 }
 
-export function changesGetPathValueByPath(_changes: ChangesModel, _value: any, path: string, defaultValue: any = undefined) {
+export function changesGetPathValueByPath(_changes: ChangesModel, _value: any, path: string, defaultValue: any = undefined): pathValue {
     let value = cloneHelper(_value || {});
     let changes: ChangesModel = cloneHelper(_changes || ChangesModelDefaultValue);
     value = value || {};
@@ -87,7 +92,7 @@ export function changesGetPathValueByPath(_changes: ChangesModel, _value: any, p
     return { pathValue: pathValue ?? defaultValue ?? '', isUnset };
 }
 
-export function changesIsUnset(_changes: ChangesModel, _value: any, _editorInput: EditorInput) {
+export function changesIsUnset(_changes: ChangesModel, _value: any, _editorInput: EditorInput): boolean {
     return changesGetPathValue(_changes, _value, _editorInput).isUnset;
 }
 
@@ -162,7 +167,7 @@ function splitBulk(changes: ChangesModel, filter: any, opartion: '$set' | '$unse
     return bulkWrite;
 }
 
-function paginate(array: any[], page_size: number, page_index: number) {
+function paginate(array: any[], page_size: number, page_index: number): any[] {
     // human-readable page numbers usually start with 1, so we reduce 1 in the first argument
     return array.slice(page_index * page_size, (page_index + 1) * page_size);
 }

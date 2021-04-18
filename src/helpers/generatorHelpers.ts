@@ -21,7 +21,7 @@ export function fixPath(path: string): string {
     }
 }
 
-export function makeDirIfNotExist(dir: string) {
+export function makeDirIfNotExist(dir: string): void {
     dir = fixPath(dir);
     try {
         if (!existsSync(dir)) {
@@ -33,7 +33,7 @@ export function makeDirIfNotExist(dir: string) {
     setFullPermission(dir);
 }
 
-export function setFullPermission(path: string) {
+export function setFullPermission(path: string): void {
     try {
         chmodSync(path, 0o777);
     } catch (e) {

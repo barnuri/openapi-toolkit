@@ -1,11 +1,11 @@
 import { ChangesModelDefaultValue } from './../models/editor/ChangesModel';
-import { EditorArrayInput, ChangesModel } from '../models';
+import { EditorArrayInput, ChangesModel, EditorInput } from '../models';
 import { cloneHelper } from './utilsHelper';
 import { jsonPath } from './utilsHelper';
 import { modifyInputPath } from './editorHelpers';
 import { changesGetPathValueByPath } from './changesHelper';
 
-export function arrayChildModifyIndex(index: number, arrayInput: EditorArrayInput) {
+export function arrayChildModifyIndex(index: number, arrayInput: EditorArrayInput): EditorInput {
     return modifyInputPath(arrayInput.itemInput, arrayInput.itemInput.path, arrayInput.itemInput.path.replace('[i]', `.${index}`));
 }
 
@@ -22,7 +22,7 @@ export function arrayIsItemDeleted(_arrayInput: EditorArrayInput, _value: any, _
     return changesGetPathValueByPath(changes, value, arrayKeyPrefix(index, arrayInput), '').isUnset;
 }
 
-export function arrayDeleteItem(index: number, _changes: ChangesModel, _value: any, _arrayInput: EditorArrayInput) {
+export function arrayDeleteItem(index: number, _changes: ChangesModel, _value: any, _arrayInput: EditorArrayInput): ChangesModel {
     const arrayInput = cloneHelper(_arrayInput || {});
     const value = cloneHelper(_value || {});
     let changes: ChangesModel = cloneHelper(_changes || ChangesModelDefaultValue);
@@ -57,7 +57,7 @@ export function arrayDeleteItem(index: number, _changes: ChangesModel, _value: a
     return changes;
 }
 
-export function arrayItemsCount(_arrayInput: EditorArrayInput, _value: any, _changes: ChangesModel) {
+export function arrayItemsCount(_arrayInput: EditorArrayInput, _value: any, _changes: ChangesModel): number {
     let changes = cloneHelper(_changes || ChangesModelDefaultValue);
     const arrayInput = cloneHelper(_arrayInput || {});
     let value = cloneHelper(_value || {});
@@ -83,19 +83,19 @@ export function arrayItemsCount(_arrayInput: EditorArrayInput, _value: any, _cha
     return originalItemsCount + newIndexesNumber;
 }
 
-export function arrayKeyPrefix(i: number, arrayInput: EditorArrayInput) {
+export function arrayKeyPrefix(i: number, arrayInput: EditorArrayInput): string {
     return arrayInput.itemInput.path.replace('[i]', `.${i}`);
 }
 
-export function arrayOriginalItemsCount(arrayInput: EditorArrayInput, value: any) {
+export function arrayOriginalItemsCount(arrayInput: EditorArrayInput, value: any): number {
     return ((jsonPath(value, '$.' + arrayPath(arrayInput))[0] as any[]) || []).length;
 }
 
-export function arrayPath(arrayInput: EditorArrayInput) {
+export function arrayPath(arrayInput: EditorArrayInput): string {
     return arrayInput.path.replace('[i]', ``);
 }
 
-export function arrayAddItem(_arrayInput: EditorArrayInput, _changes: ChangesModel, _value: any) {
+export function arrayAddItem(_arrayInput: EditorArrayInput, _changes: ChangesModel, _value: any): ChangesModel {
     const arrayInput = cloneHelper(_arrayInput || {});
     const value = cloneHelper(_value || {});
     let changes: ChangesModel = cloneHelper(_changes || ChangesModelDefaultValue);
@@ -105,7 +105,7 @@ export function arrayAddItem(_arrayInput: EditorArrayInput, _changes: ChangesMod
     return changes;
 }
 
-export function arrayGetIndexes(arrayInput: EditorArrayInput, changes: ChangesModel, value: any) {
+export function arrayGetIndexes(arrayInput: EditorArrayInput, changes: ChangesModel, value: any): number[] {
     const count = arrayItemsCount(arrayInput, value, changes);
     return Array.from({ length: count }, (x, i) => i);
 }

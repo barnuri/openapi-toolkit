@@ -52,7 +52,7 @@ function searchByPropValue(valueToFind: any, editors: Editor[], configValue: any
     return res;
 }
 
-function mergeSearchResults(res1: SearchPartialMatch, res2: SearchPartialMatch) {
+function mergeSearchResults(res1: SearchPartialMatch, res2: SearchPartialMatch): SearchPartialMatch {
     const editorNames = [...Object.keys(res1), ...Object.keys(res2)];
     const res: SearchPartialMatch = {};
     for (const editorName of editorNames) {

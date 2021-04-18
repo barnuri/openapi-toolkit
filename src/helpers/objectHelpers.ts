@@ -1,6 +1,5 @@
-import { EditorInput } from './../models/editor/EditorInput';
 import { ChangesModelDefaultValue } from './../models/editor/ChangesModel';
-import { EditorObjectInput, ChangesModel, EditorArrayInput } from '../models';
+import { EditorObjectInput, ChangesModel } from '../models';
 import { cloneHelper } from './utilsHelper';
 import { jsonPath } from './utilsHelper';
 import { modifyInputPath } from './editorHelpers';
@@ -38,14 +37,14 @@ export function objectDictonaryInputModify(key: string, objectInput: EditorObjec
     return modifyInputPath(objectInput.dictionaryInput!, objectInput.path, objectInput.path + '.' + key);
 }
 
-export function objectDictonaryAddKey(key: string, objectInput: EditorObjectInput, _value: any, _changes: ChangesModel) {
+export function objectDictonaryAddKey(key: string, objectInput: EditorObjectInput, _value: any, _changes: ChangesModel): ChangesModel {
     let changes = cloneHelper(_changes || ChangesModelDefaultValue);
     let value = cloneHelper(_value || {});
     value = value || {};
     changes = changes || ChangesModelDefaultValue;
     const currentKeys = objectGetDictionaryKeys(objectInput, value, changes);
     if (currentKeys.includes(key)) {
-        return;
+        return changes;
     }
 
     if (!key || (new RegExp('^[a-zA-Z](?=[a-zA-Z0-9._]{2,20}$)(?!.*[_.]{2})[^_.].*[^_.]$', 'gm').exec(key) || []).length <= 0) {
@@ -58,7 +57,7 @@ export function objectDictonaryAddKey(key: string, objectInput: EditorObjectInpu
     return changes;
 }
 
-export function objectDictonaryDeleteKey(key: string, objectInput: EditorObjectInput, _value: any, _changes: ChangesModel) {
+export function objectDictonaryDeleteKey(key: string, objectInput: EditorObjectInput, _value: any, _changes: ChangesModel): ChangesModel {
     let changes = cloneHelper(_changes || ChangesModelDefaultValue);
     let value = cloneHelper(_value || {});
     value = value || {};
@@ -69,4 +68,3 @@ export function objectDictonaryDeleteKey(key: string, objectInput: EditorObjectI
     delete changes.$set[objectInput.path + '.' + key];
     return changes;
 }
-

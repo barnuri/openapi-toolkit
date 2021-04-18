@@ -22,7 +22,7 @@ export function cloneHelper<T>(value: T): T {
     return JSON.parse(JSON.stringify(value), dateParser);
 }
 
-export function jsonPath(json: any, path: string) {
+export function jsonPath(json: any, path: string): any {
     try {
         const JSONPath = require('jsonpath-plus');
         return JSONPath({ json, path });
@@ -37,7 +37,7 @@ export function jsonPath(json: any, path: string) {
     }
 }
 
-const isMatch = (val, search) => {
+const isMatch = (val, search): boolean => {
     try {
         const valStr = val.toString().trim().toLowerCase();
         const searchStr = search.toString().trim().toLowerCase();
@@ -64,10 +64,10 @@ export function findPropsByValue(val: any, search: string | number | boolean | D
     return res;
 }
 
-export function distinct<T>(arr: T[]) {
+export function distinct<T>(arr: T[]): T[] {
     return [...new Set(arr)];
 }
 
-export function capitalize(s: string) {
+export function capitalize(s: string): string {
     return s.charAt(0).toUpperCase() + s.slice(1);
 }

@@ -3,7 +3,7 @@ import { EditorPrimitiveInput, ChangesModel } from '../models';
 import { cloneHelper } from './utilsHelper';
 import { changesGetPathValue, changesSetValue } from './changesHelper';
 
-export function primitiveGetValue(_changes: ChangesModel, _value: any, _primitiveInput: EditorPrimitiveInput) {
+export function primitiveGetValue(_changes: ChangesModel, _value: any, _primitiveInput: EditorPrimitiveInput): any {
     return changesGetPathValue(_changes, _value, _primitiveInput).pathValue;
 }
 

@@ -36,7 +36,7 @@ export function editorNameByPath(editorPath: string): string {
     return (editorPath || '').split('.').splice(-1)[0];
 }
 
-export function getAllEditors(openApiDocument: OpenApiDocument) {
+export function getAllEditors(openApiDocument: OpenApiDocument): Editor[] {
     let definitions = getDefinisions(openApiDocument);
     const allEditors = Object.keys(definitions).map(x => getEditor(openApiDocument, x, true));
     return allEditors;

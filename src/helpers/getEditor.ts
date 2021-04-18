@@ -133,6 +133,6 @@ function getPrimitiveType(definition: OpenApiDefinitionObject): 'number' | 'date
     return undefined;
 }
 
-function isPrimitive(definition: OpenApiDefinitionObject) {
+function isPrimitive(definition: OpenApiDefinitionObject): boolean {
     return getPrimitiveType(definition) !== undefined;
 }
