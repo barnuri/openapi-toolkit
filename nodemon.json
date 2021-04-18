@@ -1,0 +1,4 @@
+{
+    "watch": ["src/**/*.ts"],
+    "exec": "tsc && node --inspect=0.0.0.0 dist/test.js"
+}

@@ -30,13 +30,13 @@ export function getOpenApiDefinitionObjectProps(
     if (includeInheritProps) {
         const refsObjs = (definitionObj.allOf || []).filter(x => Object.keys(x).includes('$ref')).map(x => getOpenApiDefinitionObject(x, definitions));
         for (const x of refsObjs) {
-            inheritProps = { ...getOpenApiDefinitionObjectProps(x.def, false, definitions) };
+            inheritProps = { ...getOpenApiDefinitionObjectProps(x.def, true, definitions) };
         }
     }
     return {
-        ...props,
-        ...props2,
         ...inheritProps,
+        ...props2,
+        ...props,
     };
 }
 
