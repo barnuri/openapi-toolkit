@@ -35,7 +35,7 @@ export function arrayDeleteItem(index: number, _changes: ChangesModel, _value: a
         .forEach(key => delete changes.$set[key]);
     // new item, reorganized indexes
     if (index > originalItemsCount - 1) {
-        for (let minNewIndexToModify = index + 1; minNewIndexToModify < originalItemsCount; minNewIndexToModify++) {
+        for (let minNewIndexToModify = index + 1; minNewIndexToModify < count; minNewIndexToModify++) {
             const oldKey = arrayKeyPrefix(minNewIndexToModify, arrayInput);
             const newKey = arrayKeyPrefix(minNewIndexToModify - 1, arrayInput);
             Object.keys(changes.$set)
