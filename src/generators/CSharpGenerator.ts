@@ -1,23 +1,19 @@
-import { EditorArrayInput } from './../models/editor/EditorArrayInput';
-import { EditorInput } from './../models/editor/EditorInput';
-import { appendFileSync, existsSync, writeFileSync } from 'fs';
-import { ApiPath } from './../models/ApiPath';
+import { EditorArrayInput } from '../models/editor/EditorArrayInput';
+import { EditorInput } from '../models/editor/EditorInput';
+import { existsSync, writeFileSync } from 'fs';
+import { ApiPath } from '../models/ApiPath';
 import { join } from 'path';
 import { capitalize, getEditorInput2, makeDirIfNotExist } from '../helpers';
 import { GeneratorAbstract } from './GeneratorAbstract';
 import { EditorObjectInput, EditorPrimitiveInput, OpenApiDefinition } from '../models';
 
-export class TypescriptAxiosGenerator extends GeneratorAbstract {
-    modelsExportFile = join(this.modelsFolder, 'index.ts');
-    controllersExportFile = join(this.controllersFolder, 'index.ts');
-    mainExportFile = join(this.options.output, 'index.ts');
+export class CSharpGenerator extends GeneratorAbstract {
+    mainExportFile = join(this.options.output, 'Client.cs');
+    addNamespace(content: string) {
+        return 'namepsace ' + this.options.namepsace + '\n{\n\t' + content.replace(/\n/g, '\n\t') + '\n}';
+    }
     async generateClient(): Promise<void> {
-        let mainFileContent = `import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';\n`;
-        mainFileContent += `import * as controllers from './controllers';\n`;
-        mainFileContent += `export * from './models';\n`;
-        mainFileContent += `export * from './controllers';\n`;
-        mainFileContent += `export * from './ControllerBase';\n`;
-        mainFileContent += `export default (axiosRequestConfig: AxiosRequestConfig) => ({\n`;
+        let mainFileContent = ``;
         mainFileContent +=
             this.controllersNames
                 .map(x => x + 'Controller')
@@ -26,13 +22,6 @@ export class TypescriptAxiosGenerator extends GeneratorAbstract {
         mainFileContent += `});`;
         writeFileSync(this.mainExportFile, mainFileContent);
     }
-    shouldGenerateModel(editorInput: EditorInput) {
-        const res = super.shouldGenerateModel(editorInput);
-        if (res) {
-            appendFileSync(this.modelsExportFile, `export * from './${this.getFileName(editorInput) + this.getFileAdditionalExtension()}'\n`);
-        }
-        return res;
-    }
     async generateObject(objectInput: EditorObjectInput): Promise<void> {
         if (!this.shouldGenerateModel(objectInput)) {
             return;
@@ -40,16 +29,14 @@ export class TypescriptAxiosGenerator extends GeneratorAbstract {
         const modelFile = join(this.modelsFolder, this.getFileName(objectInput) + this.getFileExtension(true));
         const extendStr =
             objectInput.implements.length > 0
-                ? `extends ${objectInput.implements
-                      .map(x => `models.${this.options.modelNamePrefix}${x}${this.options.modelNameSuffix.split('.')[0]}`)
-                      .join(', ')}`
+                ? `: ${this.options.modelNamePrefix}${objectInput.implements[0]}${this.options.modelNameSuffix.split('.')[0]}`
                 : ``;
-        const modelFileContent = `import * as models from './index';
-export interface ${this.getFileName(objectInput)} ${extendStr} {
-${objectInput.properties.map(x => `\t${x.name.replace(/\[i\]/g, '')}${x.nullable || !x.required ? '?' : ''}: ${this.getPropDesc(x)}`).join(';\n')}
-}
-        `;
-        writeFileSync(modelFile, modelFileContent);
+        const modelFileContent = `public class ${this.getFileName(objectInput)} ${extendStr}\n{
+${objectInput.properties
+    .map(x => `\t public ${this.getPropDesc(x)}${x.nullable || !x.required ? '?' : ''} ${x.name.replace(/\[i\]/g, '')} { get; set; }`)
+    .join('\n')}
+}`;
+        writeFileSync(modelFile, this.addNamespace(modelFileContent));
     }
     getPropDesc(obj: EditorInput | OpenApiDefinition) {
         const editorInput = (obj as EditorInput)?.editorType ? (obj as EditorInput) : getEditorInput2(this.swagger, obj as OpenApiDefinition);
@@ -59,16 +46,18 @@ ${objectInput.properties.map(x => `\t${x.name.replace(/\[i\]/g, '')}${x.nullable
             const primitiveInput = editorInput as EditorPrimitiveInput;
             switch (primitiveInput.type) {
                 case 'number':
+                    return 'double';
                 case 'string':
+                    return 'string';
                 case 'boolean':
-                    return primitiveInput.type;
+                    return 'bool';
                 case 'date':
-                    return 'Date';
+                    return 'DateTime';
                 case 'enum':
                     if (!fileName) {
                         return 'any';
                     }
-                    return `models.${fileName}`;
+                    return `${fileName}`;
             }
         }
         if (editorInput.editorType === 'EditorArrayInput') {
@@ -79,11 +68,11 @@ ${objectInput.properties.map(x => `\t${x.name.replace(/\[i\]/g, '')}${x.nullable
             const objectInput = editorInput as EditorObjectInput;
             if (!objectInput.isDictionary) {
                 if (!fileName) {
-                    return 'any';
+                    return 'object';
                 }
-                return `models.${fileName}`;
+                return `${fileName}`;
             }
-            return `{ [key: string]: ${objectInput.dictionaryInput ? this.getPropDesc(objectInput.dictionaryInput) : 'any'} }`;
+            return `Dictionary<string, ${objectInput.dictionaryInput ? this.getPropDesc(objectInput.dictionaryInput) : 'object'}>`;
         }
     }
     async generateEnum(enumInput: EditorPrimitiveInput, enumVals: { [name: string]: string | number }): Promise<void> {
@@ -91,24 +80,20 @@ ${objectInput.properties.map(x => `\t${x.name.replace(/\[i\]/g, '')}${x.nullable
             return;
         }
         const modelFile = join(this.modelsFolder, this.getFileName(enumInput) + this.getFileExtension(true));
-        const modelFileContent = `   
-export enum ${this.getFileName(enumInput)} {
+        const modelFileContent = `public enum ${this.getFileName(enumInput)} 
+{
 ${Object.keys(enumVals)
-    .map(x => `\t${x} = ${typeof enumVals[x] === 'number' ? enumVals[x] : `'${enumVals[x]}'`}`)
+    .map(x => `\t${x}${typeof enumVals[x] === 'number' ? ' = ' + enumVals[x] : ``}`)
     .join(',\n')}
-}
-            `;
-        writeFileSync(modelFile, modelFileContent);
+}`;
+        writeFileSync(modelFile, this.addNamespace(modelFileContent));
     }
     async generateController(controllerName: string, controlerPaths: ApiPath[]): Promise<void> {
         this.generateBaseController();
         makeDirIfNotExist(this.controllersFolder);
-        appendFileSync(this.controllersExportFile, `export * from './${controllerName}'\n`);
         console.log(`${controllerName} - ${controlerPaths.length}`);
-        let controllerContent = `import * as models from '../models';\n`;
-        controllerContent += `import { AxiosRequestConfig } from 'axios';\n`;
-        controllerContent += `import { ControllerBase } from '../ControllerBase';\n`;
-        controllerContent += `export class ${controllerName} extends ControllerBase {\n`;
+        let controllerContent = ``;
+        controllerContent += `public class ${controllerName} : ControllerBase \n{\n`;
         for (const controlerPath of controlerPaths) {
             console.log(`\t${controlerPath.method} - ${controlerPath.path}`);
             const pathFixed = controlerPath.path.replace(/\/|-|{|}/g, '');
@@ -148,31 +133,47 @@ ${Object.keys(enumVals)
         writeFileSync(controllerFile, controllerContent);
     }
     generateBaseController() {
-        const controllerBaseFile = join(this.options.output, 'ControllerBase.ts');
+        const controllerBaseFile = join(this.options.output, 'ControllerBase.cs');
         if (existsSync(controllerBaseFile)) {
             return;
         }
-        const baseControllerContent = `import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
-export class ControllerBase {
-    axiosInstance: AxiosInstance;
-    constructor(public axiosSettings?: AxiosRequestConfig) {
-        this.axiosInstance = axios.create(axiosSettings);
+        const usings = `using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.Http;
+using System.Threading.Tasks;`;
+
+        const baseControllerContent = `public class ControllerBase
+{
+    public HttpClient HttpClient { get; set; } = new HttpClient();
+
+    protected async Task<S> Method<T, S>(string method, string path, T? body, Dictionary<string, string?> headers)
+    {
+        var json = await Method(method, path, body, headers);
+        var res = JsonConvert.DeserializeObject<S>(json);
+        return res;
     }
-    protected method<T, S>(method: string, path: string, body: T | undefined, headers?: { [key: string]: string | undefined }, customConfig?: AxiosRequestConfig): Promise<S> {
-        return this.axiosInstance.request<T, S>({
-            url: path,
-            method: method as any,
-            headers,
-            data: body,
-            ...customConfig,
-        });
+
+    protected async Task<string> Method<T>(string method, string path, T? body, Dictionary<string, string?>? headers)
+    {
+        var req = new HttpRequestMessage
+        {
+            Method = new HttpMethod(method),
+            RequestUri = new Uri(path),
+            Content = new StringContent(JsonConvert.SerializeObject(body)),
+        };
+        headers?.Keys.ToList().ForEach(x => req.Headers.TryAddWithoutValidation(x, headers[x]));
+        var res = await HttpClient.SendAsync(req);
+        res.EnsureSuccessStatusCode();
+        var content = await res.Content.ReadAsStringAsync();
+        return content;
     }
-}
-        `;
-        writeFileSync(controllerBaseFile, baseControllerContent);
+}`;
+        writeFileSync(controllerBaseFile, usings + '\n' + this.addNamespace(baseControllerContent));
     }
 
     getFileExtension(isModel: boolean) {
-        return isModel ? this.getFileAdditionalExtension() + '.ts' : '.ts';
+        return '.cs';
     }
 }

@@ -1,9 +1,10 @@
+import { existsSync } from 'fs';
 import { EditorInput } from './../models/editor/EditorInput';
 import { fixPath, makeDirIfNotExist } from '../helpers/generatorHelpers';
 import { getAllEditors, getApiPaths, getAllEditorInputsByEditors } from '../helpers';
 import { OpenApiDocument, Editor, ApiPath, EditorPrimitiveInput, EditorObjectInput } from '../models/index';
 import rimraf from 'rimraf';
-import GeneratorsOptions from './GeneratorsOptions';
+import GeneratorsOptions from '../models/GeneratorsOptions';
 import { join } from 'path';
 
 export abstract class GeneratorAbstract {
@@ -26,6 +27,8 @@ export abstract class GeneratorAbstract {
         console.log('-----  start generating -----');
         rimraf.sync(this.options.output);
         makeDirIfNotExist(this.options.output);
+        makeDirIfNotExist(this.modelsFolder);
+        makeDirIfNotExist(this.controllersFolder);
         console.log('-----  start generating object models -----');
         for (const editorInput of this.allEditorInputs.filter(x => x.editorType === 'EditorObjectInput')) {
             const objectInput = editorInput as EditorObjectInput;
@@ -61,13 +64,29 @@ export abstract class GeneratorAbstract {
         this.generateClient();
         console.log('----- done -----');
     }
+    shouldGenerateModel(editorInput: EditorInput) {
+        makeDirIfNotExist(this.modelsFolder);
+        const modelFile = join(this.modelsFolder, this.getFileName(editorInput) + this.getFileExtension(true));
+        if (existsSync(modelFile)) {
+            return false;
+        }
+        return true;
+    }
     getFileName(editorInput: EditorInput) {
         let name = editorInput.className || (editorInput as any).definistionName || editorInput.title;
         if (!name || name === 'undefined' || name === '') {
             return undefined;
         }
-        return this.options.modelNamePrefix + name + this.options.modelNameSuffix;
+        return this.options.modelNamePrefix + name + this.options.modelNameSuffix.split('.')[0];
     }
+    getFileAdditionalExtension() {
+        const suffix = this.options.modelNameSuffix.split('.');
+        if (suffix.length < 1) {
+            return '';
+        }
+        return '.' + this.options.modelNameSuffix.split('.').slice(1).join('.');
+    }
+    abstract getFileExtension(isModel: boolean);
     abstract generateObject(objectInput: EditorObjectInput): Promise<void>;
     abstract generateEnum(enumInput: EditorPrimitiveInput, enumVals: { [name: string]: string | number }): Promise<void>;
     abstract generateController(controllerName: string, controlerPaths: ApiPath[]): Promise<void>;

@@ -1,6 +1,7 @@
 import { getSwaggerJson } from '../index';
-import { Generators } from './Generators';
-import GeneratorsOptions from './GeneratorsOptions';
+import { Generators } from '../models/Generators';
+import GeneratorsOptions from '../models/GeneratorsOptions';
+import { CSharpGenerator } from './CSharpGenerator';
 import { TypescriptAxiosGenerator } from './TypescriptAxiosGenerator';
 
 export * from './TypescriptAxiosGenerator';
@@ -26,6 +27,9 @@ export function generatorGetter(generator: Generators) {
     }
     if (generator === Generators.TypescriptAxios) {
         return TypescriptAxiosGenerator;
+    }
+    if (generator === Generators.CSharp) {
+        // return CSharpGenerator; // not done
     }
     throw new Error('not implemented: ' + generator);
 }

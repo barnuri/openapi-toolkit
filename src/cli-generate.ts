@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { Generators } from './generators/Generators';
+import { Generators } from './models/Generators';
 import { generate } from './generators';
 import yargs = require('yargs/yargs');
 
@@ -34,7 +34,10 @@ yargs(process.argv.slice(2))
                 .nargs('controllerNamePrefix', 1)
                 .default('controllerNamePrefix', '')
                 .nargs('controllerNameSuffix', 1)
-                .default('controllerNameSuffix', 'Controller'),
+                .default('controllerNameSuffix', 'Controller')
+                .alias('namepsace', 'n')
+                .nargs('namepsace', 1)
+                .default('namepsace', 'OpenapiDefinitionGenerate'),
 
         argv => {
             generate(argv as any)

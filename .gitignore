@@ -13,4 +13,5 @@ openapiSchemaExample.html
 openapiSchemaExample2*
 src/value.json
 test
+test-csharp
 dist-test

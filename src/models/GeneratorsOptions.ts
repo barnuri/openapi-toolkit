@@ -10,4 +10,5 @@ export default class GeneratorsOptions {
     controllersFolderName!: string;
     controllerNamePrefix!: string;
     controllerNameSuffix!: string;
+    namepsace!: string;
 }

@@ -13,7 +13,8 @@
         "preupload": "rimraf dist && tsc",
         "upload": "npm version patch && npm publish",
         "postupload": "git push",
-        "generate:test": "tsc && openapi-definition-generate -i ./src/openapiSchemaExample.json -g typescript-axios -o ./test --modelNamePrefix My --modelNameSuffix Dto && tsc --build tsconfig-test.json"
+        "test:typescript": "tsc && openapi-definition-generate -i ./src/openapiSchemaExample.json -g typescript-axios -o ./test --modelNamePrefix My --modelNameSuffix .dto.test && tsc --build tsconfig-test.json",
+        "test:csharp": "tsc && openapi-definition-generate -i ./src/openapiSchemaExample.json -g c# -o ./test-csharp --modelNamePrefix My"
     },
     "bin": {
         "openapi-definition-generate": "./dist/cli-generate.js"
