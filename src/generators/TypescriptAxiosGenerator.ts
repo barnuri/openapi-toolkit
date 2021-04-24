@@ -8,11 +8,9 @@ import { GeneratorAbstract } from './GeneratorAbstract';
 import { EditorObjectInput, EditorPrimitiveInput, OpenApiDefinition } from '../models';
 
 export class TypescriptAxiosGenerator extends GeneratorAbstract {
-    modelsFolder = join(this.outputPath, 'models');
     modelsExportFile = join(this.modelsFolder, 'index.ts');
-    controllersFolder = join(this.outputPath, 'controllers');
     controllersExportFile = join(this.controllersFolder, 'index.ts');
-    mainExportFile = join(this.outputPath, 'index.ts');
+    mainExportFile = join(this.options.output, 'index.ts');
     async generateClient(): Promise<void> {
         let mainFileContent = `import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';\n`;
         mainFileContent += `import * as controllers from './controllers';\n`;
@@ -42,7 +40,10 @@ export class TypescriptAxiosGenerator extends GeneratorAbstract {
             return;
         }
         const modelFile = join(this.modelsFolder, this.getFileName(objectInput) + '.ts');
-        const extendStr = objectInput.implements.length > 0 ? `extends ${objectInput.implements.map(x => `models.${x}`).join(', ')}` : ``;
+        const extendStr =
+            objectInput.implements.length > 0
+                ? `extends ${objectInput.implements.map(x => `models.${this.options.modelNamePrefix}${x}${this.options.modelNameSuffix}`).join(', ')}`
+                : ``;
         const modelFileContent = `import * as models from './index';
 export interface ${this.getFileName(objectInput)} ${extendStr} {
 ${objectInput.properties.map(x => `\t${x.name.replace(/\[i\]/g, '')}${x.nullable || !x.required ? '?' : ''}: ${this.getPropDesc(x)}`).join(';\n')}
@@ -50,13 +51,10 @@ ${objectInput.properties.map(x => `\t${x.name.replace(/\[i\]/g, '')}${x.nullable
         `;
         writeFileSync(modelFile, modelFileContent);
     }
-    getFileName(editorInput: EditorInput) {
-        const name = editorInput.className || (editorInput as any).definistionName || editorInput.title;
-        return name;
-    }
     getPropDesc(obj: EditorInput | OpenApiDefinition) {
         const editorInput = (obj as EditorInput)?.editorType ? (obj as EditorInput) : getEditorInput2(this.swagger, obj as OpenApiDefinition);
         const fileName = this.getFileName(editorInput);
+
         if (editorInput.editorType === 'EditorPrimitiveInput') {
             const primitiveInput = editorInput as EditorPrimitiveInput;
             switch (primitiveInput.type) {
@@ -105,7 +103,6 @@ ${Object.keys(enumVals)
     async generateController(controllerName: string, controlerPaths: ApiPath[]): Promise<void> {
         this.generateBaseController();
         makeDirIfNotExist(this.controllersFolder);
-        controllerName += 'Controller';
         appendFileSync(this.controllersExportFile, `export * from './${controllerName}'\n`);
         console.log(`${controllerName} - ${controlerPaths.length}`);
         let controllerContent = `import * as models from '../models';\n`;
@@ -116,8 +113,8 @@ ${Object.keys(enumVals)
             console.log(`\t${controlerPath.method} - ${controlerPath.path}`);
             const pathFixed = controlerPath.path.replace(/\/|-|{|}/g, '');
             const methodName = controlerPath.method.toLowerCase() + capitalize(pathFixed);
-            let requestType = this.getPropDesc(controlerPath.body.schema);
             const haveBody = !controlerPath.body;
+            let requestType = haveBody ? this.getPropDesc(controlerPath.body.schema) : 'undefined';
             const responseType = this.getPropDesc(controlerPath.response);
             const bodyParam = haveBody ? `body: ${requestType}${!controlerPath.body.required ? `?` : ''}, ` : '';
             const headers = [...controlerPath.cookieParams, ...controlerPath.headerParams];
@@ -151,7 +148,7 @@ ${Object.keys(enumVals)
         writeFileSync(controllerFile, controllerContent);
     }
     generateBaseController() {
-        const controllerBaseFile = join(this.outputPath, 'ControllerBase.ts');
+        const controllerBaseFile = join(this.options.output, 'ControllerBase.ts');
         if (existsSync(controllerBaseFile)) {
             return;
         }
@@ -161,7 +158,7 @@ export class ControllerBase {
     constructor(public axiosSettings?: AxiosRequestConfig) {
         this.axiosInstance = axios.create(axiosSettings);
     }
-    protected method<T, S>(method: string, path: string, body: T | undefined, headers?: { [key: string]: string }, customConfig?: AxiosRequestConfig): Promise<S> {
+    protected method<T, S>(method: string, path: string, body: T | undefined, headers?: { [key: string]: string | undefined }, customConfig?: AxiosRequestConfig): Promise<S> {
         return this.axiosInstance.request<T, S>({
             url: path,
             method: method as any,

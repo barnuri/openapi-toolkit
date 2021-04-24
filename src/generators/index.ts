@@ -1,27 +1,31 @@
-import { GeneratorAbstract, getSwaggerJson } from '../index';
-import { OpenApiDocument } from '../models';
+import { getSwaggerJson } from '../index';
+import { Generators } from './Generators';
+import GeneratorsOptions from './GeneratorsOptions';
 import { TypescriptAxiosGenerator } from './TypescriptAxiosGenerator';
 
 export * from './TypescriptAxiosGenerator';
 export * from './GeneratorAbstract';
 
-export async function generate(swaggerPathOrUrl: string, generatorName: string, outputPath: string) {
+export async function generate(options: GeneratorsOptions) {
     console.log(`get swagger`);
-    const swagger = await getSwaggerJson(swaggerPathOrUrl);
+    const swagger = await getSwaggerJson(options.pathOrUrl);
     console.log(`get swagger successfull`);
-    const generator = generatorGetter(generatorName, swagger, outputPath);
+    const constractor = generatorGetter(options.generator);
+    const generator = new constractor(swagger, options);
     console.log(`start ${generator.constructor.name}`);
     await generator.generate();
 }
 
-export const generatorsNames = ['typescript-axios'];
-
-export function generatorGetter(type: string, swagger: OpenApiDocument, outputPath: string): GeneratorAbstract {
-    if (!generatorsNames.find(x => x.toLowerCase() === type.toLowerCase())) {
-        throw new Error(`bad generator name: '${type}', available names: [${generatorsNames.map(x => `'${x}'`).join(', ')}]`);
+export function generatorGetter(generator: Generators) {
+    if (!Object.values(Generators).find(x => x.toLowerCase() === generator.toLowerCase())) {
+        throw new Error(
+            `bad generator name: '${generator}', available names: [${Object.values(Generators)
+                .map(x => `'${x}'`)
+                .join(', ')}]`,
+        );
     }
-    if (type === 'typescript-axios') {
-        return new TypescriptAxiosGenerator(swagger, outputPath);
+    if (generator === Generators.TypescriptAxios) {
+        return TypescriptAxiosGenerator;
     }
-    throw new Error('not implemented: ' + type);
+    throw new Error('not implemented: ' + generator);
 }
