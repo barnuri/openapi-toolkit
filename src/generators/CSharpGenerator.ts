@@ -97,7 +97,7 @@ ${Object.keys(enumVals)
         for (const controlerPath of controlerPaths) {
             console.log(`\t${controlerPath.method} - ${controlerPath.path}`);
             const pathFixed = controlerPath.path.replace(/\/|-|{|}/g, '');
-            const methodName = controlerPath.method.toLowerCase() + capitalize(pathFixed);
+            const methodName = capitalize(controlerPath.method) + capitalize(pathFixed);
             const haveBody = !controlerPath.body;
             let requestType = haveBody ? this.getPropDesc(controlerPath.body.schema) : 'undefined';
             const responseType = this.getPropDesc(controlerPath.response);
