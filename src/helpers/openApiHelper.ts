@@ -60,6 +60,7 @@ export function getApiPaths(openApiDocument: OpenApiDocument): ApiPath[] {
                 body: {
                     schema: Object.values(body?.content || {}).find(_ => true)?.schema || oldBody?.schema || {},
                     required: body?.required || oldBody?.require || false,
+                    haveBody: body !== undefined || oldBody !== undefined,
                 },
                 queryParams: getParamsByType('query'),
                 headerParams: getParamsByType('header'),

@@ -11,6 +11,7 @@ export class ApiPath {
     body!: {
         schema: OpenApiDefinition;
         required: boolean;
+        haveBody: boolean;
     };
     response!: OpenApiDefinition;
     controller!: string;

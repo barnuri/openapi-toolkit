@@ -29,7 +29,7 @@ export function generatorGetter(generator: Generators) {
         return TypescriptAxiosGenerator;
     }
     if (generator === Generators.CSharp) {
-        // return CSharpGenerator; // not done
+        return CSharpGenerator;
     }
     throw new Error('not implemented: ' + generator);
 }

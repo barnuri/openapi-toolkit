@@ -56,7 +56,7 @@ export abstract class GeneratorAbstract {
         console.log('----- start generating controllers -----');
         for (const controllerName of this.controllersNames) {
             await this.generateController(
-                `${this.options.controllerNamePrefix}${controllerName}${this.options.controllerNameSuffix}`,
+                controllerName,
                 this.apiPaths.filter(x => x.controller === controllerName),
             );
         }
@@ -79,6 +79,9 @@ export abstract class GeneratorAbstract {
         }
         return this.options.modelNamePrefix + name + this.options.modelNameSuffix.split('.')[0];
     }
+    getControllerName(controllerName: string) {
+        return `${this.options.controllerNamePrefix}${controllerName}${this.options.controllerNameSuffix}`;
+    }
     getFileAdditionalExtension() {
         const suffix = this.options.modelNameSuffix.split('.');
         if (suffix.length < 1) {
@@ -89,6 +92,6 @@ export abstract class GeneratorAbstract {
     abstract getFileExtension(isModel: boolean);
     abstract generateObject(objectInput: EditorObjectInput): Promise<void>;
     abstract generateEnum(enumInput: EditorPrimitiveInput, enumVals: { [name: string]: string | number }): Promise<void>;
-    abstract generateController(controllerName: string, controlerPaths: ApiPath[]): Promise<void>;
+    abstract generateController(controller: string, controlerPaths: ApiPath[]): Promise<void>;
     abstract generateClient(): Promise<void>;
 }

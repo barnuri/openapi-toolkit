@@ -20,7 +20,7 @@ export class TypescriptAxiosGenerator extends GeneratorAbstract {
         mainFileContent += `export default (axiosRequestConfig: AxiosRequestConfig) => ({\n`;
         mainFileContent +=
             this.controllersNames
-                .map(x => x + 'Controller')
+                .map(x => this.getControllerName(x))
                 .map(x => `\t${x}: new controllers.${x}(axiosRequestConfig)`)
                 .join(',\n') + '\n';
         mainFileContent += `});`;
@@ -100,7 +100,8 @@ ${Object.keys(enumVals)
             `;
         writeFileSync(modelFile, modelFileContent);
     }
-    async generateController(controllerName: string, controlerPaths: ApiPath[]): Promise<void> {
+    async generateController(controller: string, controlerPaths: ApiPath[]): Promise<void> {
+        const controllerName = this.getControllerName(controller);
         this.generateBaseController();
         makeDirIfNotExist(this.controllersFolder);
         appendFileSync(this.controllersExportFile, `export * from './${controllerName}'\n`);
@@ -113,10 +114,12 @@ ${Object.keys(enumVals)
             console.log(`\t${controlerPath.method} - ${controlerPath.path}`);
             const pathFixed = controlerPath.path.replace(/\/|-|{|}/g, '');
             const methodName = controlerPath.method.toLowerCase() + capitalize(pathFixed);
-            const haveBody = !controlerPath.body;
-            let requestType = haveBody ? this.getPropDesc(controlerPath.body.schema) : 'undefined';
+            let requestType = controlerPath.body.haveBody ? this.getPropDesc(controlerPath.body.schema) : 'undefined';
+            if (controlerPath.body.haveBody) {
+                const a = 1;
+            }
             const responseType = this.getPropDesc(controlerPath.response);
-            const bodyParam = haveBody ? `body: ${requestType}${!controlerPath.body.required ? `?` : ''}, ` : '';
+            const bodyParam = controlerPath.body.haveBody ? `body: ${requestType}${!controlerPath.body.required && requestType !== 'any' ? `?` : ''}, ` : '';
             const headers = [...controlerPath.cookieParams, ...controlerPath.headerParams];
             const haveHeaderParams = headers.length > 0;
             const headersParams = haveHeaderParams ? `headers: {${headers.map(x => `${x.name}${x.required ? '' : '?'}: string`)}}, ` : ``;
@@ -137,7 +140,7 @@ ${Object.keys(enumVals)
             controllerContent += `\t\treturn this.method<${requestType},${responseType}>(\n`;
             controllerContent += `\t\t\t'${controlerPath.method.toLowerCase()}',\n`;
             controllerContent += `\t\t\t\`${url}\`,\n`;
-            controllerContent += `\t\t\t${haveBody ? 'body' : 'undefined'},\n`;
+            controllerContent += `\t\t\t${controlerPath.body.haveBody ? 'body' : 'undefined'},\n`;
             controllerContent += `\t\t\t${haveHeaderParams ? 'headers' : 'undefined'},\n`;
             controllerContent += `\t\t\tcustomConfig\n`;
             controllerContent += `\t\t);\n`;
