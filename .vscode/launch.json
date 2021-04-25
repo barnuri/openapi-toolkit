@@ -31,6 +31,28 @@
             "outFiles": ["${workspaceFolder}/dist/**/*.js"],
             "args": ["-i", "./src/openapiSchemaExample.json", "-g", "typescript-axios", "-o", "./test"],
             "console": "integratedTerminal"
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Launch Cli2",
+            "skipFiles": ["<node_internals>/**"],
+            "program": "${workspaceFolder}\\src\\cli-generate.ts",
+            "preLaunchTask": "tsc: build - tsconfig.json",
+            "outFiles": ["${workspaceFolder}/dist/**/*.js"],
+            "args": [
+                "-i",
+                "https://petstore3.swagger.io/api/v3/openapi.json",
+                "-g",
+                "typescript-axios",
+                "-o",
+                "./test",
+                "--modelNamePrefix",
+                "My",
+                "--modelNameSuffix",
+                ".dto"
+            ],
+            "console": "integratedTerminal"
         }
     ]
 }

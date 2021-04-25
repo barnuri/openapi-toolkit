@@ -1,4 +1,4 @@
-export enum Generators {
+export enum ClientGenerators {
     TypescriptAxios = 'typescript-axios',
     CSharp = 'c#',
 }

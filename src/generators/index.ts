@@ -1,35 +1,47 @@
+import { ServerGenerators } from './../models/ServerGenerators';
 import { getSwaggerJson } from '../index';
-import { Generators } from '../models/Generators';
+import { ClientGenerators } from '../models/ClientGenerators';
 import GeneratorsOptions from '../models/GeneratorsOptions';
-import { CSharpGenerator } from './CSharpGenerator';
-import { TypescriptAxiosGenerator } from './TypescriptAxiosGenerator';
+import { CSharpClientGenerator } from './client/CSharpClientGenerator';
+import { TypescriptAxiosClientGenerator } from './client/TypescriptAxiosClientGenerator';
 
-export * from './TypescriptAxiosGenerator';
+export * from './client/TypescriptAxiosClientGenerator';
 export * from './GeneratorAbstract';
 
 export async function generate(options: GeneratorsOptions) {
     console.log(`get swagger`);
     const swagger = await getSwaggerJson(options.pathOrUrl);
     console.log(`get swagger successfull`);
-    const constractor = generatorGetter(options.generator);
+    const constractor = options.type === 'server' ? clientGeneratorGetter(options.generator) : clientGeneratorGetter(options.generator);
     const generator = new constractor(swagger, options);
     console.log(`start ${generator.constructor.name}`);
     await generator.generate();
 }
 
-export function generatorGetter(generator: Generators) {
-    if (!Object.values(Generators).find(x => x.toLowerCase() === generator.toLowerCase())) {
+export function serverGeneratorGetter(generator: ClientGenerators | ServerGenerators) {
+    if (!Object.values(ServerGenerators).find(x => x.toLowerCase() === generator.toLowerCase())) {
         throw new Error(
-            `bad generator name: '${generator}', available names: [${Object.values(Generators)
+            `bad server generator name: '${generator}', available names: [${Object.values(ServerGenerators)
                 .map(x => `'${x}'`)
                 .join(', ')}]`,
         );
     }
-    if (generator === Generators.TypescriptAxios) {
-        return TypescriptAxiosGenerator;
+    throw new Error('not implemented: ' + generator);
+}
+
+export function clientGeneratorGetter(generator: ClientGenerators | ServerGenerators) {
+    if (!Object.values(ClientGenerators).find(x => x.toLowerCase() === generator.toLowerCase())) {
+        throw new Error(
+            `bad client generator name: '${generator}', available names: [${Object.values(ClientGenerators)
+                .map(x => `'${x}'`)
+                .join(', ')}]`,
+        );
     }
-    if (generator === Generators.CSharp) {
-        return CSharpGenerator;
+    if (generator === ClientGenerators.TypescriptAxios) {
+        return TypescriptAxiosClientGenerator;
+    }
+    if (generator === ClientGenerators.CSharp) {
+        return CSharpClientGenerator;
     }
     throw new Error('not implemented: ' + generator);
 }

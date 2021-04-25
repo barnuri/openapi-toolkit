@@ -1,7 +1,7 @@
 import { existsSync } from 'fs';
-import { EditorInput } from './../models/editor/EditorInput';
+import { EditorInput } from '../models/editor/EditorInput';
 import { fixPath, makeDirIfNotExist } from '../helpers/generatorHelpers';
-import { getAllEditors, getApiPaths, getAllEditorInputsByEditors } from '../helpers';
+import { getAllEditors, getApiPaths, getAllEditorInputsByEditors, capitalize } from '../helpers';
 import { OpenApiDocument, Editor, ApiPath, EditorPrimitiveInput, EditorObjectInput } from '../models/index';
 import rimraf from 'rimraf';
 import GeneratorsOptions from '../models/GeneratorsOptions';
@@ -74,10 +74,19 @@ export abstract class GeneratorAbstract {
     }
     getFileName(editorInput: EditorInput) {
         let name = editorInput.className || (editorInput as any).definistionName || editorInput.title;
+        if (editorInput.openApiDefinition.enum) {
+            const b = 1;
+        }
+        if (!name || name === 'undefined' || name === '') {
+            name = undefined;
+        }
+        if (!name && editorInput.editorType === 'EditorPrimitiveInput' && (editorInput as EditorPrimitiveInput).enumsOptions.length > 0) {
+            name = editorInput.name;
+        }
         if (!name || name === 'undefined' || name === '') {
             return undefined;
         }
-        return this.options.modelNamePrefix + name + this.options.modelNameSuffix.split('.')[0];
+        return this.options.modelNamePrefix + capitalize(name) + this.options.modelNameSuffix.split('.')[0];
     }
     getControllerName(controllerName: string) {
         return `${this.options.controllerNamePrefix}${controllerName}${this.options.controllerNameSuffix}`;

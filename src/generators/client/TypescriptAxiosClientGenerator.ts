@@ -1,13 +1,13 @@
-import { EditorArrayInput } from './../models/editor/EditorArrayInput';
-import { EditorInput } from './../models/editor/EditorInput';
+import { EditorArrayInput } from '../../models/editor/EditorArrayInput';
+import { EditorInput } from '../../models/editor/EditorInput';
 import { appendFileSync, existsSync, writeFileSync } from 'fs';
-import { ApiPath } from './../models/ApiPath';
+import { ApiPath } from '../../models/ApiPath';
 import { join } from 'path';
-import { capitalize, getEditorInput2, makeDirIfNotExist } from '../helpers';
-import { GeneratorAbstract } from './GeneratorAbstract';
-import { EditorObjectInput, EditorPrimitiveInput, OpenApiDefinition } from '../models';
+import { capitalize, getEditorInput2, makeDirIfNotExist } from '../../helpers';
+import { GeneratorAbstract } from '../GeneratorAbstract';
+import { EditorObjectInput, EditorPrimitiveInput, OpenApiDefinition } from '../../models';
 
-export class TypescriptAxiosGenerator extends GeneratorAbstract {
+export class TypescriptAxiosClientGenerator extends GeneratorAbstract {
     modelsExportFile = join(this.modelsFolder, 'index.ts');
     controllersExportFile = join(this.controllersFolder, 'index.ts');
     mainExportFile = join(this.options.output, 'index.ts');
@@ -115,11 +115,8 @@ ${Object.keys(enumVals)
             const pathFixed = controlerPath.path.replace(/\/|-|{|}/g, '');
             const methodName = controlerPath.method.toLowerCase() + capitalize(pathFixed);
             let requestType = controlerPath.body.haveBody ? this.getPropDesc(controlerPath.body.schema) : 'undefined';
-            if (controlerPath.body.haveBody) {
-                const a = 1;
-            }
             const responseType = this.getPropDesc(controlerPath.response);
-            const bodyParam = controlerPath.body.haveBody ? `body: ${requestType}${!controlerPath.body.required && requestType !== 'any' ? `?` : ''}, ` : '';
+            const bodyParam = controlerPath.body.haveBody ? `body: ${requestType}${!controlerPath.body.required ? ` | undefined` : ''}, ` : '';
             const headers = [...controlerPath.cookieParams, ...controlerPath.headerParams];
             const haveHeaderParams = headers.length > 0;
             const headersParams = haveHeaderParams ? `headers: {${headers.map(x => `${x.name}${x.required ? '' : '?'}: string`)}}, ` : ``;

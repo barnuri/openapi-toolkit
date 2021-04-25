@@ -1,13 +1,13 @@
-import { EditorArrayInput } from '../models/editor/EditorArrayInput';
-import { EditorInput } from '../models/editor/EditorInput';
+import { EditorArrayInput } from '../../models/editor/EditorArrayInput';
+import { EditorInput } from '../../models/editor/EditorInput';
 import { existsSync, writeFileSync } from 'fs';
-import { ApiPath } from '../models/ApiPath';
+import { ApiPath } from '../../models/ApiPath';
 import { join } from 'path';
-import { capitalize, getEditorInput2, makeDirIfNotExist } from '../helpers';
-import { GeneratorAbstract } from './GeneratorAbstract';
-import { EditorObjectInput, EditorPrimitiveInput, OpenApiDefinition } from '../models';
+import { capitalize, getEditorInput2, makeDirIfNotExist } from '../../helpers';
+import { GeneratorAbstract } from '../GeneratorAbstract';
+import { EditorObjectInput, EditorPrimitiveInput, OpenApiDefinition } from '../../models';
 
-export class CSharpGenerator extends GeneratorAbstract {
+export class CSharpClientGenerator extends GeneratorAbstract {
     mainExportFile = join(this.options.output, 'Client.cs');
     addNamespace(content: string) {
         const usings = `using System;

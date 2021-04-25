@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { Generators } from './models/Generators';
+import { ClientGenerators } from './models/ClientGenerators';
 import { generate } from './generators';
 import yargs = require('yargs/yargs');
 
@@ -15,14 +15,21 @@ yargs(process.argv.slice(2))
                 .nargs('i', 1)
                 .describe('i', 'path or url for swagger file')
                 .demandOption(['i'])
-                .alias('g', 'generator')
-                .nargs('g', 1)
-                .describe('g', 'generator name')
-                .default('g', 'typescript-axios')
                 .alias('o', 'output')
                 .nargs('o', 1)
                 .describe('o', 'output path')
                 .demandOption(['o'])
+                .alias('type', 't')
+                .nargs('type', 1)
+                .default('type', 'client')
+                .choices('type', ['client', 'server'])
+                .alias('g', 'generator')
+                .nargs('g', 1)
+                .describe('g', 'generator name')
+                .default('g', 'typescript-axios')
+                .alias('namepsace', 'n')
+                .nargs('namepsace', 1)
+                .default('namepsace', 'OpenapiDefinitionGenerate')
                 .nargs('modelsFolderName', 1)
                 .default('modelsFolderName', 'models')
                 .nargs('modelNamePrefix', 1)
@@ -34,10 +41,7 @@ yargs(process.argv.slice(2))
                 .nargs('controllerNamePrefix', 1)
                 .default('controllerNamePrefix', '')
                 .nargs('controllerNameSuffix', 1)
-                .default('controllerNameSuffix', 'Controller')
-                .alias('namepsace', 'n')
-                .nargs('namepsace', 1)
-                .default('namepsace', 'OpenapiDefinitionGenerate'),
+                .default('controllerNameSuffix', 'Controller'),
 
         argv => {
             generate(argv as any)
@@ -50,7 +54,7 @@ yargs(process.argv.slice(2))
         'generators list',
         () => {},
         argv => {
-            console.log('generators:' + '\n\t- ' + Object.values(Generators).join('\n\t- '));
+            console.log('generators:' + '\n\t- ' + Object.values(ClientGenerators).join('\n\t- '));
         },
     )
     .demandCommand()

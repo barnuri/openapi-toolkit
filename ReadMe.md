@@ -41,3 +41,17 @@ require('child_process').exec(start + ' ' + './openapiSchemaExample.html');
 ### Result
 
 ![Example](https://github.com/barnuri/openapi-definition-to-editor/blob/master/ex.png?raw=true)
+
+# Auto Generate Client/Server
+
+```bash
+npm i -g openapi-definition-to-editor
+
+# show all options
+openapi-definition-generate -h
+
+# example
+openapi-definition-generate -i https://petstore3.swagger.io/api/v3/openapi.json -g typescript-axios -o ./src/services/petStore --modelNamePrefix My --modelNameSuffix .dto
+```
+
+## [Vscode Plugin For Auto Generate](https://marketplace.visualstudio.com/items?itemName=Bar.generator-from-swagger)

@@ -1,9 +1,10 @@
-import { Generators } from './Generators';
+import { ServerGenerators } from './ServerGenerators';
+import { ClientGenerators } from './ClientGenerators';
 
 export default class GeneratorsOptions {
     pathOrUrl!: string;
     output!: string;
-    generator!: Generators;
+    generator!: ClientGenerators | ServerGenerators;
     modelsFolderName!: string;
     modelNamePrefix!: string;
     modelNameSuffix!: string;
@@ -11,4 +12,5 @@ export default class GeneratorsOptions {
     controllerNamePrefix!: string;
     controllerNameSuffix!: string;
     namepsace!: string;
+    type!: string;
 }
