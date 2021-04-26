@@ -42,7 +42,7 @@ require('child_process').exec(start + ' ' + './openapiSchemaExample.html');
 
 ![Example](https://github.com/barnuri/openapi-definition-to-editor/blob/master/ex.png?raw=true)
 
-# Auto Generate Client/Server
+# Auto Generate Client/Server (Cli)
 
 ```bash
 npm i -g openapi-definition-to-editor
