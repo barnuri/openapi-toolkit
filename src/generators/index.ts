@@ -10,6 +10,9 @@ export * from './client/TypescriptAxiosClientGenerator';
 export * from './GeneratorAbstract';
 
 export async function generate(options: GeneratorsOptions) {
+    if (!options.pathOrUrl) {
+        throw new Error('pathOrUrl is required');
+    }
     console.log(`get swagger`);
     const swagger = await getSwaggerJson(options.pathOrUrl);
     console.log(`get swagger successfull`);

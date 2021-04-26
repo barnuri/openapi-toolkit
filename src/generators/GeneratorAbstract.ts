@@ -16,6 +16,27 @@ export abstract class GeneratorAbstract {
     controllersFolder = join(this.options.output, this.options.controllersFolderName);
 
     constructor(public swagger: OpenApiDocument, public options: GeneratorsOptions) {
+        if (!options.pathOrUrl) {
+            throw new Error('pathOrUrl is required');
+        }
+        if (!options.output) {
+            throw new Error('output is required');
+        }
+        if (!options.generator) {
+            throw new Error('generator is required');
+        }
+        if (!options.type) {
+            throw new Error('type is required');
+        }
+
+        options.modelsFolderName = options.modelsFolderName || '';
+        options.modelNamePrefix = options.modelNamePrefix || '';
+        options.modelNameSuffix = options.modelNameSuffix || '';
+        options.controllersFolderName = options.controllersFolderName || '';
+        options.controllerNamePrefix = options.controllerNamePrefix || '';
+        options.controllerNameSuffix = options.controllerNameSuffix || '';
+        options.namepsace = options.namepsace || '';
+
         this.swagger = swagger;
         this.editors = getAllEditors(swagger);
         this.apiPaths = getApiPaths(swagger);
