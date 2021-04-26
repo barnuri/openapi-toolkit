@@ -11,6 +11,7 @@ export abstract class TypescriptGenerator extends GeneratorAbstract {
     modelsExportFile = join(this.modelsFolder, 'index.ts');
     controllersExportFile = join(this.controllersFolder, 'index.ts');
     mainExportFile = join(this.options.output, 'index.ts');
+    disableLinting = '/* eslint-disable */\n/* tslint:disable */\n';
     abstract generateClient(): Promise<void>;
     shouldGenerateModel(editorInput: EditorInput) {
         const res = super.shouldGenerateModel(editorInput);
@@ -34,7 +35,7 @@ export abstract class TypescriptGenerator extends GeneratorAbstract {
 export interface ${this.getFileName(objectInput)} ${extendStr} {
 ${objectInput.properties.map(x => `\t${x.name.replace(/\[i\]/g, '')}${x.nullable || !x.required ? '?' : ''}: ${this.getPropDesc(x)}`).join(';\n')}
 }`;
-        writeFileSync(modelFile, modelFileContent);
+        writeFileSync(modelFile, this.disableLinting + modelFileContent);
     }
     getPropDesc(obj: EditorInput | OpenApiDefinition) {
         const editorInput = (obj as EditorInput)?.editorType ? (obj as EditorInput) : getEditorInput2(this.swagger, obj as OpenApiDefinition);
@@ -83,7 +84,7 @@ ${Object.keys(enumVals)
     .join(',\n')}
 }
             `;
-        writeFileSync(modelFile, modelFileContent);
+        writeFileSync(modelFile, this.disableLinting + modelFileContent);
     }
     async generateController(controller: string, controlerPaths: ApiPath[]): Promise<void> {
         const controllerName = this.getControllerName(controller);
@@ -130,7 +131,7 @@ ${Object.keys(enumVals)
         }
         controllerContent += `}`;
         const controllerFile = join(this.controllersFolder, controllerName + this.getFileExtension(false));
-        writeFileSync(controllerFile, controllerContent);
+        writeFileSync(controllerFile, this.disableLinting + controllerContent);
     }
     generateBaseController() {
         const controllerBaseFile = join(this.options.output, 'ControllerBase.ts');
@@ -154,7 +155,7 @@ export class ControllerBase {
     }
 }
         `;
-        writeFileSync(controllerBaseFile, baseControllerContent);
+        writeFileSync(controllerBaseFile, this.disableLinting + baseControllerContent);
     }
 
     getFileExtension(isModel: boolean) {

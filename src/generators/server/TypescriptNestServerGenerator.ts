@@ -56,6 +56,6 @@ export class TypescriptNestServerGenerator extends TypescriptGenerator {
         }
         controllerContent += `}`;
         const controllerFile = join(this.controllersFolder, controllerName + this.getFileExtension(false));
-        writeFileSync(controllerFile, controllerContent);
+        writeFileSync(controllerFile, this.disableLinting + controllerContent);
     }
 }

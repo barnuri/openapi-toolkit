@@ -21,7 +21,7 @@ export class TypescriptAxiosClientGenerator extends TypescriptGenerator {
                 .map(x => `\t${x}: new controllers.${x}(axiosRequestConfig)`)
                 .join(',\n') + '\n';
         mainFileContent += `});`;
-        writeFileSync(this.mainExportFile, mainFileContent);
+        writeFileSync(this.mainExportFile, this.disableLinting + mainFileContent);
     }
     async generateController(controller: string, controlerPaths: ApiPath[]): Promise<void> {
         const controllerName = this.getControllerName(controller);
@@ -68,7 +68,7 @@ export class TypescriptAxiosClientGenerator extends TypescriptGenerator {
         }
         controllerContent += `}`;
         const controllerFile = join(this.controllersFolder, controllerName + this.getFileExtension(false));
-        writeFileSync(controllerFile, controllerContent);
+        writeFileSync(controllerFile, this.disableLinting + controllerContent);
     }
     generateBaseController() {
         const controllerBaseFile = join(this.options.output, 'ControllerBase.ts');
@@ -92,6 +92,6 @@ export class ControllerBase {
     }
 }
         `;
-        writeFileSync(controllerBaseFile, baseControllerContent);
+        writeFileSync(controllerBaseFile, this.disableLinting + baseControllerContent);
     }
 }
