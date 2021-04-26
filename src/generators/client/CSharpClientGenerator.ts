@@ -9,16 +9,17 @@ import { EditorObjectInput, EditorPrimitiveInput, OpenApiDefinition } from '../.
 
 export class CSharpClientGenerator extends GeneratorAbstract {
     mainExportFile = join(this.options.output, 'Client.cs');
-    addNamespace(content: string) {
-        const usings = `using System;
+    addNamespace(content: string, customUsing?: string) {
+        const usings =
+            customUsing ??
+            `using System;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
-#nullable enable
 `;
-        return usings + '\nnamespace ' + this.options.namepsace + '\n{\n\t' + content.replace(/\n/g, '\n\t') + '\n}';
+        return usings + '\n#nullable enable' + '\nnamespace ' + this.options.namepsace + '\n{\n\t' + content.replace(/\n/g, '\n\t') + '\n}';
     }
     async generateClient(): Promise<void> {
         const controllerPropsNames = this.controllersNames.map(x => this.getControllerName(x));
@@ -111,7 +112,7 @@ ${Object.keys(enumVals)
         makeDirIfNotExist(this.controllersFolder);
         console.log(`${controllerName} - ${controlerPaths.length}`);
         let controllerContent = ``;
-        controllerContent += `public class ${controllerName} : ControllerBase \n{\n`;
+        controllerContent += `public class ${controllerName} : BaseController \n{\n`;
         for (const controlerPath of controlerPaths) {
             console.log(`\t${controlerPath.method} - ${controlerPath.path}`);
             const pathFixed = controlerPath.path.replace(/\/|-|{|}/g, '');
@@ -172,14 +173,14 @@ ${Object.keys(enumVals)
         }
         controllerContent += `}`;
         const controllerFile = join(this.controllersFolder, controllerName + this.getFileExtension(false));
-        writeFileSync(controllerFile, '\nusing System.Threading.Tasks;\n' + this.addNamespace(controllerContent));
+        writeFileSync(controllerFile, '\n' + this.addNamespace(controllerContent));
     }
     generateBaseController() {
-        const controllerBaseFile = join(this.options.output, 'ControllerBase.cs');
+        const controllerBaseFile = join(this.options.output, 'BaseController.cs');
         if (existsSync(controllerBaseFile)) {
             return;
         }
-        const baseControllerContent = `public class ControllerBase
+        const baseControllerContent = `public class BaseController
 {
     public HttpClient HttpClient { get; set; } = new HttpClient();
 

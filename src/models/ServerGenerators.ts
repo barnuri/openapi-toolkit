@@ -1,4 +1,4 @@
 export enum ServerGenerators {
-    TypescriptAxios = 'typescript-axios',
+    TypescriptNest = 'typescript-nest',
     CSharp = 'c#',
 }

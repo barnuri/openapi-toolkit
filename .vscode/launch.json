@@ -24,7 +24,7 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "Launch Cli",
+            "name": "Cli-ts-axios",
             "skipFiles": ["<node_internals>/**"],
             "program": "${workspaceFolder}\\src\\cli-generate.ts",
             "preLaunchTask": "tsc: build - tsconfig.json",
@@ -35,7 +35,7 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "Launch Cli2",
+            "name": "Cli-ts-axios2",
             "skipFiles": ["<node_internals>/**"],
             "program": "${workspaceFolder}\\src\\cli-generate.ts",
             "preLaunchTask": "tsc: build - tsconfig.json",
@@ -52,6 +52,28 @@
                 "--modelNameSuffix",
                 ".dto"
             ],
+            "console": "integratedTerminal"
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Cli-ts-nest-Server",
+            "skipFiles": ["<node_internals>/**"],
+            "program": "${workspaceFolder}\\src\\cli-generate.ts",
+            "preLaunchTask": "tsc: build - tsconfig.json",
+            "outFiles": ["${workspaceFolder}/dist/**/*.js"],
+            "args": ["-i", "./src/openapiSchemaExample.json", "-g", "typescript-nest", "-o", "./test", "-t", "server"],
+            "console": "integratedTerminal"
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Cli-C#-Server",
+            "skipFiles": ["<node_internals>/**"],
+            "program": "${workspaceFolder}\\src\\cli-generate.ts",
+            "preLaunchTask": "tsc: build - tsconfig.json",
+            "outFiles": ["${workspaceFolder}/dist/**/*.js"],
+            "args": ["-i", "./src/openapiSchemaExample.json", "-g", "c#", "-o", "./test-csharp", "-t", "server"],
             "console": "integratedTerminal"
         }
     ]

@@ -74,9 +74,6 @@ export abstract class GeneratorAbstract {
     }
     getFileName(editorInput: EditorInput) {
         let name = editorInput.className || (editorInput as any).definistionName || editorInput.title;
-        if (editorInput.openApiDefinition.enum) {
-            const b = 1;
-        }
         if (!name || name === 'undefined' || name === '') {
             name = undefined;
         }
@@ -89,14 +86,14 @@ export abstract class GeneratorAbstract {
         return this.options.modelNamePrefix + capitalize(name) + this.options.modelNameSuffix.split('.')[0];
     }
     getControllerName(controllerName: string) {
-        return `${this.options.controllerNamePrefix}${controllerName}${this.options.controllerNameSuffix}`;
+        return `${this.options.controllerNamePrefix}${capitalize(controllerName)}${this.options.controllerNameSuffix}`;
     }
     getFileAdditionalExtension() {
-        const suffix = this.options.modelNameSuffix.split('.');
+        const suffix = this.options.modelNameSuffix.split('.').filter(x => x);
         if (suffix.length < 1) {
             return '';
         }
-        return '.' + this.options.modelNameSuffix.split('.').slice(1).join('.');
+        return ('.' + this.options.modelNameSuffix.split('.').slice(1).join('.')).replace('..ts', '');
     }
     abstract getFileExtension(isModel: boolean);
     abstract generateObject(objectInput: EditorObjectInput): Promise<void>;
