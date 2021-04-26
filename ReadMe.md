@@ -47,11 +47,37 @@ require('child_process').exec(start + ' ' + './openapiSchemaExample.html');
 ```bash
 npm i -g openapi-definition-to-editor
 
-# show all options
-openapi-definition-generate -h
-
 # example
 openapi-definition-generate -i https://petstore3.swagger.io/api/v3/openapi.json -g typescript-axios -o ./src/services/petStore --modelNamePrefix My --modelNameSuffix .dto
+
+# show all options
+openapi-definition-generate -h
+```
+
+### Help output
+
+```text
+openapi-definition-generate <command>, default command 'generate'
+
+Commands:
+  generate    auto generate proxy client from swagger file             [default]
+  generators  generators list
+  completion  generate completion script
+
+Options:
+      --version                Show version number                     [boolean]
+  -h, --help                   Show help                               [boolean]
+  -i, --pathOrUrl              path or url for swagger file           [required]
+  -o, --output                 output path                            [required]
+  -g, --generator              generator name      [default: "typescript-axios"]
+  -t, --type                   [choices: "client", "server"] [default: "client"]
+  -n, --namepsace                         [default: "OpenapiDefinitionGenerate"]
+      --modelsFolderName                                     [default: "models"]
+      --modelNamePrefix                                            [default: ""]
+      --modelNameSuffix                                            [default: ""]
+      --controllersFolderName                           [default: "controllers"]
+      --controllerNamePrefix                                       [default: ""]
+      --controllerNameSuffix                             [default: "Controller"]
 ```
 
 ## [Vscode Plugin For Auto Generate](https://marketplace.visualstudio.com/items?itemName=Bar.generator-from-swagger)
