@@ -64,7 +64,10 @@ ${objectInput.properties
             const primitiveInput = editorInput as EditorPrimitiveInput;
             switch (primitiveInput.type) {
                 case 'number':
-                    return 'double';
+                    if (primitiveInput.openApiDefinition?.type === 'integer') {
+                        return primitiveInput.openApiDefinition?.format === 'int64' ? 'long' : 'int';
+                    }
+                    return primitiveInput.openApiDefinition?.format === 'float' ? 'float' : 'double';
                 case 'string':
                     return 'string';
                 case 'boolean':
