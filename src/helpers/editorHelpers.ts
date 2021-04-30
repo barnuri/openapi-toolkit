@@ -1,6 +1,6 @@
-import { ChangesModel } from 'openapi-definition-to-editor';
+import { ChangesModel } from '../models';
 import { EditorInput, Editor, EditorObjectInput, EditorArrayInput, OpenApiDocument } from '../models';
-import { getDefinisions, getEditor, getEditorInput2 } from './getEditor';
+import { getDefinisions, getEditor } from './getEditor';
 import { cloneHelper } from './utilsHelper';
 
 export function modifyInputPath(editor: EditorInput, parentPath: string, newParentPath: string): EditorInput {
