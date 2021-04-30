@@ -23,7 +23,7 @@ export class EditorObjectInput extends EditorInput {
         this.definistionName = definistionName;
         openApiDefinition.anyOf = openApiDefinition.anyOf || [];
         this.switchable = openApiDefinition.anyOf.length > 0;
-        this.isAbstract = openApiDefinition['x-abstract'] == true;
+        this.isAbstract = openApiDefinition['x-abstract'] == true || ((openApiDefinition.allOf || [])).filter(x=> x['x-abstract'] == true).length > 0;
         this.switchableOptions = !this.switchable ? [] : switchableOptions || [];
         this.isDictionary = !!openApiDefinition.additionalProperties;
         this.default = {};
