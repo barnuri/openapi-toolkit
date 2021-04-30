@@ -1,3 +1,4 @@
+import { ChangesModel } from 'openapi-definition-to-editor';
 import { EditorInput, Editor, EditorObjectInput, EditorArrayInput, OpenApiDocument } from '../models';
 import { getDefinisions, getEditor, getEditorInput2 } from './getEditor';
 import { cloneHelper } from './utilsHelper';
@@ -86,3 +87,23 @@ export function editorFilterUnkownPaths(editor: Editor, pathesToCheck: string[])
     const existBoth = pathesToCheck.filter(value => existingPathes.includes(value));
     return existBoth;
 }
+
+const fixPathForArraies = (fieldKey: string): string => {
+    const indexesStr = [...fieldKey.matchAll(/\.\d+/g)]?.map(x => x[0].replace('.', '')).join('-');
+    const modifiedKey = fieldKey.replace(/\.\d+/g, '') + indexesStr;
+    return modifiedKey;
+};
+
+export const getEditorChangesHash = (changes: ChangesModel, editorInput: EditorInput): string => {
+    const arrayPath = editorInput.path.replace(/\[i\]/g, '');
+    let res = '';
+    for (const changeType of Object.keys(changes)) {
+        for (const fieldKey of Object.keys(changes[changeType])) {
+            const fixedFieldKey = fixPathForArraies(fieldKey);
+            if (fieldKey.startsWith(arrayPath) || fixedFieldKey.startsWith(fixPathForArraies(arrayPath)) || fixPathForArraies(fieldKey).startsWith(arrayPath)) {
+                res += fieldKey + '=' + changes[changeType][fieldKey];
+            }
+        }
+    }
+    return res;
+};

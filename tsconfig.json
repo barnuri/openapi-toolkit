@@ -29,7 +29,7 @@
         "strictBindCallApply": true,
         "strictNullChecks": true,
         "skipLibCheck": true,
-        "lib": ["es2015", "dom"],
+        "lib": ["es2015", "dom", "es2020.string"],
         "rootDir": "src"
     },
     "include": ["src"],
