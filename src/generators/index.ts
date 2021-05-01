@@ -1,12 +1,19 @@
-import { TypescriptNestServerGenerator } from './server/TypescriptNestServerGenerator';
-import { CSharpServerGenerator } from './server/CSharpServerGenerator';
 import { ServerGenerators } from './../models/ServerGenerators';
 import { ClientGenerators } from '../models/ClientGenerators';
 import GeneratorsOptions from '../models/GeneratorsOptions';
+import { TypescriptNestServerGenerator } from './server/TypescriptNestServerGenerator';
+import { CSharpServerGenerator } from './server/CSharpServerGenerator';
+import { PythonClientGenerator } from './client/PythonClientGenerator';
 import { CSharpClientGenerator } from './client/CSharpClientGenerator';
 import { TypescriptAxiosClientGenerator } from './client/TypescriptAxiosClientGenerator';
 import { getSwaggerJson } from '../helpers';
+
+export * from './server/TypescriptNestServerGenerator';
+export * from './server/CSharpServerGenerator';
+export * from './client/PythonClientGenerator';
+export * from './client/CSharpClientGenerator';
 export * from './client/TypescriptAxiosClientGenerator';
+export * from './TypescriptGenerator';
 export * from './GeneratorAbstract';
 
 export async function generate(options: GeneratorsOptions) {
@@ -52,6 +59,9 @@ export function clientGeneratorGetter(generator: ClientGenerators | ServerGenera
     }
     if (generator === ClientGenerators.CSharp) {
         return CSharpClientGenerator;
+    }
+    if (generator === ClientGenerators.Python) {
+        return PythonClientGenerator;
     }
     throw new Error('not implemented: ' + generator);
 }

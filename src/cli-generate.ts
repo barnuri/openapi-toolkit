@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { ServerGenerators } from './models/ServerGenerators';
 import { ClientGenerators } from './models/ClientGenerators';
 import { generate } from './generators';
 import yargs = require('yargs/yargs');
@@ -54,7 +55,8 @@ yargs(process.argv.slice(2))
         'generators list',
         () => {},
         argv => {
-            console.log('generators:' + '\n\t- ' + Object.values(ClientGenerators).join('\n\t- '));
+            console.log('client generators:' + '\n\t- ' + Object.values(ClientGenerators).join('\n\t- '));
+            console.log('server generators:' + '\n\t- ' + Object.values(ServerGenerators).join('\n\t- '));
         },
     )
     .demandCommand()

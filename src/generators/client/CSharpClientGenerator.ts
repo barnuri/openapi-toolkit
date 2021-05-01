@@ -21,7 +21,7 @@ using System.Threading.Tasks;
 `;
         return usings + '\n#nullable enable' + '\nnamespace ' + this.options.namepsace + '\n{\n\t' + content.replace(/\n/g, '\n\t') + '\n}';
     }
-    async generateClient(): Promise<void> {
+    generateClient(): void {
         const controllerPropsNames = this.controllersNames.map(x => this.getControllerName(x));
         const controllerProps = controllerPropsNames.map(x => `\tpublic ${x} ${x} { get; private set; }`).join('\n') + '\n';
         const controllerPropsCtor = controllerPropsNames.map(x => `\t\t${x} = new ${x} { HttpClient = HttpClient };`).join('\n') + '\n';
@@ -40,7 +40,7 @@ ${controllerPropsCtor}
 }`;
         writeFileSync(this.mainExportFile, 'using System.Net.Http;\n' + this.addNamespace(mainFileContent));
     }
-    async generateObject(objectInput: EditorObjectInput): Promise<void> {
+    generateObject(objectInput: EditorObjectInput): void {
         if (!this.shouldGenerateModel(objectInput)) {
             return;
         }
@@ -96,7 +96,7 @@ ${objectInput.properties
             return `Dictionary<string, ${objectInput.dictionaryInput ? this.getPropDesc(objectInput.dictionaryInput) : 'object'}>`;
         }
     }
-    async generateEnum(enumInput: EditorPrimitiveInput, enumVals: { [name: string]: string | number }): Promise<void> {
+    generateEnum(enumInput: EditorPrimitiveInput, enumVals: { [name: string]: string | number }): void {
         if (!this.shouldGenerateModel(enumInput)) {
             return;
         }
@@ -109,74 +109,74 @@ ${Object.keys(enumVals)
 }`;
         writeFileSync(modelFile, this.addNamespace(modelFileContent));
     }
-    async generateController(controller: string, controlerPaths: ApiPath[]): Promise<void> {
+    generateController(controller: string, controlerPaths: ApiPath[]): void {
         const controllerName = this.getControllerName(controller);
         this.generateBaseController();
         makeDirIfNotExist(this.controllersFolder);
-        console.log(`${controllerName} - ${controlerPaths.length}`);
         let controllerContent = ``;
         controllerContent += `public class ${controllerName} : BaseController \n{\n`;
-        for (const controlerPath of controlerPaths) {
-            console.log(`\t${controlerPath.method} - ${controlerPath.path}`);
-            const pathFixed = controlerPath.path.replace(/\/|-|{|}/g, '');
-            const methodName = capitalize(controlerPath.method) + capitalize(pathFixed);
-            let requestType = controlerPath.body.haveBody ? this.getPropDesc(controlerPath.body.schema) : 'object';
-            const responseType = this.getPropDesc(controlerPath.response);
-            const bodyParam = controlerPath.body.haveBody ? `${requestType}${!controlerPath.body.required ? `?` : ''} body, ` : '';
-            const headers = [...controlerPath.cookieParams, ...controlerPath.headerParams];
-            const haveHeaderParams = headers.length > 0;
-            const headersParams = haveHeaderParams ? headers.map(x => `string${x.required ? '' : '?'} h${capitalize(x.name)} = default`).join(', ') + `, ` : ``;
-            const pathParams =
-                controlerPath.pathParams.length > 0
-                    ? controlerPath.pathParams.map(x => `${this.getPropDesc(x.schema!)}${x.required ? '' : '?'} p${capitalize(x.name)} = default`).join(', ') +
-                      ', '
-                    : ``;
-            let url = controlerPath.path;
-            for (const pathParam of controlerPath.pathParams) {
-                url = url.replace('{' + pathParam.name + '}', `{p${capitalize(pathParam.name)}}`);
-            }
-            const haveQueryParams = controlerPath.queryParams.length > 0;
-            url += !haveQueryParams ? '' : '?' + controlerPath.queryParams.map(x => `${x.name}={q${capitalize(x.name)}}`).join('&');
-            const queryParams = haveQueryParams
-                ? controlerPath.queryParams.map(x => `${this.getPropDesc(x.schema!)}${x.required ? '' : '?'} q${capitalize(x.name)} = default`).join(', ') +
-                  ', '
-                : ``;
-
-            let methodCommonText = `\t\t\t"${capitalize(controlerPath.method.toLowerCase())}",\n`;
-            methodCommonText += `\t\t\t\$"${url}\",\n`;
-            methodCommonText += `\t\t\t${controlerPath.body.haveBody ? 'body' : 'null'},\n`;
-            methodCommonText += `\t\t\t`;
-            if (haveHeaderParams) {
-                methodCommonText += 'new Dictionary<string, string?>()\n';
-                methodCommonText += `\t\t\t{\n`;
-                for (const headerParam of headers) {
-                    methodCommonText += `\t\t\t\t["${headerParam.name}"] = h${capitalize(headerParam.name)},\n`;
-                }
-                methodCommonText += `\t\t\t}\n`;
-            } else {
-                methodCommonText += 'null\n';
-            }
-            methodCommonText += `\t\t);\n`;
-            methodCommonText += `\t}\n`;
-            const methodParams = `${bodyParam}${pathParams}${queryParams}${headersParams}`;
-
-            // method one
-            controllerContent += `\tpublic Task<${responseType}> ${methodName}(${methodParams}) \n\t{\n`.replace(', )', ')');
-            controllerContent += `\t\treturn Method<${requestType},${responseType}>(\n`;
-            controllerContent += methodCommonText;
-
-            // method two
-            controllerContent += `\tpublic Task<T> ${methodName}<T>(${methodParams}) \n\t{\n`.replace(', )', ')');
-            controllerContent += `\t\treturn Method<${requestType},T>(\n`;
-            controllerContent += methodCommonText;
-            // method three
-            controllerContent += `\tpublic Task<string?> ${methodName}Content(${methodParams}) \n\t{\n`.replace(', )', ')');
-            controllerContent += `\t\treturn Method<${requestType}>(\n`;
-            controllerContent += methodCommonText;
-        }
+        controllerContent += this.generateControllerMethodsContent(controller, controlerPaths);
         controllerContent += `}`;
         const controllerFile = join(this.controllersFolder, controllerName + this.getFileExtension(false));
         writeFileSync(controllerFile, '\n' + this.addNamespace(controllerContent));
+    }
+    generateControllerMethodContent(controller: string, controllerPath: ApiPath): string {
+        const pathFixed = controllerPath.path.replace(/\/|-|{|}/g, '');
+        const methodName = capitalize(controllerPath.method) + capitalize(pathFixed);
+        let requestType = controllerPath.body.haveBody ? this.getPropDesc(controllerPath.body.schema) : 'object';
+        const responseType = this.getPropDesc(controllerPath.response);
+        const bodyParam = controllerPath.body.haveBody ? `${requestType}${!controllerPath.body.required ? `?` : ''} body, ` : '';
+        const headers = [...controllerPath.cookieParams, ...controllerPath.headerParams];
+        const haveHeaderParams = headers.length > 0;
+        const headersParams = haveHeaderParams ? headers.map(x => `string${x.required ? '' : '?'} h${capitalize(x.name)} = default`).join(', ') + `, ` : ``;
+        const pathParams =
+            controllerPath.pathParams.length > 0
+                ? controllerPath.pathParams.map(x => `${this.getPropDesc(x.schema!)}${x.required ? '' : '?'} p${capitalize(x.name)} = default`).join(', ') +
+                  ', '
+                : ``;
+        let url = controllerPath.path;
+        for (const pathParam of controllerPath.pathParams) {
+            url = url.replace('{' + pathParam.name + '}', `{p${capitalize(pathParam.name)}}`);
+        }
+        const haveQueryParams = controllerPath.queryParams.length > 0;
+        url += !haveQueryParams ? '' : '?' + controllerPath.queryParams.map(x => `${x.name}={q${capitalize(x.name)}}`).join('&');
+        const queryParams = haveQueryParams
+            ? controllerPath.queryParams.map(x => `${this.getPropDesc(x.schema!)}${x.required ? '' : '?'} q${capitalize(x.name)} = default`).join(', ') + ', '
+            : ``;
+
+        let methodCommonText = `\t\t\t"${capitalize(controllerPath.method.toLowerCase())}",\n`;
+        methodCommonText += `\t\t\t\$"${url}\",\n`;
+        methodCommonText += `\t\t\t${controllerPath.body.haveBody ? 'body' : 'null'},\n`;
+        methodCommonText += `\t\t\t`;
+        if (haveHeaderParams) {
+            methodCommonText += 'new Dictionary<string, string?>()\n';
+            methodCommonText += `\t\t\t{\n`;
+            for (const headerParam of headers) {
+                methodCommonText += `\t\t\t\t["${headerParam.name}"] = h${capitalize(headerParam.name)},\n`;
+            }
+            methodCommonText += `\t\t\t}\n`;
+        } else {
+            methodCommonText += 'null\n';
+        }
+        methodCommonText += `\t\t);\n`;
+        methodCommonText += `\t}\n`;
+        const methodParams = `${bodyParam}${pathParams}${queryParams}${headersParams}`;
+
+        let methodContent = '';
+        // method one
+        methodContent += `\tpublic Task<${responseType}> ${methodName}(${methodParams}) \n\t{\n`.replace(', )', ')');
+        methodContent += `\t\treturn Method<${requestType},${responseType}>(\n`;
+        methodContent += methodCommonText;
+
+        // method two
+        methodContent += `\tpublic Task<T> ${methodName}<T>(${methodParams}) \n\t{\n`.replace(', )', ')');
+        methodContent += `\t\treturn Method<${requestType},T>(\n`;
+        methodContent += methodCommonText;
+        // method three
+        methodContent += `\tpublic Task<string?> ${methodName}Content(${methodParams}) \n\t{\n`.replace(', )', ')');
+        methodContent += `\t\treturn Method<${requestType}>(\n`;
+        methodContent += methodCommonText;
+        return methodContent;
     }
     generateBaseController() {
         const controllerBaseFile = join(this.options.output, 'BaseController.cs');

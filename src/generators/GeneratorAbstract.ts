@@ -76,10 +76,9 @@ export abstract class GeneratorAbstract {
         }
         console.log('----- start generating controllers -----');
         for (const controllerName of this.controllersNames) {
-            await this.generateController(
-                controllerName,
-                this.apiPaths.filter(x => x.controller === controllerName),
-            );
+            const controllerPaths = this.apiPaths.filter(x => x.controller === controllerName);
+            console.log(`${controllerName} - ${controllerPaths.length}`);
+            await this.generateController(controllerName, controllerPaths);
         }
         console.log('----- start generating client -----');
         this.generateClient();
@@ -116,9 +115,18 @@ export abstract class GeneratorAbstract {
         }
         return ('.' + this.options.modelNameSuffix.split('.').slice(1).join('.')).replace('..ts', '');
     }
+    generateControllerMethodsContent(controller: string, controllerPaths: ApiPath[]): string {
+        let content = '';
+        for (const controllerPath of controllerPaths) {
+            console.log(`\t${controllerPath.method} - ${controllerPath.path}`);
+            content += this.generateControllerMethodContent(controller, controllerPath);
+        }
+        return content;
+    }
     abstract getFileExtension(isModel: boolean);
-    abstract generateObject(objectInput: EditorObjectInput): Promise<void>;
-    abstract generateEnum(enumInput: EditorPrimitiveInput, enumVals: { [name: string]: string | number }): Promise<void>;
-    abstract generateController(controller: string, controlerPaths: ApiPath[]): Promise<void>;
-    abstract generateClient(): Promise<void>;
+    abstract generateObject(objectInput: EditorObjectInput): void;
+    abstract generateEnum(enumInput: EditorPrimitiveInput, enumVals: { [name: string]: string | number }): void;
+    abstract generateController(controller: string, controllerPaths: ApiPath[]): void;
+    abstract generateControllerMethodContent(controller: string, controllerPath: ApiPath): string;
+    abstract generateClient(): void;
 }

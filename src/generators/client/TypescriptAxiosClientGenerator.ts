@@ -8,7 +8,7 @@ export class TypescriptAxiosClientGenerator extends TypescriptGenerator {
     modelsExportFile = join(this.modelsFolder, 'index.ts');
     controllersExportFile = join(this.controllersFolder, 'index.ts');
     mainExportFile = join(this.options.output, 'index.ts');
-    async generateClient(): Promise<void> {
+    generateClient(): void {
         let mainFileContent = `import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';\n`;
         mainFileContent += `import * as controllers from './controllers';\n`;
         mainFileContent += `export * from './models';\n`;
@@ -23,52 +23,54 @@ export class TypescriptAxiosClientGenerator extends TypescriptGenerator {
         mainFileContent += `});`;
         writeFileSync(this.mainExportFile, this.disableLinting + mainFileContent);
     }
-    async generateController(controller: string, controlerPaths: ApiPath[]): Promise<void> {
+    generateController(controller: string, controlerPaths: ApiPath[]): void {
         const controllerName = this.getControllerName(controller);
         this.generateBaseController();
         makeDirIfNotExist(this.controllersFolder);
         appendFileSync(this.controllersExportFile, `export * from './${controllerName}'\n`);
-        console.log(`${controllerName} - ${controlerPaths.length}`);
         let controllerContent = `import * as models from '../models';\n`;
         controllerContent += `import { AxiosRequestConfig } from 'axios';\n`;
         controllerContent += `import { ControllerBase } from '../ControllerBase';\n`;
         controllerContent += `export class ${controllerName} extends ControllerBase {\n`;
-        for (const controlerPath of controlerPaths) {
-            console.log(`\t${controlerPath.method} - ${controlerPath.path}`);
-            const pathFixed = controlerPath.path.replace(/\/|-|{|}/g, '');
-            const methodName = controlerPath.method.toLowerCase() + capitalize(pathFixed);
-            let requestType = controlerPath.body.haveBody ? this.getPropDesc(controlerPath.body.schema) : 'undefined';
-            const responseType = this.getPropDesc(controlerPath.response);
-            const bodyParam = controlerPath.body.haveBody ? `body: ${requestType}${!controlerPath.body.required ? ` | undefined` : ''}, ` : '';
-            const headers = [...controlerPath.cookieParams, ...controlerPath.headerParams];
-            const haveHeaderParams = headers.length > 0;
-            const headersParams = haveHeaderParams ? `headers: {${headers.map(x => `${x.name}${x.required ? '' : '?'}: string`)}}, ` : ``;
-            const pathParams =
-                controlerPath.pathParams.length > 0
-                    ? `pathParams: {${controlerPath.pathParams.map(x => `${x.name}${x.required ? '' : '?'}: ${this.getPropDesc(x.schema!)}`)}}, `
-                    : ``;
-            let url = controlerPath.path;
-            for (const pathParam of controlerPath.pathParams) {
-                url = url.replace('{' + pathParam.name + '}', "${pathParams['" + pathParam.name + "']}");
-            }
-            const haveQueryParams = controlerPath.queryParams.length > 0;
-            url += !haveQueryParams ? '' : '?' + controlerPath.queryParams.map(x => `${x.name}=\${queryParams['${x.name}']}`).join('&');
-            const queryParams = haveQueryParams
-                ? `queryParams: {${controlerPath.queryParams.map(x => `${x.name}${x.required ? '' : '?'}: ${this.getPropDesc(x.schema!)}`)}}, `
-                : ``;
-            controllerContent += `\tasync ${methodName}(${bodyParam}${pathParams}${queryParams}${headersParams}customConfig?: AxiosRequestConfig): Promise<${responseType}> {\n`;
-            controllerContent += `\t\treturn this.method<${requestType},${responseType}>(\n`;
-            controllerContent += `\t\t\t'${controlerPath.method.toLowerCase()}',\n`;
-            controllerContent += `\t\t\t\`${url}\`,\n`;
-            controllerContent += `\t\t\t${controlerPath.body.haveBody ? 'body' : 'undefined'},\n`;
-            controllerContent += `\t\t\t${haveHeaderParams ? 'headers' : 'undefined'},\n`;
-            controllerContent += `\t\t\tcustomConfig\n`;
-            controllerContent += `\t\t);\n`;
-            controllerContent += `\t}\n`;
-        }
+        controllerContent += this.generateControllerMethodsContent(controller, controlerPaths);
         controllerContent += `}`;
         const controllerFile = join(this.controllersFolder, controllerName + this.getFileExtension(false));
         writeFileSync(controllerFile, this.disableLinting + controllerContent);
+    }
+    generateControllerMethodContent(controller: string, controllerPath: ApiPath): string {
+        const pathFixed = controllerPath.path.replace(/\/|-|{|}/g, '');
+        const methodName = controllerPath.method.toLowerCase() + capitalize(pathFixed);
+        let requestType = controllerPath.body.haveBody ? this.getPropDesc(controllerPath.body.schema) : 'undefined';
+        const responseType = this.getPropDesc(controllerPath.response);
+        const bodyParam = controllerPath.body.haveBody ? `body: ${requestType}${!controllerPath.body.required ? ` | undefined` : ''}, ` : '';
+        const headers = [...controllerPath.cookieParams, ...controllerPath.headerParams];
+        const haveHeaderParams = headers.length > 0;
+        const headersParams = haveHeaderParams ? `headers: {${headers.map(x => `${x.name}${x.required ? '' : '?'}: string`)}}, ` : ``;
+        const pathParams =
+            controllerPath.pathParams.length > 0
+                ? `pathParams: {${controllerPath.pathParams.map(x => `${x.name}${x.required ? '' : '?'}: ${this.getPropDesc(x.schema!)}`)}}, `
+                : ``;
+        let url = controllerPath.path;
+        for (const pathParam of controllerPath.pathParams) {
+            url = url.replace('{' + pathParam.name + '}', "${pathParams['" + pathParam.name + "']}");
+        }
+        const haveQueryParams = controllerPath.queryParams.length > 0;
+        url += !haveQueryParams ? '' : '?' + controllerPath.queryParams.map(x => `${x.name}=\${queryParams['${x.name}']}`).join('&');
+        const queryParams = haveQueryParams
+            ? `queryParams: {${controllerPath.queryParams.map(x => `${x.name}${x.required ? '' : '?'}: ${this.getPropDesc(x.schema!)}`)}}, `
+            : ``;
+
+        let methodContent = '';
+        methodContent += `\tasync ${methodName}(${bodyParam}${pathParams}${queryParams}${headersParams}customConfig?: AxiosRequestConfig): Promise<${responseType}> {\n`;
+        methodContent += `\t\treturn this.method<${requestType},${responseType}>(\n`;
+        methodContent += `\t\t\t'${controllerPath.method.toLowerCase()}',\n`;
+        methodContent += `\t\t\t\`${url}\`,\n`;
+        methodContent += `\t\t\t${controllerPath.body.haveBody ? 'body' : 'undefined'},\n`;
+        methodContent += `\t\t\t${haveHeaderParams ? 'headers' : 'undefined'},\n`;
+        methodContent += `\t\t\tcustomConfig\n`;
+        methodContent += `\t\t);\n`;
+        methodContent += `\t}\n`;
+        return methodContent;
     }
     generateBaseController() {
         const controllerBaseFile = join(this.options.output, 'ControllerBase.ts');

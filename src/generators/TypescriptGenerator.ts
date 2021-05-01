@@ -3,7 +3,7 @@ import { EditorInput } from '../models/editor/EditorInput';
 import { appendFileSync, existsSync, writeFileSync } from 'fs';
 import { ApiPath } from '../models/ApiPath';
 import { join } from 'path';
-import { capitalize, getEditorInput2, makeDirIfNotExist } from '../helpers';
+import { getEditorInput2 } from '../helpers';
 import { GeneratorAbstract } from './GeneratorAbstract';
 import { EditorObjectInput, EditorPrimitiveInput, OpenApiDefinition } from '../models';
 
@@ -12,7 +12,6 @@ export abstract class TypescriptGenerator extends GeneratorAbstract {
     controllersExportFile = join(this.controllersFolder, 'index.ts');
     mainExportFile = join(this.options.output, 'index.ts');
     disableLinting = '/* eslint-disable */\n/* tslint:disable */\n';
-    abstract generateClient(): Promise<void>;
     shouldGenerateModel(editorInput: EditorInput) {
         const res = super.shouldGenerateModel(editorInput);
         if (res) {
@@ -20,7 +19,7 @@ export abstract class TypescriptGenerator extends GeneratorAbstract {
         }
         return res;
     }
-    async generateObject(objectInput: EditorObjectInput): Promise<void> {
+    generateObject(objectInput: EditorObjectInput): void {
         if (!this.shouldGenerateModel(objectInput)) {
             return;
         }
@@ -72,7 +71,7 @@ ${objectInput.properties.map(x => `\t${x.name.replace(/\[i\]/g, '')}${x.nullable
             return `{ [key: string]: ${objectInput.dictionaryInput ? this.getPropDesc(objectInput.dictionaryInput) : 'any'} }`;
         }
     }
-    async generateEnum(enumInput: EditorPrimitiveInput, enumVals: { [name: string]: string | number }): Promise<void> {
+    generateEnum(enumInput: EditorPrimitiveInput, enumVals: { [name: string]: string | number }): void {
         if (!this.shouldGenerateModel(enumInput)) {
             return;
         }
@@ -85,53 +84,6 @@ ${Object.keys(enumVals)
 }
             `;
         writeFileSync(modelFile, this.disableLinting + modelFileContent);
-    }
-    async generateController(controller: string, controlerPaths: ApiPath[]): Promise<void> {
-        const controllerName = this.getControllerName(controller);
-        this.generateBaseController();
-        makeDirIfNotExist(this.controllersFolder);
-        appendFileSync(this.controllersExportFile, `export * from './${controllerName}'\n`);
-        console.log(`${controllerName} - ${controlerPaths.length}`);
-        let controllerContent = `import * as models from '../models';\n`;
-        controllerContent += `import { AxiosRequestConfig } from 'axios';\n`;
-        controllerContent += `import { ControllerBase } from '../ControllerBase';\n`;
-        controllerContent += `export class ${controllerName} extends ControllerBase {\n`;
-        for (const controlerPath of controlerPaths) {
-            console.log(`\t${controlerPath.method} - ${controlerPath.path}`);
-            const pathFixed = controlerPath.path.replace(/\/|-|{|}/g, '');
-            const methodName = controlerPath.method.toLowerCase() + capitalize(pathFixed);
-            let requestType = controlerPath.body.haveBody ? this.getPropDesc(controlerPath.body.schema) : 'undefined';
-            const responseType = this.getPropDesc(controlerPath.response);
-            const bodyParam = controlerPath.body.haveBody ? `body: ${requestType}${!controlerPath.body.required ? ` | undefined` : ''}, ` : '';
-            const headers = [...controlerPath.cookieParams, ...controlerPath.headerParams];
-            const haveHeaderParams = headers.length > 0;
-            const headersParams = haveHeaderParams ? `headers: {${headers.map(x => `${x.name}${x.required ? '' : '?'}: string`)}}, ` : ``;
-            const pathParams =
-                controlerPath.pathParams.length > 0
-                    ? `pathParams: {${controlerPath.pathParams.map(x => `${x.name}${x.required ? '' : '?'}: ${this.getPropDesc(x.schema!)}`)}}, `
-                    : ``;
-            let url = controlerPath.path;
-            for (const pathParam of controlerPath.pathParams) {
-                url = url.replace('{' + pathParam.name + '}', "${pathParams['" + pathParam.name + "']}");
-            }
-            const haveQueryParams = controlerPath.queryParams.length > 0;
-            url += !haveQueryParams ? '' : '?' + controlerPath.queryParams.map(x => `${x.name}=\${queryParams['${x.name}']}`).join('&');
-            const queryParams = haveQueryParams
-                ? `queryParams: {${controlerPath.queryParams.map(x => `${x.name}${x.required ? '' : '?'}: ${this.getPropDesc(x.schema!)}`)}}, `
-                : ``;
-            controllerContent += `\tasync ${methodName}(${bodyParam}${pathParams}${queryParams}${headersParams}customConfig?: AxiosRequestConfig): Promise<${responseType}> {\n`;
-            controllerContent += `\t\treturn this.method<${requestType},${responseType}>(\n`;
-            controllerContent += `\t\t\t'${controlerPath.method.toLowerCase()}',\n`;
-            controllerContent += `\t\t\t\`${url}\`,\n`;
-            controllerContent += `\t\t\t${controlerPath.body.haveBody ? 'body' : 'undefined'},\n`;
-            controllerContent += `\t\t\t${haveHeaderParams ? 'headers' : 'undefined'},\n`;
-            controllerContent += `\t\t\tcustomConfig\n`;
-            controllerContent += `\t\t);\n`;
-            controllerContent += `\t}\n`;
-        }
-        controllerContent += `}`;
-        const controllerFile = join(this.controllersFolder, controllerName + this.getFileExtension(false));
-        writeFileSync(controllerFile, this.disableLinting + controllerContent);
     }
     generateBaseController() {
         const controllerBaseFile = join(this.options.output, 'ControllerBase.ts');
