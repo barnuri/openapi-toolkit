@@ -84,7 +84,7 @@ export class ControllerBase {
         this.axiosInstance = axios.create(axiosSettings);
     }
     protected method<T, S>(method: string, path: string, body: T | undefined, headers?: { [key: string]: string | undefined }, customConfig?: AxiosRequestConfig): Promise<S> {
-        return this.axiosInstance.request<T, S>({
+        return this.axiosInstance.request<S>({
             url: path,
             method: method as any,
             headers,
