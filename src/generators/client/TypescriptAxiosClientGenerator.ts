@@ -90,7 +90,7 @@ export class ControllerBase {
             headers,
             data: body,
             ...customConfig,
-        });
+        }).then(res => res.data);
     }
 }
         `;
