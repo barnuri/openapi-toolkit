@@ -156,7 +156,9 @@ class BaseController(object):
                 }
                 return `${fileName}`;
             }
-            return `dict[str, ${objectInput.dictionaryInput ? this.getPropDesc(objectInput.dictionaryInput) : 'object'}]`;
+            return `dict[${objectInput.dictionaryKeyInput ? this.getPropDesc(objectInput.dictionaryKeyInput) : 'object'}, ${
+                objectInput.dictionaryInput ? this.getPropDesc(objectInput.dictionaryInput) : 'object'
+            }]`;
         }
     }
     getFileExtension(isModel: boolean) {

@@ -9,9 +9,9 @@ export class EditorObjectInput extends EditorInput {
     public switchableObjects!: EditorInput[];
     public readonly isDictionary: boolean;
     public dictionaryInput: EditorInput | undefined;
+    public dictionaryKeyInput: EditorInput | undefined;
     public readonly definistionName: string;
     public implements: string[];
-
     constructor(
         switchableOptions: string[],
         path: string,

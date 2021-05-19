@@ -68,7 +68,7 @@ ${objectInput.properties.map(x => `\t${x.name.replace(/\[i\]/g, '')}${x.nullable
                 }
                 return `models.${fileName}`;
             }
-            return `{ [key: string]: ${objectInput.dictionaryInput ? this.getPropDesc(objectInput.dictionaryInput) : 'any'} }`;
+            return `{ [key: ${objectInput.dictionaryKeyInput ? this.getPropDesc(objectInput.dictionaryKeyInput) : 'any'}]: ${objectInput.dictionaryInput ? this.getPropDesc(objectInput.dictionaryInput) : 'any'} }`;
         }
     }
     generateEnum(enumInput: EditorPrimitiveInput, enumVals: { [name: string]: string | number }): void {

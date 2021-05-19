@@ -93,7 +93,9 @@ ${objectInput.properties
                 }
                 return `${fileName}`;
             }
-            return `Dictionary<string, ${objectInput.dictionaryInput ? this.getPropDesc(objectInput.dictionaryInput) : 'object'}>`;
+            return `Dictionary<${objectInput.dictionaryKeyInput ? this.getPropDesc(objectInput.dictionaryKeyInput) : 'object'}, ${
+                objectInput.dictionaryInput ? this.getPropDesc(objectInput.dictionaryInput) : 'object'
+            }>`;
         }
     }
     generateEnum(enumInput: EditorPrimitiveInput, enumVals: { [name: string]: string | number }): void {

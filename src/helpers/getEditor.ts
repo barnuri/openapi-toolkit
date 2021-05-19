@@ -109,10 +109,23 @@ export function getEditorInput(
         }
         dictionaryInput.name = 'value';
     }
+    let dictionaryKeyInput: EditorInput | undefined = undefined;
+    const dictionaryKeyInputObj = definitionObj['x-dictionaryKey'];
+    if (!!dictionaryKeyInputObj) {
+        try {
+            const dictOpenApiObj = getOpenApiDefinitionObject(dictionaryKeyInputObj as any, definitions);
+            dictionaryKeyInput = getEditorInput(definitions, path, dictOpenApiObj.def, definitionObj, undefined, existingObjectEditorInputs);
+            dictionaryKeyInput.className = dictOpenApiObj.refName;
+        } catch {
+            dictionaryKeyInput = new EditorPrimitiveInput('string', path, definitionObj, parentDefinition);
+        }
+        dictionaryKeyInput.name = 'key';
+    }
     objectInput.properties = propsInputs;
     objectInput.switchableObjects = !objectInput.switchable ? [] : switchableObjects || [];
     objectInput.switchableOptions = !objectInput.switchable ? [] : switchableObjects.map(x => x.openApiDefinition.title!) || [];
     objectInput.dictionaryInput = dictionaryInput;
+    objectInput.dictionaryKeyInput = dictionaryKeyInput;
     return objectInput;
 }
 
