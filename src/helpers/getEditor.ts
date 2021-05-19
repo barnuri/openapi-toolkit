@@ -99,25 +99,26 @@ export function getEditorInput(
         switchableObjects.push(switchableObject);
     }
     let dictionaryInput: EditorInput | undefined = undefined;
-    if (!!definitionObj.additionalProperties) {
-        try {
-            const dictOpenApiObj = getOpenApiDefinitionObject(definitionObj.additionalProperties as any, definitions);
-            dictionaryInput = getEditorInput(definitions, path, dictOpenApiObj.def, definitionObj, undefined, existingObjectEditorInputs);
-            dictionaryInput.className = dictOpenApiObj.refName;
-        } catch {
-            dictionaryInput = new EditorPrimitiveInput('string', path, definitionObj, parentDefinition);
+    let dictionaryKeyInput: EditorInput | undefined = undefined;
+    if (objectInput.isDictionary) {
+        dictionaryInput = new EditorPrimitiveInput('string', path, definitionObj, parentDefinition);
+        if (!!definitionObj.additionalProperties) {
+            try {
+                const dictOpenApiObj = getOpenApiDefinitionObject(definitionObj.additionalProperties as any, definitions);
+                dictionaryInput = getEditorInput(definitions, path, dictOpenApiObj.def, definitionObj, undefined, existingObjectEditorInputs);
+                dictionaryInput.className = dictOpenApiObj.refName;
+            } catch {}
         }
         dictionaryInput.name = 'value';
-    }
-    let dictionaryKeyInput: EditorInput | undefined = undefined;
-    const dictionaryKeyInputObj = definitionObj['x-dictionaryKey'];
-    if (!!dictionaryKeyInputObj) {
-        try {
-            const dictOpenApiObj = getOpenApiDefinitionObject(dictionaryKeyInputObj as any, definitions);
-            dictionaryKeyInput = getEditorInput(definitions, path, dictOpenApiObj.def, definitionObj, undefined, existingObjectEditorInputs);
-            dictionaryKeyInput.className = dictOpenApiObj.refName;
-        } catch {
-            dictionaryKeyInput = new EditorPrimitiveInput('string', path, definitionObj, parentDefinition);
+
+        const dictionaryKeyInputObj = definitionObj['x-dictionaryKey'];
+        dictionaryKeyInput = new EditorPrimitiveInput('string', path, definitionObj, parentDefinition);
+        if (!!dictionaryKeyInputObj) {
+            try {
+                const dictOpenApiObj = getOpenApiDefinitionObject(dictionaryKeyInputObj as any, definitions);
+                dictionaryKeyInput = getEditorInput(definitions, path, dictOpenApiObj.def, definitionObj, undefined, existingObjectEditorInputs);
+                dictionaryKeyInput.className = dictOpenApiObj.refName;
+            } catch {}
         }
         dictionaryKeyInput.name = 'key';
     }
