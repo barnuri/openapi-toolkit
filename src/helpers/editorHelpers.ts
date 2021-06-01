@@ -39,7 +39,7 @@ export function editorNameByPath(editorPath: string): string {
 
 export function getAllEditors(openApiDocument: OpenApiDocument): Editor[] {
     let definitions = getDefinisions(openApiDocument);
-    const allEditors = Object.keys(definitions).map(x => getEditor(openApiDocument, x, true));
+    const allEditors = Object.keys(definitions || {}).map(x => getEditor(openApiDocument, x, true));
     return allEditors;
 }
 
@@ -55,6 +55,9 @@ export function getAllEditorInputsByEditors(editors: Editor[]): EditorInput[] {
 }
 
 export function getAllEditorInputsByInput(editorInput: EditorInput): EditorInput[] {
+    if(!editorInput) {
+        return [];
+    }
     let allEditors: EditorInput[] = [];
     let input = cloneHelper(editorInput || {});
     if (input.editorType === 'EditorObjectInput') {
@@ -89,7 +92,13 @@ export function editorFilterUnkownPaths(editor: Editor, pathesToCheck: string[])
 }
 
 const fixPathForArraies = (fieldKey: string): string => {
-    const indexesStr = [...fieldKey.matchAll(/\.\d+/g)]?.map(x => x[0].replace('.', '')).join('-');
+    if (!fieldKey) {
+        return '';
+    }
+    const indexesStr = [...fieldKey.matchAll(/\.\d+/g)]
+        ?.map(x => (x.length > 0 ? x[0].replace('.', '') : ''))
+        .filter(x => x)
+        .join('-');
     const modifiedKey = fieldKey.replace(/\.\d+/g, '') + indexesStr;
     return modifiedKey;
 };
@@ -97,9 +106,9 @@ const fixPathForArraies = (fieldKey: string): string => {
 export const getEditorChangesHash = (changes: ChangesModel, editorInput: EditorInput): string => {
     const arrayPath = editorInput.path.replace(/\[i\]/g, '');
     let res = '';
-    for (const changeType of Object.keys(changes)) {
-        for (const fieldKey of Object.keys(changes[changeType])) {
-            const fixedFieldKey = fixPathForArraies(fieldKey);
+    for (const changeType of Object.keys(changes || {})) {
+        for (const fieldKey of Object.keys(changes[changeType] || {})) {
+            const fixedFieldKey = fixPathForArraies(fieldKey) || '';
             if (fieldKey.startsWith(arrayPath) || fixedFieldKey.startsWith(fixPathForArraies(arrayPath)) || fixPathForArraies(fieldKey).startsWith(arrayPath)) {
                 res += fieldKey + '=' + changes[changeType][fieldKey];
             }
