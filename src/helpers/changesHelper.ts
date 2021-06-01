@@ -149,7 +149,7 @@ function getPrepreBulkForArrayAndObjects(changes: ChangesModel, filter: any): bu
     return distinctBulkWrite;
 }
 
-function splitBulk(changes: ChangesModel, filter: any, opartion: '$set' | '$unset' | '$pull'): bulkEntry[] {
+function splitBulk(changes: ChangesModel, filter: any, opartion: '$set' | '$unset' | '$pull' | '$push'): bulkEntry[] {
     const bulkWrite: bulkEntry[] = [];
     const keys = Object.keys(changes[opartion] || {});
     if (keys.length <= 0) {
@@ -180,5 +180,6 @@ export function getBulkWrite(_changes: ChangesModel, filter: any): bulkEntry[] {
     bulkWrite.push(...splitBulk(changes, filter, '$set'));
     bulkWrite.push(...splitBulk(changes, filter, '$unset'));
     bulkWrite.push(...splitBulk(changes, filter, '$pull'));
+    bulkWrite.push(...splitBulk(changes, filter, '$push'));
     return bulkWrite;
 }

@@ -5,6 +5,8 @@ import { jsonPath } from './utilsHelper';
 import { modifyInputPath } from './editorHelpers';
 import { changesGetPathValueByPath } from './changesHelper';
 
+export const ORDER_PROP = '_order';
+
 export function arrayChildModifyIndex(index: number, arrayInput: EditorArrayInput): EditorInput {
     return modifyInputPath(arrayInput.itemInput, arrayInput.itemInput.path, arrayInput.itemInput.path.replace('[i]', `.${index}`));
 }
@@ -107,5 +109,39 @@ export function arrayAddItem(_arrayInput: EditorArrayInput, _changes: ChangesMod
 
 export function arrayGetIndexes(arrayInput: EditorArrayInput, changes: ChangesModel, value: any): number[] {
     const count = arrayItemsCount(arrayInput, value, changes);
-    return Array.from({ length: count }, (x, i) => i);
+    return Array.from({ length: count }, (x, i) => i).sort(
+        (i1, i2) => arrayItemOrderInArray(arrayInput, changes, value, i1) - arrayItemOrderInArray(arrayInput, changes, value, i2),
+    );
+}
+
+export function arrayItemOrderPath(arrayInput: EditorArrayInput, index: number) {
+    return arrayKeyPrefix(index, arrayInput) + `.${ORDER_PROP}`;
+}
+
+export function arrayItemOrderInArray(arrayInput: EditorArrayInput, _changes: ChangesModel, _value: any, index: number) {
+    let changes = cloneHelper(_changes || ChangesModelDefaultValue);
+    let value = cloneHelper(_value || {});
+    value = value || {};
+    changes = changes || ChangesModelDefaultValue;
+    const jpath = arrayItemOrderPath(arrayInput, index);
+    return changes.$set[jpath] ?? jsonPath(value, jpath)[0] ?? index;
+}
+
+export function setArrayOrder(arrayInput: EditorArrayInput, _changes: ChangesModel, _value: any, index: number, order: number) {
+    let changes = cloneHelper(_changes || ChangesModelDefaultValue);
+    let value = cloneHelper(_value || {});
+    value = value || {};
+    changes = changes || ChangesModelDefaultValue;
+
+    //fill order props for missing items
+    for (const index of arrayGetIndexes(arrayInput, changes, value)) {
+        const jpath = arrayItemOrderPath(arrayInput, index);
+        const orderVal = changes.$set[jpath] ?? jsonPath(value, jpath)[0];
+        if (!orderVal && orderVal != 0) {
+            changes.$set[jpath] = arrayItemOrderInArray(arrayInput, changes, value, index);
+        }
+    }
+
+    changes.$push[arrayPath(arrayInput)] = { $each: [], $sort: { [ORDER_PROP]: 1 } };
+    changes.$set[arrayItemOrderPath(arrayInput, index)] = order;
 }
