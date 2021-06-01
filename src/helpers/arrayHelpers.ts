@@ -114,11 +114,11 @@ export function arrayGetIndexes(arrayInput: EditorArrayInput, changes: ChangesMo
     );
 }
 
-export function arrayItemOrderPath(arrayInput: EditorArrayInput, index: number) {
+export function arrayItemOrderPath(arrayInput: EditorArrayInput, index: number): string {
     return arrayKeyPrefix(index, arrayInput) + `.${ORDER_PROP}`;
 }
 
-export function arrayItemOrderInArray(arrayInput: EditorArrayInput, _changes: ChangesModel, _value: any, index: number) {
+export function arrayItemOrderInArray(arrayInput: EditorArrayInput, _changes: ChangesModel, _value: any, index: number): number {
     let changes = cloneHelper(_changes || ChangesModelDefaultValue);
     let value = cloneHelper(_value || {});
     value = value || {};
@@ -127,7 +127,7 @@ export function arrayItemOrderInArray(arrayInput: EditorArrayInput, _changes: Ch
     return changes.$set[jpath] ?? jsonPath(value, jpath)[0] ?? index;
 }
 
-export function setArrayOrder(arrayInput: EditorArrayInput, _changes: ChangesModel, _value: any, index: number, order: number) {
+export function setArrayOrder(arrayInput: EditorArrayInput, _changes: ChangesModel, _value: any, index: number, order: number): ChangesModel {
     let changes = cloneHelper(_changes || ChangesModelDefaultValue);
     let value = cloneHelper(_value || {});
     value = value || {};
@@ -144,4 +144,6 @@ export function setArrayOrder(arrayInput: EditorArrayInput, _changes: ChangesMod
 
     changes.$push[arrayPath(arrayInput)] = { $each: [], $sort: { [ORDER_PROP]: 1 } };
     changes.$set[arrayItemOrderPath(arrayInput, index)] = order;
+
+    return changes;
 }
