@@ -15,15 +15,16 @@ setTimeout(() => {
         // 'ShallowMappingSettings',
         // 'DeepMappingSettings',
         // 'IndexingSettings',
-        'ParsingSettingsConfig',
+        // 'ParsingSettingsConfig',
         // 'ImagesManagerConfig',
         // 'CrawlingSettings',
         // 'WebAuthenticationTemplateConfig',
         // 'BrowserBaseAuthenticationConfig',
         // 'WebDriverRequestSettings',
         // 'CrawlerSelectors',
+        'NewOnlyMappingSettings',
     ].map(tabName => getEditor(openApiDoc, tabName));
-    const keySelector = editors.find(x => x.name === 'ParsingSettingsConfig'); //?.inputs.find(x => x.path === 'topicKeySelector');
+    const keySelector = editors.find(x => x.name === 'NewOnlyMappingSettings'); //?.inputs.find(x => x.path === 'topicKeySelector');
     const ccb = 1;
 
     // let res = {};

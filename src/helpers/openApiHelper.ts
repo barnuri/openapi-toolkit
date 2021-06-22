@@ -4,18 +4,19 @@ import { OpenApiDefinition, OpenApiDocument, OpenApiDefinitionReference, OpenApi
 export function getOpenApiDefinitionObject(
     definition: OpenApiDefinition,
     definitions: OpenApiDefinitionsDictionary,
-): { def: OpenApiDefinitionObject; refName: string | undefined } {
+): { def: OpenApiDefinitionObject; refName: string | undefined, ignoreInherit: boolean } {
     definition = definition || {};
     definitions = definitions || {};
+    const ignoreInherit = definition['x-ignore-inherit'] === true;
     if (Object.keys(definition).includes('$ref')) {
         const refName = (definition as OpenApiDefinitionReference).$ref.split('/').splice(-1)[0];
-        return { def: definitions[refName], refName };
+        return { def: definitions[refName], refName, ignoreInherit };
     }
     if (Object.keys(definition).includes('oneOf')) {
         const openApiDefinitionObject = (definition as OpenApiDefinitionObject).oneOf!.filter((x: any) => x.type != 'null')[0];
         return getOpenApiDefinitionObject(openApiDefinitionObject, definitions);
     }
-    return { def: definition as OpenApiDefinitionObject, refName: undefined };
+    return { def: definition as OpenApiDefinitionObject, refName: undefined, ignoreInherit };
 }
 
 export function getOpenApiDefinitionObjectProps(
@@ -27,7 +28,7 @@ export function getOpenApiDefinitionObjectProps(
     const props = definitionObj.properties || ({} as any);
     const props2 = (((definitionObj.allOf || []).filter(x => Object.keys(x).includes('properties'))[0] as OpenApiDefinitionObject) || {}).properties;
     let inheritProps = {};
-    if (includeInheritProps && definitionObj['x-ignore-inherit'] !== true) {
+    if (includeInheritProps) {
         const refsObjs = (definitionObj.allOf || []).filter(x => Object.keys(x).includes('$ref')).map(x => getOpenApiDefinitionObject(x, definitions));
         for (const x of refsObjs) {
             inheritProps = { ...getOpenApiDefinitionObjectProps(x.def, true, definitions) };
