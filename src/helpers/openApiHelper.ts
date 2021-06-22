@@ -27,7 +27,7 @@ export function getOpenApiDefinitionObjectProps(
     const props = definitionObj.properties || ({} as any);
     const props2 = (((definitionObj.allOf || []).filter(x => Object.keys(x).includes('properties'))[0] as OpenApiDefinitionObject) || {}).properties;
     let inheritProps = {};
-    if (includeInheritProps) {
+    if (includeInheritProps && definitionObj['x-ignore-inherit'] !== true) {
         const refsObjs = (definitionObj.allOf || []).filter(x => Object.keys(x).includes('$ref')).map(x => getOpenApiDefinitionObject(x, definitions));
         for (const x of refsObjs) {
             inheritProps = { ...getOpenApiDefinitionObjectProps(x.def, true, definitions) };
