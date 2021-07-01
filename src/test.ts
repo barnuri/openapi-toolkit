@@ -21,9 +21,9 @@ const editors = [
     // 'BrowserBaseAuthenticationConfig',
     // 'WebDriverRequestSettings',
     // 'CrawlerSelectors',
-    'NewOnlyMappingSettings',
+    // 'NewOnlyMappingSettings',
 ].map(tabName => getEditor(openApiDoc, tabName));
-const keySelector = editors.find(x => x.name === 'NewOnlyMappingSettings'); //?.inputs.find(x => x.path === 'topicKeySelector');
+const obj = editors.find(x => x.name === 'ShallowMappingSettings')?.inputs[0]; //?.inputs.find(x => x.path === 'topicKeySelector');
 const ccb = 1;
 
 // let res = {};

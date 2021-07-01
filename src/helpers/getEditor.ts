@@ -18,13 +18,13 @@ type existingObjectEditorInputs = { [inputName: string]: EditorObjectInput };
 
 export function getEditor(openApiDocument: OpenApiDocument, editorName: string, includeInheritProps: boolean = false): Editor {
     let definitions = getDefinisions(openApiDocument);
-    const tabContainers = getOpenApiDefinitionObjectProps(definitions[editorName], includeInheritProps, definitions);
     const existingObjectEditorInputs: existingObjectEditorInputs = {};
     const editor = new Editor();
     editor.name = editorName;
     editor.editorAsInput = getEditorInput2(openApiDocument, definitions[editorName]);
-    editor.inputs = Object.keys(tabContainers).map(containerName =>
-        getEditorInput(definitions, containerName, tabContainers[containerName], tabContainers, containerName, existingObjectEditorInputs),
+    const editorProps = getOpenApiDefinitionObjectProps(definitions[editorName], includeInheritProps, definitions);
+    editor.inputs = Object.keys(editorProps).map(inputName =>
+        getEditorInput(definitions, inputName, editorProps[inputName], editor.editorAsInput.openApiDefinition, inputName, existingObjectEditorInputs),
     );
     editor.editorAsInput.className = editorName;
     return editor;
