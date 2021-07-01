@@ -23,7 +23,7 @@ const editors = [
     // 'CrawlerSelectors',
     // 'NewOnlyMappingSettings',
 ].map(tabName => getEditor(openApiDoc, tabName));
-const obj = editors.find(x => x.name === 'ShallowMappingSettings')?.inputs[0]; //?.inputs.find(x => x.path === 'topicKeySelector');
+const obj = editors.find(x => x.name === 'ShallowMappingSettings')?.inputs; //?.inputs.find(x => x.path === 'topicKeySelector');
 const ccb = 1;
 
 // let res = {};

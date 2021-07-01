@@ -24,7 +24,7 @@ export function getEditor(openApiDocument: OpenApiDocument, editorName: string, 
     editor.editorAsInput = getEditorInput2(openApiDocument, definitions[editorName]);
     const editorProps = getOpenApiDefinitionObjectProps(definitions[editorName], includeInheritProps, definitions);
     editor.inputs = Object.keys(editorProps).map(inputName =>
-        getEditorInput(definitions, inputName, editorProps[inputName], editor.editorAsInput.openApiDefinition, inputName, existingObjectEditorInputs),
+        getEditorInput(definitions, inputName, editorProps[inputName], definitions[editorName], inputName, existingObjectEditorInputs),
     );
     editor.editorAsInput.className = editorName;
     return editor;
@@ -68,11 +68,12 @@ export function getEditorInput(
     const objectInput = new EditorObjectInput([], path, defDetails.refName || '', definitionObj, parentDefinition, definitions);
     objectInput.className = defDetails.refName || switchableRefName;
     if (objectInput.definistionName) {
-        const existingObjectInput = existingObjectEditorInputs[objectInput.definistionName];
+        const key = `${objectInput.definistionName}-${objectInput.required}-${defDetails.ignoreInherit}`;
+        const existingObjectInput = existingObjectEditorInputs[key];
         if (existingObjectInput) {
             return modifyInputPath(cloneHelper(existingObjectInput), existingObjectInput.path, path);
         }
-        existingObjectEditorInputs[objectInput.definistionName] = objectInput;
+        existingObjectEditorInputs[key] = objectInput;
     }
     const props = getOpenApiDefinitionObjectProps(definitionObj, !defDetails.ignoreInherit, definitions);
     const propsInputs: EditorInput[] =

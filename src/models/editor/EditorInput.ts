@@ -38,6 +38,12 @@ export class EditorInput {
             parentClone.properties[this.name]['x-nullable'];
         this.editorType = editorType;
         const requiredList = getOpenApiDefinitionPropGetter(parentClone, true, definitions || {}, x => (x as OpenApiDefinitionObject)?.required || [], 'array');
-        this.required = requiredList.includes(path.split('.').splice(-1)[0]);
+        const propName = path.split('.').splice(-1)[0];
+        this.required = requiredList.includes(propName);
+        if (path == 'subCategoryCounterSelector' || propName.includes('categoryCounterSelector')) {
+            if (this.required) {
+                const a = 1;
+            }
+        }
     }
 }
