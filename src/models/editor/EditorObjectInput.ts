@@ -1,3 +1,4 @@
+import { OpenApiDefinitionsDictionary } from './../openapi/OpenApiDefinitionsDictionary';
 import { OpenApiDefinitionObject } from './../openapi/OpenApiDefinitionObject';
 import { EditorInput } from './EditorInput';
 
@@ -18,8 +19,9 @@ export class EditorObjectInput extends EditorInput {
         definistionName: string,
         openApiDefinition: OpenApiDefinitionObject,
         openApiParentDefinition: OpenApiDefinitionObject | undefined,
+        definitions: OpenApiDefinitionsDictionary | undefined
     ) {
-        super(path, 'EditorObjectInput', openApiDefinition, openApiParentDefinition);
+        super(path, 'EditorObjectInput', openApiDefinition, openApiParentDefinition, definitions);
         this.definistionName = definistionName;
         openApiDefinition.anyOf = openApiDefinition.anyOf || [];
         this.switchable = openApiDefinition.anyOf.length > 0;

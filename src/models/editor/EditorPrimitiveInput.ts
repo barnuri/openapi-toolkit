@@ -1,3 +1,4 @@
+import { OpenApiDefinitionsDictionary } from './../openapi/OpenApiDefinitionsDictionary';
 import { OpenApiDefinitionObject } from './../openapi/OpenApiDefinitionObject';
 import { EditorInput } from './EditorInput';
 
@@ -17,8 +18,9 @@ export class EditorPrimitiveInput extends EditorInput {
         path: string,
         openApiDefinition: OpenApiDefinitionObject,
         openApiParentDefinition: OpenApiDefinitionObject | undefined,
+        definitions: OpenApiDefinitionsDictionary | undefined
     ) {
-        super(path, 'EditorPrimitiveInput', openApiDefinition, openApiParentDefinition);
+        super(path, 'EditorPrimitiveInput', openApiDefinition, openApiParentDefinition, definitions);
         this.enumNames = openApiDefinition['x-enumNames'] || [];
         this.enumValues = openApiDefinition.enum || [];
         this.pattern = openApiDefinition.pattern;

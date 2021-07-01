@@ -4,7 +4,7 @@ import { OpenApiDefinition, OpenApiDocument, OpenApiDefinitionReference, OpenApi
 export function getOpenApiDefinitionObject(
     definition: OpenApiDefinition,
     definitions: OpenApiDefinitionsDictionary,
-): { def: OpenApiDefinitionObject; refName: string | undefined, ignoreInherit: boolean } {
+): { def: OpenApiDefinitionObject; refName: string | undefined; ignoreInherit: boolean } {
     definition = definition || {};
     definitions = definitions || {};
     const ignoreInherit = definition['x-ignore-inherit'] === true;
@@ -24,21 +24,38 @@ export function getOpenApiDefinitionObjectProps(
     includeInheritProps: boolean,
     definitions: OpenApiDefinitionsDictionary,
 ): { [propName: string]: OpenApiDefinition } {
+    return getOpenApiDefinitionPropGetter(
+        definitionObj,
+        includeInheritProps,
+        definitions,
+        def => (def as OpenApiDefinitionObject)?.properties || {},
+        'object',
+    ) as any;
+}
+
+export function getOpenApiDefinitionPropGetter<T>(
+    definitionObj: OpenApiDefinitionObject,
+    includeInheritProps: boolean,
+    definitions: OpenApiDefinitionsDictionary,
+    getter: (definition: OpenApiDefinition) => T,
+    getterType: 'array' | 'object' | 'primitive',
+): T {
     definitionObj = definitionObj || {};
-    const props = definitionObj.properties || ({} as any);
-    const props2 = (((definitionObj.allOf || []).filter(x => Object.keys(x).includes('properties'))[0] as OpenApiDefinitionObject) || {}).properties;
-    let inheritProps = {};
+    const defaultVal: any = getterType === 'object' ? {} : [];
+    const vals = getter(definitionObj);
+    const combineVals: any = (a: T, b: T) => (getterType === 'object' ? { ...a, ...b } : getterType === 'array' ? [...(a as any), ...(b as any)] : [a, b]);
+    let vals2 = defaultVal;
+    for (const def of definitionObj.allOf || []) {
+        vals2 = combineVals(vals2, getter(def));
+    }
+    let inheritVals = defaultVal;
     if (includeInheritProps) {
         const refsObjs = (definitionObj.allOf || []).filter(x => Object.keys(x).includes('$ref')).map(x => getOpenApiDefinitionObject(x, definitions));
         for (const x of refsObjs) {
-            inheritProps = { ...getOpenApiDefinitionObjectProps(x.def, true, definitions) };
+            inheritVals = combineVals(inheritVals, getOpenApiDefinitionPropGetter(x.def, true, definitions, getter, getterType));
         }
     }
-    return {
-        ...inheritProps,
-        ...props2,
-        ...props,
-    };
+    return combineVals(combineVals(inheritVals, vals2), vals);
 }
 
 export function getApiPaths(openApiDocument: OpenApiDocument): ApiPath[] {

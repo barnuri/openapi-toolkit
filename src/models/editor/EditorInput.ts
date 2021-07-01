@@ -1,4 +1,5 @@
-import { cloneHelper, editorNameByPath } from '../../helpers';
+import { OpenApiDefinitionsDictionary } from './../openapi/OpenApiDefinitionsDictionary';
+import { cloneHelper, editorNameByPath, getOpenApiDefinitionPropGetter } from '../../helpers';
 import { OpenApiDefinitionObject } from './../openapi/OpenApiDefinitionObject';
 export class EditorInput {
     public path: string;
@@ -18,11 +19,11 @@ export class EditorInput {
         editorType: 'EditorArrayInput' | 'EditorObjectInput' | 'EditorPrimitiveInput',
         openApiDefinition: OpenApiDefinitionObject,
         openApiParentDefinition: OpenApiDefinitionObject | undefined,
+        definitions: OpenApiDefinitionsDictionary | undefined,
     ) {
         this.path = path;
         this.openApiDefinition = openApiDefinition;
         this.openApiParentDefinition = openApiParentDefinition;
-        this.required = inputIsRequired(path, openApiParentDefinition);
         this.description = openApiDefinition.description;
         this.title = openApiDefinition.title;
         this.name = editorNameByPath(this.path || '');
@@ -36,9 +37,7 @@ export class EditorInput {
             parentClone.properties[this.name]['nullable'] ||
             parentClone.properties[this.name]['x-nullable'];
         this.editorType = editorType;
+        const requiredList = getOpenApiDefinitionPropGetter(parentClone, true, definitions || {}, x => (x as OpenApiDefinitionObject)?.required || [], 'array');
+        this.required = requiredList.includes(path.split('.').splice(-1)[0]);
     }
-}
-
-function inputIsRequired(path: string, parentContainer: OpenApiDefinitionObject | undefined) {
-    return ((parentContainer || {}).required || []).includes(path.split('.').splice(-1)[0]);
 }
