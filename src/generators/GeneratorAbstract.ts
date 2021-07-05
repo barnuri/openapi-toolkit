@@ -124,7 +124,7 @@ export abstract class GeneratorAbstract {
         return content;
     }
     getMethodName(controllerPath: ApiPath) {
-        const cleanRegex = /\/|-|{|}|\./g;
+        const cleanRegex = /\/|-|{|}|\.|_/g;
         const longName = controllerPath.method.toLowerCase() + capitalize(controllerPath.path.replace(cleanRegex, ''));
         if (this.options.longMethodName) {
             return longName;
