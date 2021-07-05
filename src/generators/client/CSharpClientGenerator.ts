@@ -123,8 +123,7 @@ ${Object.keys(enumVals)
         writeFileSync(controllerFile, '\n' + this.addNamespace(controllerContent));
     }
     generateControllerMethodContent(controller: string, controllerPath: ApiPath): string {
-        const pathFixed = controllerPath.path.replace(/\/|-|{|}/g, '');
-        const methodName = capitalize(controllerPath.method) + capitalize(pathFixed);
+        const methodName = this.getMethodName(controllerPath);
         let requestType = controllerPath.body.haveBody ? this.getPropDesc(controllerPath.body.schema) : 'object';
         const responseType = this.getPropDesc(controllerPath.response);
         const bodyParam = controllerPath.body.haveBody ? `${requestType}${!controllerPath.body.required ? `?` : ''} body, ` : '';

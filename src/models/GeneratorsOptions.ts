@@ -13,4 +13,5 @@ export default class GeneratorsOptions {
     controllerNameSuffix!: string;
     namepsace!: string;
     type!: string;
+    longMethodName!: boolean;
 }

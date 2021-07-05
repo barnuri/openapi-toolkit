@@ -38,8 +38,7 @@ export class TypescriptAxiosClientGenerator extends TypescriptGenerator {
         writeFileSync(controllerFile, this.disableLinting + controllerContent);
     }
     generateControllerMethodContent(controller: string, controllerPath: ApiPath): string {
-        const pathFixed = controllerPath.path.replace(/\/|-|{|}/g, '');
-        const methodName = controllerPath.method.toLowerCase() + capitalize(pathFixed);
+        const methodName = this.getMethodName(controllerPath);
         let requestType = controllerPath.body.haveBody ? this.getPropDesc(controllerPath.body.schema) : 'undefined';
         const responseType = this.getPropDesc(controllerPath.response);
         const bodyParam = controllerPath.body.haveBody ? `body: ${requestType}${!controllerPath.body.required ? ` | undefined` : ''}, ` : '';

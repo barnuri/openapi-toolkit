@@ -123,6 +123,20 @@ export abstract class GeneratorAbstract {
         }
         return content;
     }
+    getMethodName(controllerPath: ApiPath) {
+        const cleanRegex = /\/|-|{|}\./g;
+        const longName = controllerPath.method.toLowerCase() + capitalize(controllerPath.path.replace(cleanRegex, ''));
+        if (this.options.longMethodName) {
+            return longName;
+        }
+        let shortName = '';
+        try {
+            shortName = controllerPath.path.split(controllerPath.controller).slice(1).join(controllerPath.controller).replace(cleanRegex, '');
+            shortName = capitalize(shortName);
+            shortName = shortName[0].toLowerCase() + shortName.substr(1);
+        } catch {}
+        return !(shortName || '').trim() ? longName : shortName.trim();
+    }
     abstract getFileExtension(isModel: boolean);
     abstract generateObject(objectInput: EditorObjectInput): void;
     abstract generateEnum(enumInput: EditorPrimitiveInput, enumVals: { [name: string]: string | number }): void;
