@@ -1,10 +1,11 @@
-import { ChangesModelDefaultValue } from './models';
+import { ChangesModelDefaultValue, ClientGenerators } from './models';
 import { writeFileSync } from 'fs';
 import openapiSchemaExample from './openapiSchemaExample.json';
 // import value from './value.json';
 
-import { editorInputToHtml, getEditor, OpenApiDocument, getDefinisions } from './index';
+import { editorInputToHtml, getEditor, OpenApiDocument, getDefinisions, generate } from './index';
 import { changesGetPathValue, changesUnsetPathValue, editorFilterUnkownPaths, findPropsByValue, getBulkWrite } from './helpers';
+import GeneratorsOptions from './models/GeneratorsOptions';
 
 // const propsPaths = findPropsByValue(value, 'title');
 const openApiDoc = (openapiSchemaExample as any) as OpenApiDocument;
@@ -25,6 +26,12 @@ const editors = [
 ].map(tabName => getEditor(openApiDoc, tabName));
 const obj = editors.find(x => x.name === 'ShallowMappingSettings')?.inputs; //?.inputs.find(x => x.path === 'topicKeySelector');
 const ccb = 1;
+
+generate({
+    ...new GeneratorsOptions(),
+    pathOrUrl: 'http://crawlers-local.ke-la.com:3000/api/swagger/swagger.json',
+    output: './dist/test1',
+});
 
 // let res = {};
 // for (const editor of editors) {

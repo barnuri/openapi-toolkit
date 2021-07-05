@@ -42,7 +42,9 @@ yargs(process.argv.slice(2))
                 .nargs('controllerNamePrefix', 1)
                 .default('controllerNamePrefix', '')
                 .nargs('controllerNameSuffix', 1)
-                .default('controllerNameSuffix', 'Controller'),
+                .default('controllerNameSuffix', 'Controller')
+                .nargs('longMethodName', 1)
+                .default('longMethodName', false),
 
         argv => {
             generate(argv as any)

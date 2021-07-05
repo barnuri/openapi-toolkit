@@ -124,7 +124,7 @@ export abstract class GeneratorAbstract {
         return content;
     }
     getMethodName(controllerPath: ApiPath) {
-        const cleanRegex = /\/|-|{|}\./g;
+        const cleanRegex = /\/|-|{|}|\./g;
         const longName = controllerPath.method.toLowerCase() + capitalize(controllerPath.path.replace(cleanRegex, ''));
         if (this.options.longMethodName) {
             return longName;
@@ -133,7 +133,10 @@ export abstract class GeneratorAbstract {
         try {
             shortName = controllerPath.path.split('?')[0];
             shortName = shortName.toLowerCase().startsWith('/api') ? shortName.substring(4) : shortName;
-            shortName = shortName.split(controllerPath.controller).slice(1).join(controllerPath.controller);
+            shortName =
+                shortName.split(`/${controllerPath.controller}/`).length <= 1
+                    ? shortName
+                    : shortName.split(`/${controllerPath.controller}/`).slice(1).join(`/${controllerPath.controller}/`);
             shortName = shortName.replace(cleanRegex, '');
             shortName = capitalize(shortName);
             shortName = shortName[0].toLowerCase() + shortName.substr(1);
