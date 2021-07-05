@@ -138,10 +138,9 @@ export abstract class GeneratorAbstract {
                     ? shortName
                     : shortName.split(`/${controllerPath.controller}/`).slice(1).join(`/${controllerPath.controller}/`);
             shortName = shortName.replace(cleanRegex, '');
-            shortName = capitalize(shortName);
-            shortName = shortName[0].toLowerCase() + shortName.substr(1);
+            shortName = !(shortName || '').trim() ? '' : controllerPath.method.toLowerCase() + capitalize(shortName);
         } catch {}
-        return !(shortName || '').trim() ? longName : shortName.trim();
+        return !shortName ? longName : shortName.trim();
     }
     abstract getFileExtension(isModel: boolean);
     abstract generateObject(objectInput: EditorObjectInput): void;
