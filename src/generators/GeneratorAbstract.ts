@@ -131,7 +131,10 @@ export abstract class GeneratorAbstract {
         }
         let shortName = '';
         try {
-            shortName = controllerPath.path.split(controllerPath.controller).slice(1).join(controllerPath.controller).replace(cleanRegex, '');
+            shortName = controllerPath.path.split('?')[0];
+            shortName = shortName.toLowerCase().startsWith('/api') ? shortName.substring(4) : shortName;
+            shortName = shortName.split(controllerPath.controller).slice(1).join(controllerPath.controller);
+            shortName = shortName.replace(cleanRegex, '');
             shortName = capitalize(shortName);
             shortName = shortName[0].toLowerCase() + shortName.substr(1);
         } catch {}
