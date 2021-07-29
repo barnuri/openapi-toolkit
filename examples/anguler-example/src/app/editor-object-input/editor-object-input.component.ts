@@ -1,5 +1,5 @@
 import { Component, OnInit, Output, EventEmitter, Input, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
-import { objectGetSelectedSwitchable, EditorObjectInput, objectSetSelectedSwitchable, ChangesModel } from 'openapi-tools';
+import { objectGetSelectedSwitchable, EditorObjectInput, objectSetSelectedSwitchable, ChangesModel } from 'openapi-toolkit';
 
 @Component({
     selector: 'app-editor-object-input',

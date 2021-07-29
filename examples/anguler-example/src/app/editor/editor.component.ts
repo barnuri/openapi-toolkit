@@ -1,5 +1,5 @@
 import { Component, OnInit, Input, Output, EventEmitter, OnChanges, ChangeDetectionStrategy } from '@angular/core';
-import { Editor, ChangesModel } from 'openapi-tools';
+import { Editor, ChangesModel } from 'openapi-toolkit';
 
 @Component({
     selector: 'app-editor',

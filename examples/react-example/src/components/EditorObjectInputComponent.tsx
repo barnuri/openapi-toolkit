@@ -1,4 +1,4 @@
-import { EditorObjectInput, objectGetSelectedSwitchable, objectSetSelectedSwitchable } from 'openapi-tools';
+import { EditorObjectInput, objectGetSelectedSwitchable, objectSetSelectedSwitchable } from 'openapi-toolkit';
 import * as React from 'react';
 import EditorInputComponent from './EditorInputComponent';
 import EditorProps from './EditorProps';

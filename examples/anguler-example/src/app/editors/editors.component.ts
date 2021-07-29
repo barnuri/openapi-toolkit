@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { ChangesModelDefaultValue, Editor, getEditor, OpenApiDocument } from 'openapi-tools';
-import openapiSchemaExample from 'openapi-tools/src/openapiSchemaExample2.json';
+import { ChangesModelDefaultValue, Editor, getEditor, OpenApiDocument } from 'openapi-toolkit';
+import openapiSchemaExample from 'openapi-toolkit/src/openapiSchemaExample2.json';
 
 @Component({
     selector: 'app-editors',

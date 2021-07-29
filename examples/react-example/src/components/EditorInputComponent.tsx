@@ -1,4 +1,4 @@
-import { EditorArrayInput, EditorInput, EditorObjectInput, EditorPrimitiveInput } from 'openapi-tools';
+import { EditorArrayInput, EditorInput, EditorObjectInput, EditorPrimitiveInput } from 'openapi-toolkit';
 import * as React from 'react';
 import EditorArrayInputComponent from './EditorArrayInputComponent';
 import EditorPrimitiveInputComponent from './EditorPrimitiveInputComponent';

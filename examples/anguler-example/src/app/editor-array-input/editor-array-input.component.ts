@@ -11,7 +11,7 @@ import {
     arrayOriginalItemsCount,
     arrayAddItem,
     arrayItemsCount,
-} from 'openapi-tools';
+} from 'openapi-toolkit';
 
 @Component({
     selector: 'app-editor-array-input',

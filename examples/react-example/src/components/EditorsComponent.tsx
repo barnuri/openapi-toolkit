@@ -1,4 +1,4 @@
-import { ChangesModel, ChangesModelDefaultValue, Editor } from 'openapi-tools';
+import { ChangesModel, ChangesModelDefaultValue, Editor } from 'openapi-toolkit';
 import * as React from 'react';
 import EditorComponent from './EditorComponent';
 

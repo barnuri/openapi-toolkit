@@ -1,4 +1,4 @@
-import { ChangesModel } from 'openapi-tools';
+import { ChangesModel } from 'openapi-toolkit';
 
 export default interface EditorProps {
     changes: ChangesModel;

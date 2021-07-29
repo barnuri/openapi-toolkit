@@ -1,5 +1,5 @@
 import { Component, OnInit, OnChanges, Input, EventEmitter, Output, ChangeDetectionStrategy } from '@angular/core';
-import { EditorPrimitiveInput, primitiveSetValue, primitiveGetValue, ChangesModel } from 'openapi-tools';
+import { EditorPrimitiveInput, primitiveSetValue, primitiveGetValue, ChangesModel } from 'openapi-toolkit';
 @Component({
     selector: 'app-editor-primitive-input',
     templateUrl: './editor-primitive-input.component.html',

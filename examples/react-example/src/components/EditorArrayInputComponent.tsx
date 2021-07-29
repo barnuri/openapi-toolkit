@@ -1,4 +1,4 @@
-import { arrayAddItem, arrayChildModifyIndex, arrayDeleteItem, arrayGetIndexes, arrayIsItemDeleted, EditorArrayInput } from 'openapi-tools';
+import { arrayAddItem, arrayChildModifyIndex, arrayDeleteItem, arrayGetIndexes, arrayIsItemDeleted, EditorArrayInput } from 'openapi-toolkit';
 import * as React from 'react';
 import EditorInputComponent from './EditorInputComponent';
 import EditorProps from './EditorProps';

@@ -1,4 +1,4 @@
-import { EditorPrimitiveInput, primitiveGetValue, primitiveSetValue } from 'openapi-tools';
+import { EditorPrimitiveInput, primitiveGetValue, primitiveSetValue } from 'openapi-toolkit';
 import EditorProps from './EditorProps';
 
 type CompType = React.FC<EditorProps & { primitiveInput: EditorPrimitiveInput }>;
