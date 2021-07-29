@@ -84,7 +84,7 @@ export function changesGetPathValueByPath(_changes: ChangesModel, _value: any, p
         return { pathValue: defaultValue ?? '', isUnset: true };
     }
 
-    const pathValue = changes.$set[path] ?? jsonPath(value, '$.' + path)[0];
+    const pathValue = changes.$set[path] ?? jsonPath(value, '$.' + path);
     // object dont have props or array dont have new items
     let isUnset = Object.keys(changes.$set).filter(key => key.startsWith(path)).length <= 0;
     // value is empty or unset in changes

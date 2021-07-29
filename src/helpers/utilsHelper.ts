@@ -56,9 +56,9 @@ function my_json_path(json: any, jpath_expression: string): any {
 
 export function jsonPath(json: any, jpath_expression: string): any {
     try {
-        return my_json_path(json, jpath_expression);
+        return my_json_path(json, jpath_expression.toString());
     } catch {
-        return JSONPath.JSONPath({ json, path: jpath_expression });
+        return JSONPath.JSONPath({ json, path: jpath_expression })[0];
     }
 }
 

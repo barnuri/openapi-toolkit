@@ -17,7 +17,7 @@ export function objectGetSelectedSwitchable(objectInput: EditorObjectInput, _val
     value = value || {};
     changes = changes || ChangesModelDefaultValue;
     const jpath = objectInput.path + '._t';
-    return changes.$set[jpath] ?? jsonPath(value, jpath)[0] ?? '';
+    return changes.$set[jpath] ?? jsonPath(value, jpath) ?? '';
 }
 
 export function objectGetDictionaryKeys(objectInput: EditorObjectInput, _value: any, _changes: ChangesModel): string[] {
@@ -25,7 +25,7 @@ export function objectGetDictionaryKeys(objectInput: EditorObjectInput, _value: 
     let value = cloneHelper(_value || {});
     value = value || {};
     changes = changes || ChangesModelDefaultValue;
-    const existingKeys = Object.keys(jsonPath(value, objectInput.path)[0] || {});
+    const existingKeys = Object.keys(jsonPath(value, objectInput.path) || {});
     const newKeys = changes.dictNewKeys[objectInput.path] || [];
     const deletedKeys = Object.keys(changes.$unset)
         .filter(x => x.startsWith(objectInput.path + '.'))

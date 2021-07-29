@@ -90,7 +90,7 @@ export function arrayKeyPrefix(i: number, arrayInput: EditorArrayInput): string 
 }
 
 export function arrayOriginalItemsCount(arrayInput: EditorArrayInput, value: any): number {
-    return ((jsonPath(value, '$.' + arrayPath(arrayInput))[0] as any[]) || []).length;
+    return ((jsonPath(value, '$.' + arrayPath(arrayInput)) as any[]) || []).length;
 }
 
 export function arrayPath(arrayInput: EditorArrayInput): string {
@@ -124,7 +124,7 @@ export function arrayItemOrderInArray(arrayInput: EditorArrayInput, _changes: Ch
     value = value || {};
     changes = changes || ChangesModelDefaultValue;
     const jpath = arrayItemOrderPath(arrayInput, index);
-    return changes.$set[jpath] ?? jsonPath(value, jpath)[0] ?? index;
+    return changes.$set[jpath] ?? jsonPath(value, jpath) ?? index;
 }
 
 export function setArrayOrder(arrayInput: EditorArrayInput, _changes: ChangesModel, _value: any, index: number, order: number): ChangesModel {
@@ -136,7 +136,7 @@ export function setArrayOrder(arrayInput: EditorArrayInput, _changes: ChangesMod
     //fill order props for missing items
     for (const index of arrayGetIndexes(arrayInput, changes, value)) {
         const jpath = arrayItemOrderPath(arrayInput, index);
-        const orderVal = changes.$set[jpath] ?? jsonPath(value, jpath)[0];
+        const orderVal = changes.$set[jpath] ?? jsonPath(value, jpath);
         if (!orderVal && orderVal != 0) {
             changes.$set[jpath] = arrayItemOrderInArray(arrayInput, changes, value, index);
         }
