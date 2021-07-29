@@ -17,4 +17,5 @@ tsconfig.json
 tsconfig-test.json
 nodemon.json
 .gitignore
+node_modules
 .vscode
