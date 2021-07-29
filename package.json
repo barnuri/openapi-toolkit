@@ -29,10 +29,8 @@
     },
     "dependencies": {
         "axios": "^0.21.1",
-        "jsonpath": "^1.1.0",
         "jsonpath-plus": "^5.0.2",
         "rimraf": "^3.0.2",
-        "simple-jsonpath": "^1.0.1",
         "yargs": "^16.2.0"
     },
     "devDependencies": {

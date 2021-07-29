@@ -1,5 +1,7 @@
 const reISO = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2}(?:\.\d*))(?:Z|(\+|-)([\d|:]*))?$/;
 const reMsAjax = /^\/Date\((d|-|.*)\)[\/|\\]$/;
+import JSONPath = require('jsonpath-plus');
+
 const dateParser = function (key, value) {
     try {
         if (typeof value === 'string') {
@@ -22,18 +24,41 @@ export function cloneHelper<T>(value: T): T {
     return JSON.parse(JSON.stringify(value), dateParser);
 }
 
-export function jsonPath(json: any, path: string): any {
-    try {
-        const JSONPath = require('jsonpath-plus');
-        return JSONPath({ json, path });
-    } catch {
-        try {
-            var jp = require('simple-jsonpath');
-            return jp.query(json, path);
-        } catch {
-            var jp = require('jsonpath');
-            return jp.query(json, path);
+function my_json_path(json: any, jpath_expression: string): any {
+    const propsNames = jpath_expression.replace('$.', '').split('.');
+    let currentPoint = json;
+    for (const propName of propsNames) {
+        let modifiedPropName = propName;
+        // handle list
+        if (modifiedPropName.includes('[') && modifiedPropName.includes(']')) {
+            while (modifiedPropName.includes('[') && modifiedPropName.includes(']')) {
+                const endOfPropName = modifiedPropName.indexOf('[');
+                const endOfArrayIndex = modifiedPropName.indexOf(']');
+                const arrayIndex = +modifiedPropName.substring(endOfPropName + 1, endOfArrayIndex);
+                modifiedPropName = modifiedPropName.substring(0, endOfPropName);
+                currentPoint = currentPoint.get(modifiedPropName);
+                if (currentPoint == undefined || Array.isArray(currentPoint) || (currentPoint as any[]).length < arrayIndex + 1) {
+                    return undefined;
+                }
+                currentPoint = currentPoint[arrayIndex];
+            }
         }
+        // prop without list
+        else {
+            currentPoint = currentPoint[modifiedPropName];
+            if (!currentPoint) {
+                return currentPoint;
+            }
+        }
+    }
+    return currentPoint;
+}
+
+export function jsonPath(json: any, jpath_expression: string): any {
+    try {
+        return my_json_path(json, jpath_expression);
+    } catch {
+        return JSONPath.JSONPath({ json, path: jpath_expression });
     }
 }
 
