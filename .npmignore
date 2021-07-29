@@ -4,7 +4,6 @@ src
 *.ts
 !**/*.d.ts
 !*.d.ts
-package-lock.json
 tslint.json
 tsconfig.json
 .prettierrc
@@ -18,5 +17,4 @@ tsconfig.json
 tsconfig-test.json
 nodemon.json
 .gitignore
-node_modules
 .vscode
