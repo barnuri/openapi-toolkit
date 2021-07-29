@@ -1,5 +1,6 @@
 src
 **/*.ts
+**/*.json
 *.ts
 !**/*.d.ts
 !*.d.ts
@@ -13,3 +14,9 @@ openapiSchemaExample.json
 openapiSchemaExample.result.json
 openapiSchemaExample.html
 examples
+tsconfig.json
+tsconfig-test.json
+nodemon.json
+.gitignore
+node_modules
+.vscode
