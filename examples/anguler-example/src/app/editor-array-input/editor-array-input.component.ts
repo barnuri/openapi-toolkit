@@ -11,7 +11,7 @@ import {
     arrayOriginalItemsCount,
     arrayAddItem,
     arrayItemsCount,
-} from 'openapi-definition-to-editor';
+} from 'openapi-tools';
 
 @Component({
     selector: 'app-editor-array-input',
@@ -30,23 +30,23 @@ export class EditorArrayInputComponent {
     insertText = '';
     getIndexes = () => {
         return arrayGetIndexes(this.arrayInput, this.changes, this.value);
-    }
+    };
     modifyIndex = (index: number) => {
         return arrayChildModifyIndex(index, this.arrayInput);
-    }
+    };
     deleteItem = (index: number) => {
         const res = arrayDeleteItem(index, this.changes, this.value, this.arrayInput);
         this.setChanges.emit(res);
-    }
+    };
     isItemDeleted = (index: number) => {
         return arrayIsItemDeleted(this.arrayInput, this.value, this.changes, index);
-    }
+    };
     isNewItem = (index: number) => {
         return index > arrayOriginalItemsCount(this.arrayInput, this.value) - 1;
-    }
+    };
     addObjectItem = () => {
         this.setChanges.emit(arrayAddItem(this.arrayInput, this.changes, this.value));
-    }
+    };
     addItem = event => {
         const insertedText = event.currentTarget.value;
         if (insertedText === '') {
@@ -59,10 +59,10 @@ export class EditorArrayInputComponent {
         changes = changesSetValue(insertedText, changes, key);
         this.setChanges.emit(changes);
         event.currentTarget.value = '';
-    }
+    };
     isCurrentlyEmpty = () => {
         const indexes = this.getIndexes();
         const editorDeletedItems = indexes.filter(index => arrayIsItemDeleted(this.arrayInput, this.value, this.changes, index)).length;
         return indexes.length - editorDeletedItems <= 0;
-    }
+    };
 }

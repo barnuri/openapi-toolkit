@@ -1,4 +1,4 @@
-import { Editor } from 'openapi-definition-to-editor';
+import { Editor } from 'openapi-tools';
 import * as React from 'react';
 import EditorInputComponent from './EditorInputComponent';
 import EditorProps from './EditorProps';

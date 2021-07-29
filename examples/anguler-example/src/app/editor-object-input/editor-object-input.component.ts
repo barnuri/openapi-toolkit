@@ -1,11 +1,11 @@
 import { Component, OnInit, Output, EventEmitter, Input, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
-import { objectGetSelectedSwitchable, EditorObjectInput, objectSetSelectedSwitchable, ChangesModel } from 'openapi-definition-to-editor';
+import { objectGetSelectedSwitchable, EditorObjectInput, objectSetSelectedSwitchable, ChangesModel } from 'openapi-tools';
 
 @Component({
     selector: 'app-editor-object-input',
     templateUrl: './editor-object-input.component.html',
     styleUrls: ['./editor-object-input.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class EditorObjectInputComponent implements OnInit {
     @Output() onDelete = new EventEmitter<void>();

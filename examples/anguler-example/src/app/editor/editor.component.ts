@@ -1,11 +1,11 @@
 import { Component, OnInit, Input, Output, EventEmitter, OnChanges, ChangeDetectionStrategy } from '@angular/core';
-import { Editor, ChangesModel } from 'openapi-definition-to-editor';
+import { Editor, ChangesModel } from 'openapi-tools';
 
 @Component({
     selector: 'app-editor',
     templateUrl: './editor.component.html',
     styleUrls: ['./editor.component.css'],
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class EditorComponent {
     @Input() editor: Editor;

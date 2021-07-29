@@ -1,5 +1,5 @@
 {
-    "name": "openapi-definition-to-editor",
+    "name": "openapi-tools",
     "version": "2.0.2",
     "description": "generation of API client libraries (SDK generation)",
     "main": "./dist/index.js",
@@ -13,19 +13,19 @@
         "preupload": "rimraf dist && tsc",
         "upload": "npm version patch && npm publish",
         "postupload": "git push",
-        "test:typescript": "tsc && openapi-definition-generate -i ./src/openapiSchemaExample.json -g typescript-axios -o ./test --modelNamePrefix My --modelNameSuffix .dto.test && tsc --build tsconfig-test.json",
-        "test:csharp": "tsc && openapi-definition-generate -i ./src/openapiSchemaExample.json -g c# -o ./test-csharp --modelNamePrefix My",
-        "test:python": "tsc && openapi-definition-generate -i ./src/openapiSchemaExample.json -g python -o ./test-python --modelNamePrefix My --modelNameSuffix .dto.test"
+        "test:typescript": "tsc && openapi-tools -i ./src/openapiSchemaExample.json -g typescript-axios -o ./test --modelNamePrefix My --modelNameSuffix .dto.test && tsc --build tsconfig-test.json",
+        "test:csharp": "tsc && openapi-tools -i ./src/openapiSchemaExample.json -g c# -o ./test-csharp --modelNamePrefix My",
+        "test:python": "tsc && openapi-tools -i ./src/openapiSchemaExample.json -g python -o ./test-python --modelNamePrefix My --modelNameSuffix .dto.test"
     },
     "bin": {
-        "openapi-definition-generate": "./dist/cli-generate.js"
+        "openapi-tools": "./dist/cli-generate.js"
     },
     "author": "Bar Nuri",
     "license": "ISC",
-    "homepage": "https://github.com/barnuri/openapi-definition-to-editor",
+    "homepage": "https://github.com/barnuri/openapi-tools",
     "repository": {
         "type": "git",
-        "url": "https://github.com/barnuri/openapi-definition-to-editor"
+        "url": "https://github.com/barnuri/openapi-tools"
     },
     "dependencies": {
         "axios": "^0.21.1",

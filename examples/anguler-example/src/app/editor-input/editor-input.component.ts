@@ -1,5 +1,5 @@
 import { Component, OnInit, OnChanges, Input, Output, EventEmitter, ChangeDetectionStrategy } from '@angular/core';
-import { EditorInput, ChangesModel } from 'openapi-definition-to-editor';
+import { EditorInput, ChangesModel } from 'openapi-tools';
 
 @Component({
     selector: 'app-editor-input',
@@ -35,7 +35,7 @@ import { EditorInput, ChangesModel } from 'openapi-definition-to-editor';
             (setChanges)="setChanges.emit($event)"
         ></app-editor-object-input>
     `,
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class EditorInputComponent {
     @Input() editorInput: EditorInput;

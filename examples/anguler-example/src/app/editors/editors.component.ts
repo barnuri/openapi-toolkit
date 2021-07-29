@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { ChangesModelDefaultValue, Editor, getEditor, OpenApiDocument } from 'openapi-definition-to-editor';
-import openapiSchemaExample from 'openapi-definition-to-editor/src/openapiSchemaExample2.json';
+import { ChangesModelDefaultValue, Editor, getEditor, OpenApiDocument } from 'openapi-tools';
+import openapiSchemaExample from 'openapi-tools/src/openapiSchemaExample2.json';
 
 @Component({
     selector: 'app-editors',
@@ -13,7 +13,7 @@ export class EditorsComponent implements OnInit {
     value: any;
     changes: any;
     ngOnInit(): void {
-        this.editors = ['DeepMappingSettings'].map(tabName => getEditor((openapiSchemaExample as any) as OpenApiDocument, tabName));
+        this.editors = ['DeepMappingSettings'].map(tabName => getEditor(openapiSchemaExample as any as OpenApiDocument, tabName));
         this.value = {};
         this.changes = ChangesModelDefaultValue;
         console.log(this.editors);

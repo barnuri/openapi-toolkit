@@ -1,7 +1,7 @@
 # Install
 
 ```bash
-npm i openapi-definition-to-editor
+npm i openapi-tools
 ```
 
 # Examples
@@ -20,14 +20,14 @@ npm i openapi-definition-to-editor
 
 ## Download this file
 
-https://raw.githubusercontent.com/barnuri/openapi-definition-to-editor/master/src/openapiSchemaExample.json
+https://raw.githubusercontent.com/barnuri/openapi-tools/master/src/openapiSchemaExample.json
 
 ### Then use this code
 
 ```js
 import { writeFileSync } from 'fs';
 import openapiSchemaExample from './openapiSchemaExample.json';
-import { editorInputToHtml, getEditor, OpenApiDocument } from 'openapi-definition-to-editor';
+import { editorInputToHtml, getEditor, OpenApiDocument } from 'openapi-tools';
 
 const editors = ['Order', 'User', 'Category', 'Tag', 'Pet', 'ApiResponse'].map(tabName => getEditor((openapiSchemaExample as any) as OpenApiDocument, tabName));
 const html = editorInputToHtml(editors);
@@ -40,12 +40,12 @@ require('child_process').exec(start + ' ' + './openapiSchemaExample.html');
 
 ### Result
 
-![Example](https://github.com/barnuri/openapi-definition-to-editor/blob/master/ex.png?raw=true)
+![Example](https://github.com/barnuri/openapi-tools/blob/master/ex.png?raw=true)
 
 # Auto Generate Client/Server (Cli)
 
 ```bash
-npm i -g openapi-definition-to-editor
+npm i -g openapi-tools
 
 # example
 openapi-definition-generate -i https://petstore3.swagger.io/api/v3/openapi.json -g typescript-axios -o ./src/services/petStore --modelNamePrefix My --modelNameSuffix .dto

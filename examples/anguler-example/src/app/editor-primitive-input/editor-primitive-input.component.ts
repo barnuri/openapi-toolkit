@@ -1,5 +1,5 @@
 import { Component, OnInit, OnChanges, Input, EventEmitter, Output, ChangeDetectionStrategy } from '@angular/core';
-import { EditorPrimitiveInput, primitiveSetValue, primitiveGetValue, ChangesModel } from 'openapi-definition-to-editor';
+import { EditorPrimitiveInput, primitiveSetValue, primitiveGetValue, ChangesModel } from 'openapi-tools';
 @Component({
     selector: 'app-editor-primitive-input',
     templateUrl: './editor-primitive-input.component.html',
@@ -22,5 +22,5 @@ export class EditorPrimitiveInputComponent implements OnInit {
 
     setValue = newVal => {
         this.setChanges.emit(primitiveSetValue(newVal, this.changes, this.primitiveInput));
-    }
+    };
 }
