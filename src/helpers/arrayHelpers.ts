@@ -60,6 +60,9 @@ export function arrayDeleteItem(index: number, _changes: ChangesModel, _value: a
 }
 
 export function arrayItemsCount(_arrayInput: EditorArrayInput, _value: any, _changes: ChangesModel): number {
+    if (!_arrayInput) {
+        return 0;
+    }
     let changes = cloneHelper(_changes || ChangesModelDefaultValue);
     const arrayInput = cloneHelper(_arrayInput || {});
     let value = cloneHelper(_value || {});
@@ -76,11 +79,11 @@ export function arrayItemsCount(_arrayInput: EditorArrayInput, _value: any, _cha
     const regex = new RegExp(arrayPath(arrayInput) + '\\.(\\d+).*');
     const newIndexes = [
         -1,
-        ...Object.keys(changes.$set)
+        ...Object.keys(changes.$set || [])
             .map(key => +(regex.exec(key) || [])[1])
             .filter(x => !Number.isNaN(x)),
     ];
-    const maxNewIndex = Math.max(...newIndexes);
+    const maxNewIndex = newIndexes.sort((a, b) => b - a)[0];
     const newIndexesNumber = maxNewIndex > originalItemsCount - 1 ? maxNewIndex - (originalItemsCount - 1) : 0;
     return originalItemsCount + newIndexesNumber;
 }

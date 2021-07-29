@@ -4,6 +4,7 @@ src
 **/*.ts
 !**/*.d.ts
 !*.d.ts
+!tsconfig.json
 **/debug.log
 examples
 .gitignore

@@ -1,37 +1,39 @@
 import { ChangesModelDefaultValue, ClientGenerators } from './models';
 import { writeFileSync } from 'fs';
 import openapiSchemaExample from './openapiSchemaExample.json';
-// import value from './value.json';
+import value from './value.json';
 
-import { editorInputToHtml, getEditor, OpenApiDocument, getDefinisions, generate } from './index';
-import { changesGetPathValue, changesUnsetPathValue, editorFilterUnkownPaths, findPropsByValue, getBulkWrite } from './helpers';
+import { editorInputToHtml, getEditor, OpenApiDocument, getDefinisions, generate, arrayGetIndexes } from './index';
+import { arrayItemsCount, changesGetPathValue, changesUnsetPathValue, editorFilterUnkownPaths, findPropsByValue, getBulkWrite } from './helpers';
 import GeneratorsOptions from './models/GeneratorsOptions';
 
 // const propsPaths = findPropsByValue(value, 'title');
-const openApiDoc = (openapiSchemaExample as any) as OpenApiDocument;
+const openApiDoc = openapiSchemaExample as any as OpenApiDocument;
 // const definisions = getDefinisions(openApiDoc);
 const editors = [
-    // 'CrawlerBaseConfig',
+    'BaseConfig',
     'ShallowMappingSettings',
-    // 'DeepMappingSettings',
-    // 'IndexingSettings',
-    // 'ParsingSettingsConfig',
-    // 'ImagesManagerConfig',
-    // 'CrawlingSettings',
-    // 'WebAuthenticationTemplateConfig',
-    // 'BrowserBaseAuthenticationConfig',
-    // 'WebDriverRequestSettings',
-    // 'CrawlerSelectors',
-    // 'NewOnlyMappingSettings',
+    'DeepMappingSettings',
+    'IndexingSettings',
+    'ParsingSettingsConfig',
+    'ImagesManagerConfig',
+    'CrawlingSettings',
+    'WebAuthenticationTemplateConfig',
+    'BrowserBaseAuthenticationConfig',
+    'WebDriverRequestSettings',
+    'CrawlerSelectors',
+    'NewOnlyMappingSettings',
 ].map(tabName => getEditor(openApiDoc, tabName));
-const obj = editors.find(x => x.name === 'ShallowMappingSettings')?.inputs; //?.inputs.find(x => x.path === 'topicKeySelector');
+const obj = editors.find(x => x.name === 'BaseConfig')?.inputs; //?.inputs.find(x => x.path === 'topicKeySelector');
 const ccb = 1;
-
-generate({
-    ...new GeneratorsOptions(),
-    pathOrUrl: 'http://crawlers-local.ke-la.com:3000/api/swagger/swagger.json',
-    output: './dist/test1',
-});
+const obj2 = obj?.find(x => x.editorType === 'EditorArrayInput' && x.path == 'monitorGroups[i]');
+const a = arrayGetIndexes(obj2 as any, ChangesModelDefaultValue, value);
+const b = a;
+// generate({
+//     ...new GeneratorsOptions(),
+//     pathOrUrl: 'http://crawlers-local.ke-la.com:3000/api/swagger/swagger.json',
+//     output: './dist/test1',
+// });
 
 // let res = {};
 // for (const editor of editors) {
