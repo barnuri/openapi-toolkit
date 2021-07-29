@@ -55,7 +55,7 @@ export function getAllEditorInputsByEditors(editors: Editor[]): EditorInput[] {
 }
 
 export function getAllEditorInputsByInput(editorInput: EditorInput): EditorInput[] {
-    if(!editorInput) {
+    if (!editorInput) {
         return [];
     }
     let allEditors: EditorInput[] = [];
@@ -95,7 +95,8 @@ const fixPathForArraies = (fieldKey: string): string => {
     if (!fieldKey) {
         return '';
     }
-    const indexesStr = [...fieldKey.matchAll(/\.\d+/g)]
+    const regex = new RegExp(/\.\d+/g);
+    const indexesStr = [...(regex.exec(fieldKey) || [])]
         ?.map(x => (x.length > 0 ? x[0].replace('.', '') : ''))
         .filter(x => x)
         .join('-');
