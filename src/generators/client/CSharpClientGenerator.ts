@@ -24,17 +24,26 @@ using System.Threading.Tasks;
     generateClient(): void {
         const controllerPropsNames = this.controllersNames.map(x => this.getControllerName(x));
         const controllerProps = controllerPropsNames.map(x => `\tpublic ${x} ${x} { get; private set; }`).join('\n') + '\n';
-        const controllerPropsCtor = controllerPropsNames.map(x => `\t\t${x} = new ${x} { HttpClient = HttpClient };`).join('\n') + '\n';
+        const controllerPropsCtor = controllerPropsNames.map(x => `\t\t${x} = new ${x} { HttpClient = HttpClient, JsonSerializerSettings = JsonSerializerSettings };`).join('\n') + '\n';
 
         let mainFileContent = `
 public class Client
 {
     public HttpClient HttpClient { get; set; }
+    public JsonSerializerSettings JsonSerializerSettings { get; set; }
 ${controllerProps}
 
-    public Client(HttpClient? httpClient = null)
+    public Client(HttpClient? httpClient = null, JsonSerializerSettings? jsonSerializerSettings = null)
     {
         HttpClient = httpClient ?? new HttpClient();
+        var defaultJsonSerializerSettings = new JsonSerializerSettings
+        {
+            TypeNameHandling = TypeNameHandling.Objects,
+            StringEscapeHandling = StringEscapeHandling.EscapeNonAscii,
+            NullValueHandling = NullValueHandling.Ignore
+        };
+        defaultJsonSerializerSettings.Converters.Add(new Newtonsoft.Json.Converters.StringEnumConverter());
+        JsonSerializerSettings = jsonSerializerSettings ?? defaultJsonSerializerSettings;
 ${controllerPropsCtor}
     }
 }`;
@@ -187,14 +196,13 @@ ${Object.keys(enumVals)
         const baseControllerContent = `public class BaseController
 {
     public HttpClient HttpClient { get; set; } = new HttpClient();
-
-    protected async Task<S> Method<T, S>(string method, string path, T? body, Dictionary<string, string?> headers) where T : class
+    public JsonSerializerSettings JsonSerializerSettings { get; set; }
+    protected async Task<S?> Method<T, S>(string method, string path, T? body, Dictionary<string, string?> headers) where T : class
     {
-        var json = await Method(method, path, body, headers);
-        var res = JsonConvert.DeserializeObject<S>(json);
+        var json = await Method(method, path, body, headers) ?? string.Empty;
+        var res = JsonConvert.DeserializeObject<S>(json, JsonSerializerSettings);
         return res;
     }
-
     protected async Task<string?> Method<T>(string method, string path, T? body, Dictionary<string, string?>? headers) where T : class
     {
         var req = new HttpRequestMessage
