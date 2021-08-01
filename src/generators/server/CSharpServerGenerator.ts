@@ -24,7 +24,7 @@ export class CSharpServerGenerator extends CSharpClientGenerator {
         writeFileSync(controllerFile, '\n' + this.addNamespace(controllerContent));
     }
     generateControllerMethodContent(controller: string, controllerPath: ApiPath): string {
-        const methodName = capitalize(this.getMethodName(controllerPath));
+        const methodName = capitalize(this.getMethodName(controllerPath)) + 'Async';
         let requestType = controllerPath.body.haveBody ? this.getPropDesc(controllerPath.body.schema) : 'object';
         const responseType = this.getPropDesc(controllerPath.response);
         const bodyParam = controllerPath.body.haveBody ? `[FromBody] ${requestType}${!controllerPath.body.required ? `?` : ''} body, ` : '';
