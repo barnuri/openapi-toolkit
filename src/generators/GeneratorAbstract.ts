@@ -90,7 +90,7 @@ export abstract class GeneratorAbstract {
         return this.shouldGenerateFile(modelFile);
     }
     shouldGenerateFile(path: string) {
-        if (this.generatedFiles.filter(x => x.toLowerCase() === path.toLowerCase())) {
+        if (this.generatedFiles.filter(x => x.toLowerCase() === path.toLowerCase()).length > 0) {
             return false;
         }
         this.generatedFiles.push(path);

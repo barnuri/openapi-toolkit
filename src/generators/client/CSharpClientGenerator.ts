@@ -192,9 +192,6 @@ ${Object.keys(enumVals)
     }
     generateBaseController() {
         const controllerBaseFile = join(this.options.output, 'BaseController.cs');
-        if (!this.shouldGenerateFile(controllerBaseFile)) {
-            return;
-        }
         const baseControllerContent = `public class BaseController
 {
     public HttpClient HttpClient { get; set; } = new HttpClient();
