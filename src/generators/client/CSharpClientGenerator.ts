@@ -177,7 +177,7 @@ ${Object.keys(enumVals)
         let methodContent = '';
         // method one
         methodContent += `\tpublic Task<${responseType}?> ${methodName}(${methodParams}) \n\t{\n`.replace(', )', ')');
-        methodContent += `\t\treturn Method<${requestType},${responseType}>(\n`;
+        methodContent += `\t\treturn Method<${requestType},${responseType}?>(\n`;
         methodContent += methodCommonText;
 
         // method two
