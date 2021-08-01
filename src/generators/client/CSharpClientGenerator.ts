@@ -24,7 +24,9 @@ using System.Threading.Tasks;
     generateClient(): void {
         const controllerPropsNames = this.controllersNames.map(x => this.getControllerName(x));
         const controllerProps = controllerPropsNames.map(x => `\tpublic ${x} ${x} { get; private set; }`).join('\n') + '\n';
-        const controllerPropsCtor = controllerPropsNames.map(x => `\t\t${x} = new ${x} { HttpClient = HttpClient, JsonSerializerSettings = JsonSerializerSettings };`).join('\n') + '\n';
+        const controllerPropsCtor =
+            controllerPropsNames.map(x => `\t\t${x} = new ${x} { HttpClient = HttpClient, JsonSerializerSettings = JsonSerializerSettings };`).join('\n') +
+            '\n';
 
         let mainFileContent = `
 public class Client
@@ -132,7 +134,7 @@ ${Object.keys(enumVals)
         writeFileSync(controllerFile, '\n' + this.addNamespace(controllerContent));
     }
     generateControllerMethodContent(controller: string, controllerPath: ApiPath): string {
-        const methodName = this.getMethodName(controllerPath);
+        const methodName = capitalize(this.getMethodName(controllerPath));
         let requestType = controllerPath.body.haveBody ? this.getPropDesc(controllerPath.body.schema) : 'object';
         const responseType = this.getPropDesc(controllerPath.response);
         const bodyParam = controllerPath.body.haveBody ? `${requestType}${!controllerPath.body.required ? `?` : ''} body, ` : '';
