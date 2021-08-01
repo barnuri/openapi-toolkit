@@ -22,6 +22,7 @@ using System.Threading.Tasks;
         return usings + '\n#nullable enable' + '\nnamespace ' + this.options.namepsace + '\n{\n\t' + content.replace(/\n/g, '\n\t') + '\n}';
     }
     generateClient(): void {
+        this.generateBaseController();
         const controllerPropsNames = this.controllersNames.map(x => this.getControllerName(x));
         const controllerProps = controllerPropsNames.map(x => `\tpublic ${x} ${x} { get; private set; }`).join('\n') + '\n';
         const controllerPropsCtor =
@@ -124,7 +125,6 @@ ${Object.keys(enumVals)
     }
     generateController(controller: string, controlerPaths: ApiPath[]): void {
         const controllerName = this.getControllerName(controller);
-        this.generateBaseController();
         makeDirIfNotExist(this.controllersFolder);
         let controllerContent = ``;
         controllerContent += `public class ${controllerName} : BaseController \n{\n`;
