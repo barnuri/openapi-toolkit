@@ -1,6 +1,6 @@
 import { EditorArrayInput } from '../../models/editor/EditorArrayInput';
 import { EditorInput } from '../../models/editor/EditorInput';
-import { existsSync, writeFileSync } from 'fs';
+import { writeFileSync } from 'fs';
 import { ApiPath } from '../../models/ApiPath';
 import { join } from 'path';
 import { capitalize, getEditorInput2, makeDirIfNotExist } from '../../helpers';
@@ -182,7 +182,7 @@ ${Object.keys(enumVals)
 
         // method two
         methodContent += `\tpublic Task<T?> ${methodName}Async<T>(${methodParams}) \n\t{\n`.replace(', )', ')');
-        methodContent += `\t\treturn Method<${requestType},T>(\n`;
+        methodContent += `\t\treturn Method<${requestType},T?>(\n`;
         methodContent += methodCommonText;
         // method three
         methodContent += `\tpublic Task<string?> ${methodName}ContentAsync(${methodParams}) \n\t{\n`.replace(', )', ')');
@@ -192,7 +192,7 @@ ${Object.keys(enumVals)
     }
     generateBaseController() {
         const controllerBaseFile = join(this.options.output, 'BaseController.cs');
-        if (existsSync(controllerBaseFile)) {
+        if (!this.shouldGenerateFile(controllerBaseFile)) {
             return;
         }
         const baseControllerContent = `public class BaseController

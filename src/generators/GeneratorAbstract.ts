@@ -1,4 +1,3 @@
-import { existsSync } from 'fs';
 import { EditorInput } from '../models/editor/EditorInput';
 import { fixPath, makeDirIfNotExist } from '../helpers/generatorHelpers';
 import { getAllEditors, getApiPaths, getAllEditorInputsByEditors, capitalize } from '../helpers';
@@ -14,7 +13,7 @@ export abstract class GeneratorAbstract {
     allEditorInputs: EditorInput[];
     modelsFolder = join(this.options.output, this.options.modelsFolderName);
     controllersFolder = join(this.options.output, this.options.controllersFolderName);
-
+    generatedFiles: string[];
     constructor(public swagger: OpenApiDocument, public options: GeneratorsOptions) {
         if (!options.pathOrUrl) {
             throw new Error('pathOrUrl is required');
@@ -36,7 +35,7 @@ export abstract class GeneratorAbstract {
         options.controllerNamePrefix = options.controllerNamePrefix || '';
         options.controllerNameSuffix = options.controllerNameSuffix || '';
         options.namepsace = options.namepsace || '';
-
+        this.generatedFiles = [];
         this.swagger = swagger;
         this.editors = getAllEditors(swagger);
         this.apiPaths = getApiPaths(swagger);
@@ -46,6 +45,7 @@ export abstract class GeneratorAbstract {
     }
     async generate(): Promise<void> {
         console.log('-----  start generating -----');
+        this.generatedFiles = [];
         rimraf.sync(this.options.output);
         makeDirIfNotExist(this.options.output);
         makeDirIfNotExist(this.modelsFolder);
@@ -87,9 +87,13 @@ export abstract class GeneratorAbstract {
     shouldGenerateModel(editorInput: EditorInput) {
         makeDirIfNotExist(this.modelsFolder);
         const modelFile = join(this.modelsFolder, this.getFileName(editorInput) + this.getFileExtension(true));
-        if (existsSync(modelFile)) {
+        return this.shouldGenerateFile(modelFile);
+    }
+    shouldGenerateFile(path: string) {
+        if (this.generatedFiles.filter(x => x.toLowerCase() === path.toLowerCase())) {
             return false;
         }
+        this.generatedFiles.push(path);
         return true;
     }
     getFileName(editorInput: EditorInput) {

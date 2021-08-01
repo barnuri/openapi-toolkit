@@ -1,5 +1,5 @@
 import { TypescriptGenerator } from './../TypescriptGenerator';
-import { appendFileSync, existsSync, writeFileSync } from 'fs';
+import { appendFileSync, writeFileSync } from 'fs';
 import { ApiPath } from '../../models/ApiPath';
 import { join } from 'path';
 import { capitalize, makeDirIfNotExist } from '../../helpers';
@@ -73,7 +73,7 @@ export class TypescriptAxiosClientGenerator extends TypescriptGenerator {
     }
     generateBaseController() {
         const controllerBaseFile = join(this.options.output, 'ControllerBase.ts');
-        if (existsSync(controllerBaseFile)) {
+        if (!this.shouldGenerateFile(controllerBaseFile)) {
             return;
         }
         const baseControllerContent = `import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';

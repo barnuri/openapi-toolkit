@@ -1,7 +1,6 @@
 import { EditorArrayInput } from '../models/editor/EditorArrayInput';
 import { EditorInput } from '../models/editor/EditorInput';
-import { appendFileSync, existsSync, writeFileSync } from 'fs';
-import { ApiPath } from '../models/ApiPath';
+import { appendFileSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import { getEditorInput2 } from '../helpers';
 import { GeneratorAbstract } from './GeneratorAbstract';
@@ -89,7 +88,7 @@ ${Object.keys(enumVals)
     }
     generateBaseController() {
         const controllerBaseFile = join(this.options.output, 'ControllerBase.ts');
-        if (existsSync(controllerBaseFile)) {
+        if (!this.shouldGenerateFile(controllerBaseFile)) {
             return;
         }
         const baseControllerContent = `import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
