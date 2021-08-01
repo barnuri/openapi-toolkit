@@ -207,7 +207,7 @@ ${Object.keys(enumVals)
         var req = new HttpRequestMessage
         {
             Method = new HttpMethod(method),
-            RequestUri = new Uri(path),
+            RequestUri = new Uri(HttpClient.BaseAddress!, path),
             Content = new StringContent(JsonConvert.SerializeObject(body)),
         };
         headers?.Keys.ToList().ForEach(x => req.Headers.TryAddWithoutValidation(x, headers[x]));
