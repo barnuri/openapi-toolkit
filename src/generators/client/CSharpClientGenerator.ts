@@ -26,18 +26,20 @@ using System.Threading.Tasks;
         const controllerPropsNames = this.controllersNames.map(x => this.getControllerName(x));
         const controllerProps = controllerPropsNames.map(x => `\tpublic ${x} ${x} { get; private set; }`).join('\n') + '\n';
         const controllerPropsCtor =
-            controllerPropsNames.map(x => `\t\t${x} = new ${x} { HttpClient = HttpClient, JsonSerializerSettings = JsonSerializerSettings };`).join('\n') +
+            controllerPropsNames.map(x => `\t\t${x} = new ${x} { BaseUrl = BaseUrl, HttpClient = HttpClient, JsonSerializerSettings = JsonSerializerSettings };`).join('\n') +
             '\n';
 
         let mainFileContent = `
 public class Client
 {
+    public string BaseUrl { get; set; }
     public HttpClient HttpClient { get; set; }
     public JsonSerializerSettings JsonSerializerSettings { get; set; }
 ${controllerProps}
 
-    public Client(HttpClient? httpClient = null, JsonSerializerSettings? jsonSerializerSettings = null)
+    public Client(string baseUrl, HttpClient? httpClient = null, JsonSerializerSettings? jsonSerializerSettings = null)
     {
+        BaseUrl = baseUrl;
         HttpClient = httpClient ?? new HttpClient();
         var defaultJsonSerializerSettings = new JsonSerializerSettings
         {
@@ -194,6 +196,7 @@ ${Object.keys(enumVals)
         const controllerBaseFile = join(this.options.output, 'BaseController.cs');
         const baseControllerContent = `public class BaseController
 {
+    public string BaseUrl { get; set; }
     public HttpClient HttpClient { get; set; } = new HttpClient();
     public JsonSerializerSettings JsonSerializerSettings { get; set; }
     protected async Task<S?> Method<T, S>(string method, string path, T? body, Dictionary<string, string?>? headers) where T : class
@@ -207,7 +210,7 @@ ${Object.keys(enumVals)
         var req = new HttpRequestMessage
         {
             Method = new HttpMethod(method),
-            RequestUri = new Uri(HttpClient.BaseAddress!, path),
+            RequestUri = new Uri($"{BaseUrl.TrimEnd('/')}/{path.TrimStart('/')}"),
             Content = new StringContent(JsonConvert.SerializeObject(body)),
         };
         headers?.Keys.ToList().ForEach(x => req.Headers.TryAddWithoutValidation(x, headers[x]));
