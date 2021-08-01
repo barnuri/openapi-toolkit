@@ -134,7 +134,7 @@ ${Object.keys(enumVals)
         writeFileSync(controllerFile, '\n' + this.addNamespace(controllerContent));
     }
     generateControllerMethodContent(controller: string, controllerPath: ApiPath): string {
-        const methodName = capitalize(this.getMethodName(controllerPath)) + 'Async';
+        const methodName = capitalize(this.getMethodName(controllerPath));
         let requestType = controllerPath.body.haveBody ? this.getPropDesc(controllerPath.body.schema) : 'object';
         const responseType = this.getPropDesc(controllerPath.response);
         const bodyParam = controllerPath.body.haveBody ? `${requestType}${!controllerPath.body.required ? `?` : ''} body, ` : '';
@@ -176,16 +176,16 @@ ${Object.keys(enumVals)
 
         let methodContent = '';
         // method one
-        methodContent += `\tpublic Task<${responseType}> ${methodName}(${methodParams}) \n\t{\n`.replace(', )', ')');
+        methodContent += `\tpublic Task<${responseType}?> ${methodName}(${methodParams}) \n\t{\n`.replace(', )', ')');
         methodContent += `\t\treturn Method<${requestType},${responseType}>(\n`;
         methodContent += methodCommonText;
 
         // method two
-        methodContent += `\tpublic Task<T> ${methodName}<T>(${methodParams}) \n\t{\n`.replace(', )', ')');
+        methodContent += `\tpublic Task<T?> ${methodName}Async<T>(${methodParams}) \n\t{\n`.replace(', )', ')');
         methodContent += `\t\treturn Method<${requestType},T>(\n`;
         methodContent += methodCommonText;
         // method three
-        methodContent += `\tpublic Task<string?> ${methodName}Content(${methodParams}) \n\t{\n`.replace(', )', ')');
+        methodContent += `\tpublic Task<string?> ${methodName}ContentAsync(${methodParams}) \n\t{\n`.replace(', )', ')');
         methodContent += `\t\treturn Method<${requestType}>(\n`;
         methodContent += methodCommonText;
         return methodContent;
@@ -199,7 +199,7 @@ ${Object.keys(enumVals)
 {
     public HttpClient HttpClient { get; set; } = new HttpClient();
     public JsonSerializerSettings JsonSerializerSettings { get; set; }
-    protected async Task<S?> Method<T, S>(string method, string path, T? body, Dictionary<string, string?> headers) where T : class
+    protected async Task<S?> Method<T, S>(string method, string path, T? body, Dictionary<string, string?>? headers) where T : class
     {
         var json = await Method(method, path, body, headers) ?? string.Empty;
         var res = JsonConvert.DeserializeObject<S>(json, JsonSerializerSettings);
