@@ -48,10 +48,10 @@ require('child_process').exec(start + ' ' + './openapiSchemaExample.html');
 npm i -g openapi-toolkit
 
 # example
-openapi-definition-generate -i https://petstore3.swagger.io/api/v3/openapi.json -g typescript-axios -o ./src/services/petStore --modelNamePrefix My --modelNameSuffix .dto
+openapi-toolkit -i https://petstore3.swagger.io/api/v3/openapi.json -g typescript-axios -o ./src/services/petStore --modelNamePrefix My --modelNameSuffix .dto
 
 # show all options
-openapi-definition-generate -h
+openapi-toolkit -h
 ```
 
 ### Help output
