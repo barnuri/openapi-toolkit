@@ -46,20 +46,20 @@ ${controllerPropsCtor}
         let controllerContent = ``;
         controllerContent += this.generateControllerMethodsContent(controller, controlerPaths);
         const controllerFile = join(this.controllersFolder, controllerName + this.getFileExtension(false));
-        writeFileSync(controllerFile, '\n' + this.addNamespace(controllerContent));
+        writeFileSync(controllerFile, '\n' + this.addNamespace(controllerContent, ``));
     }
     generateControllerMethodContent(controller: string, controllerPath: ApiPath): string {
         const methodName = capitalize(this.getMethodName(controllerPath));
         let requestType = controllerPath.body.haveBody ? this.getPropDesc(controllerPath.body.schema) : 'interface{}';
         const responseType = this.getPropDesc(controllerPath.response);
-        const bodyParam = controllerPath.body.haveBody ? `${requestType} body, ` : '';
+        const bodyParam = controllerPath.body.haveBody ? `body ${requestType}, ` : '';
         const headers = [...controllerPath.cookieParams, ...controllerPath.headerParams];
         const haveHeaderParams = headers.length > 0;
         const headersParams = haveHeaderParams ? headers.map(x => `string h${capitalize(x.name)}`).join(', ') + `, ` : ``;
         const havePathParams = controllerPath.pathParams.length > 0;
         const pathParams = havePathParams ? controllerPath.pathParams.map(x => `p${capitalize(x.name)} ${this.getPropDesc(x.schema!)}`).join(', ') + ', ' : ``;
         const pathParamsWithoutTypes =
-            controllerPath.pathParams.length > 0 ? controllerPath.pathParams.map(x => `p${capitalize(x.name)}`).join(', ') + ', ' : ``;
+            controllerPath.pathParams.length > 0 ? controllerPath.pathParams.map(x => `string(p${capitalize(x.name)})`).join(', ') + ', ' : ``;
         let url = controllerPath.path;
         for (const pathParam of controllerPath.pathParams) {
             url = url.replace('{' + pathParam.name + '}', `{p${capitalize(pathParam.name)}}`);
@@ -69,7 +69,7 @@ ${controllerPropsCtor}
         const queryParams = haveQueryParams
             ? controllerPath.queryParams.map(x => `q${capitalize(x.name)} ${this.getPropDesc(x.schema!)}`).join(', ') + ', '
             : ``;
-        const queryParamsWithoutTypes = haveQueryParams ? controllerPath.queryParams.map(x => `q${capitalize(x.name)}`).join(', ') + ', ' : ``;
+        const queryParamsWithoutTypes = haveQueryParams ? controllerPath.queryParams.map(x => `string(q${capitalize(x.name)})`).join(', ') + ', ' : ``;
         const methodParams = `${bodyParam}${pathParams}${queryParams}${headersParams}`;
 
         let methodContent = '';
