@@ -5,7 +5,6 @@ import { capitalize, makeDirIfNotExist } from '../../helpers';
 import { GoGenerator } from '../GoGenerator';
 
 export class GoServerGenerator extends GoGenerator {
-    generateClient(): void {}
     generateController(controller: string, controlerPaths: ApiPath[]): void {
         const controllerName = this.getControllerName(controller);
         makeDirIfNotExist(this.controllersFolder);

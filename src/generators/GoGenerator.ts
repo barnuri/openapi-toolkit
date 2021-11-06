@@ -8,11 +8,13 @@ import { EditorObjectInput, EditorPrimitiveInput, OpenApiDefinition } from '../m
 import { camelCase, capitalize } from '../helpers/utilsHelper';
 
 export abstract class GoGenerator extends GeneratorAbstract {
-    modelsNamespace = this.options.namepsace + 'Models';
-    addNamespace(content: string, extraUsing?: string, customNamespace?: string) {
-        customNamespace = customNamespace || this.options.namepsace;
-        extraUsing = extraUsing || '';
-        const usings = `import (
+    generateClient(): void {
+        writeFileSync(this.options.output + '/go.mod', `module ${this.options.namepsace}\n\ngo 1.17`);
+    }
+    addNamespace(content: string, customUsing?: string) {
+        const usings = customUsing
+            ? customUsing
+            : `import (
     "time"
     "context"
     "fmt"
@@ -20,10 +22,11 @@ export abstract class GoGenerator extends GeneratorAbstract {
     "net/url"
     "strings"
     "encoding/json"
-    ${this.modelsNamespace} "../models"
-    ${extraUsing})
+)
+
+var _, _, _, _, _, _, _ = time.ANSIC, fmt.Errorf, context.Canceled, strings.Builder{}, json.Compact, http.Client{}, url.Parse
 `;
-        return 'package ' + customNamespace + '\n\n' + usings + '\n' + content;
+        return 'package ' + this.options.namepsace + '\n\n' + usings + '\n' + content;
     }
     generateObject(objectInput: EditorObjectInput): void {
         if (!this.shouldGenerateModel(objectInput)) {
@@ -35,7 +38,7 @@ ${this.getObjectProps(objectInput)}
 }`
             .trim()
             .replace(/\n\n/, '\n');
-        writeFileSync(modelFile, this.addNamespace(modelFileContent, ``, this.modelsNamespace));
+        writeFileSync(modelFile, this.addNamespace(modelFileContent));
     }
     getObjectProps(objectInput: EditorObjectInput) {
         let props = objectInput.properties
@@ -68,12 +71,12 @@ ${this.getObjectProps(objectInput)}
                 case 'boolean':
                     return 'bool';
                 case 'date':
-                    return 'Time';
+                    return 'time.Time';
                 case 'enum':
                     if (!fileName) {
                         return 'interface{}';
                     }
-                    return `${this.modelsNamespace}.${fileName}Enum`;
+                    return `${fileName}Enum`;
             }
         }
         if (editorInput.editorType === 'EditorArrayInput') {
@@ -86,7 +89,7 @@ ${this.getObjectProps(objectInput)}
                 if (!fileName) {
                     return 'interface{}';
                 }
-                return `${this.modelsNamespace}.${fileName}`;
+                return `${fileName}`;
             }
             return `map[${objectInput.dictionaryKeyInput ? this.getPropDesc(objectInput.dictionaryKeyInput) : 'interface{}'}]${
                 objectInput.dictionaryInput ? this.getPropDesc(objectInput.dictionaryInput) : 'interface{}'
@@ -108,9 +111,9 @@ ${Object.keys(enumVals)
 } {
 ${Object.keys(enumVals)
     .map(x => `\t${x}: ${isNumberEnum ? enumVals[x] : `"${enumVals[x]}"`}`)
-    .join(',\n')}
+    .join(',\n')},
 }`;
-        writeFileSync(modelFile, this.addNamespace(modelFileContent, ``, this.modelsNamespace));
+        writeFileSync(modelFile, this.addNamespace(modelFileContent));
     }
     getFileExtension(isModel: boolean) {
         return '.go';

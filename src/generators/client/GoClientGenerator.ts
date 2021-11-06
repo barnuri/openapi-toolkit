@@ -7,6 +7,7 @@ import { GoGenerator } from '../GoGenerator';
 export class GoClientGenerator extends GoGenerator {
     mainExportFile = join(this.options.output, 'Client.go');
     generateClient(): void {
+        super.generateClient();
         this.generateBaseController();
         const controllerPropsNames = this.controllersNames.map(x => this.getControllerName(x));
         const controllerProps = controllerPropsNames.map(x => `\tpublic ${x} ${x} { get; private set; }`).join('\n') + '\n';
@@ -38,7 +39,8 @@ ${controllerProps}
 ${controllerPropsCtor}
     }
 }`;
-        writeFileSync(this.mainExportFile, 'using System.Net.Http;\n' + this.addNamespace(mainFileContent));
+        mainFileContent = '';
+        writeFileSync(this.mainExportFile, this.addNamespace(mainFileContent));
     }
     generateController(controller: string, controlerPaths: ApiPath[]): void {
         const controllerName = this.getControllerName(controller);
@@ -46,7 +48,7 @@ ${controllerPropsCtor}
         let controllerContent = ``;
         controllerContent += this.generateControllerMethodsContent(controller, controlerPaths);
         const controllerFile = join(this.controllersFolder, controllerName + this.getFileExtension(false));
-        writeFileSync(controllerFile, '\n' + this.addNamespace(controllerContent, ``));
+        writeFileSync(controllerFile, '\n' + this.addNamespace(controllerContent));
     }
     generateControllerMethodContent(controller: string, controllerPath: ApiPath): string {
         const methodName = capitalize(this.getMethodName(controllerPath));
@@ -95,8 +97,8 @@ ${controllerPropsCtor}
         return methodContent;
     }
     generateBaseController() {
-        const controllerBaseFile = join(this.options.output, 'BaseController.cs');
-        const baseControllerContent = `public class BaseController
+        const controllerBaseFile = join(this.options.output, 'BaseController.go');
+        let baseControllerContent = `public class BaseController
 {
     public string BaseUrl { get; set; }
     public HttpClient HttpClient { get; set; } = new HttpClient();
@@ -122,6 +124,7 @@ ${controllerPropsCtor}
         return content;
     }
 }`;
+        baseControllerContent = '';
         writeFileSync(controllerBaseFile, this.addNamespace(baseControllerContent));
     }
 }
