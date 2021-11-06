@@ -2,10 +2,10 @@ import { writeFileSync } from 'fs';
 import { ApiPath } from '../../models/ApiPath';
 import { join } from 'path';
 import { capitalize, makeDirIfNotExist } from '../../helpers';
-import { CSharpGenerator } from '../CSharpGenerator';
+import { GoGenerator } from '../GoGenerator';
 
-export class CSharpClientGenerator extends CSharpGenerator {
-    mainExportFile = join(this.options.output, 'Client.cs');
+export class GoClientGenerator extends GoGenerator {
+    mainExportFile = join(this.options.output, 'Client.go');
     generateClient(): void {
         this.generateBaseController();
         const controllerPropsNames = this.controllersNames.map(x => this.getControllerName(x));
@@ -44,25 +44,22 @@ ${controllerPropsCtor}
         const controllerName = this.getControllerName(controller);
         makeDirIfNotExist(this.controllersFolder);
         let controllerContent = ``;
-        controllerContent += `public class ${controllerName} : BaseController \n{\n`;
         controllerContent += this.generateControllerMethodsContent(controller, controlerPaths);
-        controllerContent += `}`;
         const controllerFile = join(this.controllersFolder, controllerName + this.getFileExtension(false));
         writeFileSync(controllerFile, '\n' + this.addNamespace(controllerContent));
     }
     generateControllerMethodContent(controller: string, controllerPath: ApiPath): string {
         const methodName = capitalize(this.getMethodName(controllerPath));
-        let requestType = controllerPath.body.haveBody ? this.getPropDesc(controllerPath.body.schema) : 'object';
+        let requestType = controllerPath.body.haveBody ? this.getPropDesc(controllerPath.body.schema) : 'interface{}';
         const responseType = this.getPropDesc(controllerPath.response);
-        const bodyParam = controllerPath.body.haveBody ? `${requestType}${!controllerPath.body.required ? `?` : ''} body, ` : '';
+        const bodyParam = controllerPath.body.haveBody ? `${requestType} body, ` : '';
         const headers = [...controllerPath.cookieParams, ...controllerPath.headerParams];
         const haveHeaderParams = headers.length > 0;
-        const headersParams = haveHeaderParams ? headers.map(x => `string${x.required ? '' : '?'} h${capitalize(x.name)} = default`).join(', ') + `, ` : ``;
-        const pathParams =
-            controllerPath.pathParams.length > 0
-                ? controllerPath.pathParams.map(x => `${this.getPropDesc(x.schema!)}${x.required ? '' : '?'} p${capitalize(x.name)} = default`).join(', ') +
-                  ', '
-                : ``;
+        const headersParams = haveHeaderParams ? headers.map(x => `string h${capitalize(x.name)}`).join(', ') + `, ` : ``;
+        const havePathParams = controllerPath.pathParams.length > 0;
+        const pathParams = havePathParams ? controllerPath.pathParams.map(x => `p${capitalize(x.name)} ${this.getPropDesc(x.schema!)}`).join(', ') + ', ' : ``;
+        const pathParamsWithoutTypes =
+            controllerPath.pathParams.length > 0 ? controllerPath.pathParams.map(x => `p${capitalize(x.name)}`).join(', ') + ', ' : ``;
         let url = controllerPath.path;
         for (const pathParam of controllerPath.pathParams) {
             url = url.replace('{' + pathParam.name + '}', `{p${capitalize(pathParam.name)}}`);
@@ -70,41 +67,31 @@ ${controllerPropsCtor}
         const haveQueryParams = controllerPath.queryParams.length > 0;
         url += !haveQueryParams ? '' : '?' + controllerPath.queryParams.map(x => `${x.name}={q${capitalize(x.name)}}`).join('&');
         const queryParams = haveQueryParams
-            ? controllerPath.queryParams.map(x => `${this.getPropDesc(x.schema!)}${x.required ? '' : '?'} q${capitalize(x.name)} = default`).join(', ') + ', '
+            ? controllerPath.queryParams.map(x => `q${capitalize(x.name)} ${this.getPropDesc(x.schema!)}`).join(', ') + ', '
             : ``;
-
-        let methodCommonText = `\t\t\t"${capitalize(controllerPath.method.toLowerCase())}",\n`;
-        methodCommonText += `\t\t\t\$"${url}\",\n`;
-        methodCommonText += `\t\t\t${controllerPath.body.haveBody ? 'body' : 'null'},\n`;
-        methodCommonText += `\t\t\t`;
-        if (haveHeaderParams) {
-            methodCommonText += 'new Dictionary<string, string?>()\n';
-            methodCommonText += `\t\t\t{\n`;
-            for (const headerParam of headers) {
-                methodCommonText += `\t\t\t\t["${headerParam.name}"] = h${capitalize(headerParam.name)},\n`;
-            }
-            methodCommonText += `\t\t\t}\n`;
-        } else {
-            methodCommonText += 'null\n';
-        }
-        methodCommonText += `\t\t);\n`;
-        methodCommonText += `\t}\n`;
+        const queryParamsWithoutTypes = haveQueryParams ? controllerPath.queryParams.map(x => `q${capitalize(x.name)}`).join(', ') + ', ' : ``;
         const methodParams = `${bodyParam}${pathParams}${queryParams}${headersParams}`;
 
         let methodContent = '';
-        // method one
-        methodContent += `\tpublic Task<${responseType}?> ${methodName}(${methodParams}) \n\t{\n`.replace(', )', ')');
-        methodContent += `\t\treturn Method<${requestType},${responseType}?>(\n`;
-        methodContent += methodCommonText;
+        methodContent += `func ${methodName}(${methodParams}) ${responseType} {\n`.replace(', )', ')');
+        methodContent += '\theaders := make(map[string]string)\n';
 
-        // method two
-        methodContent += `\tpublic Task<T?> ${methodName}Async<T>(${methodParams}) \n\t{\n`.replace(', )', ')');
-        methodContent += `\t\treturn Method<${requestType},T?>(\n`;
-        methodContent += methodCommonText;
-        // method three
-        methodContent += `\tpublic Task<string?> ${methodName}ContentAsync(${methodParams}) \n\t{\n`.replace(', )', ')');
-        methodContent += `\t\treturn Method<${requestType}>(\n`;
-        methodContent += methodCommonText;
+        if (haveHeaderParams) {
+            for (const headerParam of headers) {
+                methodContent += `\theaders["${headerParam.name}"] = h${capitalize(headerParam.name)}\n`;
+            }
+        }
+        methodContent += `\treturn request(\n`;
+        methodContent += `\t\t"${capitalize(controllerPath.method.toLowerCase())}",\n`;
+        if (havePathParams || haveQueryParams) {
+            methodContent += `\t\tstrings.NewReplacer(${pathParamsWithoutTypes}${queryParamsWithoutTypes}).Replace("${url}"),\n`.replace(', )', ')');
+        } else {
+            methodContent += `\t\t"${url}",\n`;
+        }
+        methodContent += `\t\t${controllerPath.body.haveBody ? 'body' : 'nil'},\n`;
+        methodContent += `\t\theaders,\n`;
+        methodContent += `\t)\n`;
+        methodContent += `}\n\n`;
         return methodContent;
     }
     generateBaseController() {

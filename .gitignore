@@ -12,8 +12,6 @@ openapiSchemaExample.result.json
 openapiSchemaExample.html
 openapiSchemaExample2*
 src/value.json
-test
-test-csharp
-test-python
 dist-test
 test-python.py
+test*

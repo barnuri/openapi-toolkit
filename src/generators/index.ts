@@ -1,3 +1,4 @@
+import { GoServerGenerator } from './server/GoServerGenerator';
 import { ServerGenerators } from './../models/ServerGenerators';
 import { ClientGenerators } from '../models/ClientGenerators';
 import GeneratorsOptions from '../models/GeneratorsOptions';
@@ -7,6 +8,7 @@ import { PythonClientGenerator } from './client/PythonClientGenerator';
 import { CSharpClientGenerator } from './client/CSharpClientGenerator';
 import { TypescriptAxiosClientGenerator } from './client/TypescriptAxiosClientGenerator';
 import { getSwaggerJson } from '../helpers';
+import { GoClientGenerator } from './client/GoClientGenerator';
 
 export * from './server/TypescriptNestServerGenerator';
 export * from './server/CSharpServerGenerator';
@@ -43,6 +45,9 @@ export function serverGeneratorGetter(generator: ClientGenerators | ServerGenera
     if (generator === ServerGenerators.TypescriptNest) {
         return TypescriptNestServerGenerator;
     }
+    if (generator === ServerGenerators.Go) {
+        return GoServerGenerator;
+    }
     throw new Error('not implemented: ' + generator);
 }
 
@@ -62,6 +67,9 @@ export function clientGeneratorGetter(generator: ClientGenerators | ServerGenera
     }
     if (generator === ClientGenerators.Python) {
         return PythonClientGenerator;
+    }
+    if (generator === ClientGenerators.Go) {
+        return GoClientGenerator;
     }
     throw new Error('not implemented: ' + generator);
 }

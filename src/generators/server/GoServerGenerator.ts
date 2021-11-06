@@ -2,15 +2,9 @@ import { writeFileSync } from 'fs';
 import { ApiPath } from '../../models/ApiPath';
 import { join } from 'path';
 import { capitalize, makeDirIfNotExist } from '../../helpers';
-import { CSharpGenerator } from '../CSharpGenerator';
+import { GoGenerator } from '../GoGenerator';
 
-export class CSharpServerGenerator extends CSharpGenerator {
-    addNamespace(content: string) {
-        return super.addNamespace(
-            content,
-            'using System;\nusing Microsoft.AspNetCore.Mvc;\nusing System.Threading.Tasks;\nusing System.Collections.Generic;\n',
-        );
-    }
+export class GoServerGenerator extends GoGenerator {
     generateClient(): void {}
     generateController(controller: string, controlerPaths: ApiPath[]): void {
         const controllerName = this.getControllerName(controller);
