@@ -6,7 +6,7 @@ import yargs = require('yargs/yargs');
 
 process.argv[1] = '';
 yargs(process.argv.slice(2))
-    .usage("openapi-definition-generate <command>, default command 'generate'")
+    .usage("openapi-toolkit <command>, default command 'generate'")
     .command(
         ['generate', '*'],
         'auto generate proxy client from swagger file',
