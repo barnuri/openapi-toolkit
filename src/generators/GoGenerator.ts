@@ -11,7 +11,7 @@ export abstract class GoGenerator extends GeneratorAbstract {
     generateClient(): void {
         writeFileSync(this.options.output + '/go.mod', `module ${this.options.namepsace}\n\ngo 1.17`);
     }
-    addNamespace(content: string, customUsing?: string) {
+    addNamespace(content: string, customUsing?: string, extraUsing?: string) {
         const usings = customUsing
             ? customUsing
             : `import (
@@ -21,10 +21,11 @@ export abstract class GoGenerator extends GeneratorAbstract {
     "net/http"
     "net/url"
     "strings"
-    "encoding/json"
+	"strconv"
+    "encoding/json"${extraUsing || ''}
 )
 
-var _, _, _, _, _, _, _ = time.ANSIC, fmt.Errorf, context.Canceled, strings.Builder{}, json.Compact, http.Client{}, url.Parse
+var _, _, _, _, _, _, _, _ = time.ANSIC, fmt.Errorf, context.Canceled, strings.Builder{}, json.Compact, http.Client{}, url.Parse, strconv.FormatBool
 `;
         return 'package ' + this.options.namepsace + '\n\n' + usings + '\n' + content;
     }
@@ -54,7 +55,8 @@ ${this.getObjectProps(objectInput)}
         }
         return props;
     }
-    getPropDesc(obj: EditorInput | OpenApiDefinition) {
+    getPropDesc(obj: EditorInput | OpenApiDefinition, modelModule?: string) {
+        modelModule = modelModule ? `${modelModule}.`.replace('..', '.') : ``;
         const editorInput = (obj as EditorInput)?.editorType ? (obj as EditorInput) : getEditorInput2(this.swagger, obj as OpenApiDefinition);
         const fileName = this.getFileName(editorInput);
 
@@ -76,12 +78,12 @@ ${this.getObjectProps(objectInput)}
                     if (!fileName) {
                         return 'interface{}';
                     }
-                    return `${fileName}Enum`;
+                    return `${modelModule}${fileName}Enum`;
             }
         }
         if (editorInput.editorType === 'EditorArrayInput') {
             const arrayInput = editorInput as EditorArrayInput;
-            return `[]${this.getPropDesc(arrayInput.itemInput)}`;
+            return `[]${this.getPropDesc(arrayInput.itemInput, modelModule)}`;
         }
         if (editorInput.editorType === 'EditorObjectInput') {
             const objectInput = editorInput as EditorObjectInput;
@@ -89,10 +91,10 @@ ${this.getObjectProps(objectInput)}
                 if (!fileName) {
                     return 'interface{}';
                 }
-                return `${fileName}`;
+                return `${modelModule}${fileName}`;
             }
-            return `map[${objectInput.dictionaryKeyInput ? this.getPropDesc(objectInput.dictionaryKeyInput) : 'interface{}'}]${
-                objectInput.dictionaryInput ? this.getPropDesc(objectInput.dictionaryInput) : 'interface{}'
+            return `map[${objectInput.dictionaryKeyInput ? this.getPropDesc(objectInput.dictionaryKeyInput, modelModule) : 'interface{}'}]${
+                objectInput.dictionaryInput ? this.getPropDesc(objectInput.dictionaryInput, modelModule) : 'interface{}'
             }`;
         }
     }

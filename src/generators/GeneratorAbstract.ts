@@ -11,9 +11,13 @@ export abstract class GeneratorAbstract {
     apiPaths: ApiPath[];
     controllersNames: string[];
     allEditorInputs: EditorInput[];
+    allObjectEditorInputs: EditorObjectInput[];
+    allPrimitiveEditorInput: EditorPrimitiveInput[];
+    allEnumsEditorInput: EditorPrimitiveInput[];
     modelsFolder = join(this.options.output, this.options.modelsFolderName);
     controllersFolder = join(this.options.output, this.options.controllersFolderName);
     generatedFiles: string[];
+    haveModels: boolean;
     constructor(public swagger: OpenApiDocument, public options: GeneratorsOptions) {
         if (!options.pathOrUrl) {
             throw new Error('pathOrUrl is required');
@@ -42,6 +46,10 @@ export abstract class GeneratorAbstract {
         this.options.output = fixPath(options.output);
         this.controllersNames = [...new Set(this.apiPaths.map(x => x.controller))];
         this.allEditorInputs = getAllEditorInputsByEditors(this.editors);
+        this.allObjectEditorInputs = this.allEditorInputs.filter(x => x.editorType === 'EditorObjectInput').map(x => x as EditorObjectInput);
+        this.allPrimitiveEditorInput = this.allEditorInputs.filter(x => x.editorType === 'EditorPrimitiveInput').map(x => x as EditorPrimitiveInput);
+        this.allEnumsEditorInput = this.allPrimitiveEditorInput.filter(x => x.enumNames.length + x.enumsOptions.length + x.enumValues.length > 0);
+        this.haveModels = this.allObjectEditorInputs.length + this.allEnumsEditorInput.length > 0;
     }
     async generate(): Promise<void> {
         console.log('-----  start generating -----');
@@ -51,28 +59,23 @@ export abstract class GeneratorAbstract {
         makeDirIfNotExist(this.modelsFolder);
         makeDirIfNotExist(this.controllersFolder);
         console.log('-----  start generating object models -----');
-        for (const editorInput of this.allEditorInputs.filter(x => x.editorType === 'EditorObjectInput')) {
-            const objectInput = editorInput as EditorObjectInput;
+        for (const objectInput of this.allObjectEditorInputs) {
             if (objectInput.isDictionary) {
                 continue;
             }
             await this.generateObject(objectInput);
         }
         console.log('-----  start generating enum models -----');
-        for (const editorInput of this.allEditorInputs.filter(x => x.editorType === 'EditorPrimitiveInput')) {
-            const primitiveInput = editorInput as EditorPrimitiveInput;
-            if (primitiveInput.enumNames.length + primitiveInput.enumsOptions.length + primitiveInput.enumValues.length <= 0) {
-                continue;
-            }
+        for (const enumInput of this.allEnumsEditorInput) {
             const enumVals = {};
-            if (primitiveInput.enumNames.length === primitiveInput.enumValues.length) {
-                for (let i = 0; i < primitiveInput.enumNames.length; i++) {
-                    enumVals[primitiveInput.enumNames[i]] = primitiveInput.enumValues[i];
+            if (enumInput.enumNames.length === enumInput.enumValues.length) {
+                for (let i = 0; i < enumInput.enumNames.length; i++) {
+                    enumVals[enumInput.enumNames[i]] = enumInput.enumValues[i];
                 }
             } else {
-                primitiveInput.enumsOptions.forEach(x => (enumVals[x] = x));
+                enumInput.enumsOptions.forEach(x => (enumVals[x] = x));
             }
-            await this.generateEnum(primitiveInput, enumVals);
+            await this.generateEnum(enumInput, enumVals);
         }
         console.log('----- start generating controllers -----');
         for (const controllerName of this.controllersNames) {
