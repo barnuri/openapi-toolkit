@@ -18,13 +18,40 @@ func getClient(httpClient *http.Client, baseUrl string) *Client {
 	if(httpClient == nil) {
 		httpClient = &http.Client{}
 	}
+	httpReq := func(method string, route string, body interface{}, headers map[string]string, result interface{}) (res *http.Response, err error) {
+		fullUrl := (&url.URL{Host: baseUrl}).ResolveReference(&url.URL{Path: route})
+		var bodyJson *bytes.Buffer
+		if body != nil {
+			jsonValue, _ := json.Marshal(body)
+			bodyJson = bytes.NewBuffer(jsonValue)
+		} else {
+			bodyJson = nil
+		}
+		req, err := http.NewRequest(strings.ToUpper(method), fullUrl.String(), bodyJson)
+		if err != nil {
+			return nil, err
+		}
+		if body != nil {
+			req.Header.Set("Content-Type", "application/json")
+		}
+		for key := range headers {
+			req.Header.Set(key, headers[key])
+		}
+		resp, err := httpClient.Do(req)
+		if err != nil {
+			return nil, err
+		}
+		defer resp.Body.Close()
+		err = json.NewDecoder(resp.Body).Decode(&result)
+		return resp, err
+	}
 	client := &Client{
-${controllerPropsNames.map(x => `\t\t${x}: &controllers.${x}{ httpClient: httpClient, baseUrl: baseUrl},`).join('\n')}
+${controllerPropsNames.map(x => `\t\t${x}: &controllers.${x}{ HttpClient: httpClient, BaseUrl: baseUrl, Request: httpReq },`).join('\n')}
     }
 	return client
 }
 `;
-        writeFileSync(this.mainExportFile, this.addNamespace(mainFileContent, undefined, '\n\tcontrollers "OpenapiDefinitionGenerate/controllers"'));
+        writeFileSync(this.mainExportFile, this.addNamespace(mainFileContent, undefined, '\n\t"bytes"\n\tcontrollers "OpenapiDefinitionGenerate/controllers"'));
     }
     generateController(controller: string, controlerPaths: ApiPath[]): void {
         const controllerName = this.getControllerName(controller);
@@ -34,9 +61,9 @@ ${controllerPropsNames.map(x => `\t\t${x}: &controllers.${x}{ httpClient: httpCl
             controllerContent += `var _ = models.${this.getFileName([...this.allEnumsEditorInput, ...this.allObjectEditorInputs][0])}\n\n`;
         }
         controllerContent += `type ${controllerName} struct {
-    httpClient *http.Client
-    baseUrl string
-    request func(method string, route string, body interface{}, headers map[string]string, result interface{}) (res *http.Response, err error)
+    HttpClient *http.Client
+    BaseUrl string
+    Request func(method string, route string, body interface{}, headers map[string]string, result interface{}) (res *http.Response, err error)
 }\n\n`;
         controllerContent += this.generateControllerMethodsContent(controller, controlerPaths);
         const controllerFile = join(this.controllersFolder, controllerName + this.getFileExtension(false));
@@ -75,7 +102,11 @@ ${controllerPropsNames.map(x => `\t\t${x}: &controllers.${x}{ httpClient: httpCl
         const queryParams = haveQueryParams
             ? controllerPath.queryParams.map(x => `q${capitalize(x.name)} ${this.getPropDesc(x.schema!, 'models')}`).join(', ') + ', '
             : ``;
-        const queryParamsWithoutTypes = haveQueryParams ? controllerPath.queryParams.map(x => `string(q${capitalize(x.name)})`).join(', ') + ', ' : ``;
+        const queryParamsWithoutTypes = haveQueryParams
+            ? controllerPath.queryParams
+                  .map(x => (this.getPropDesc(x.schema!, 'models') == 'bool' ? `strconv.FormatBool(q${capitalize(x.name)})` : `string(q${capitalize(x.name)})`))
+                  .join(', ') + ', '
+            : ``;
         const methodParams = `${bodyParam}${pathParams}${queryParams}${headersParams}`;
 
         let methodContent = '';
@@ -91,7 +122,7 @@ ${controllerPropsNames.map(x => `\t\t${x}: &controllers.${x}{ httpClient: httpCl
                 methodContent += `\theaders["${headerParam.name}"] = h${capitalize(headerParam.name)}\n`;
             }
         }
-        methodContent += `\thttpRes, error := c.request(\n`;
+        methodContent += `\thttpRes, error := c.Request(\n`;
         methodContent += `\t\t"${capitalize(controllerPath.method.toLowerCase())}",\n`;
         if (havePathParams || haveQueryParams) {
             methodContent += `\t\tstrings.NewReplacer(${pathParamsWithoutTypes}${queryParamsWithoutTypes}).Replace("${url}"),\n`.replace(', )', ')');
