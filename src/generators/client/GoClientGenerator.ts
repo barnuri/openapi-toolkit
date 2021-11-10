@@ -70,10 +70,18 @@ ${controllerPropsNames.map(x => `\t\t${x}: &controllers.${x}{ HttpClient: httpCl
     }
 	return client
 }
+
+/* 
+example: 
+import (
+	client "${this.options.namepsace}"
+)
+clientInstace := client.GetClient(nil, "http://localhost:3000", nil, nil)
+*/
 `;
         writeFileSync(
             this.mainExportFile,
-            this.addNamespace(mainFileContent, undefined, '\n\t"io/ioutil"\n\t"bytes"\n\tcontrollers "OpenapiDefinitionGenerate/controllers"'),
+            this.addNamespace(mainFileContent, undefined, `\n\t"io/ioutil"\n\t"bytes"\n\tcontrollers "${this.options.namepsace}/controllers"`),
         );
     }
     generateController(controller: string, controlerPaths: ApiPath[]): void {
@@ -92,7 +100,7 @@ ${controllerPropsNames.map(x => `\t\t${x}: &controllers.${x}{ HttpClient: httpCl
         const controllerFile = join(this.controllersFolder, controllerName + this.getFileExtension(false));
         writeFileSync(
             controllerFile,
-            '\n' + this.addNamespace(controllerContent, undefined, !this.haveModels ? '' : `\n\tmodels "OpenapiDefinitionGenerate/models"`),
+            '\n' + this.addNamespace(controllerContent, undefined, !this.haveModels ? '' : `\n\tmodels "${this.options.namepsace}/models"`),
         );
     }
     generateControllerMethodContent(controller: string, controllerPath: ApiPath): string {
