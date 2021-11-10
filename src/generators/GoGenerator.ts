@@ -120,4 +120,7 @@ ${Object.keys(enumVals)
     getFileExtension(isModel: boolean) {
         return '.go';
     }
+    getFileName(editorInput: EditorInput) {
+        return capitalize(super.getFileName(editorInput) || '');
+    }
 }

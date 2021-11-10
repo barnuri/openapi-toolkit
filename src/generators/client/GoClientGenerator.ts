@@ -14,20 +14,29 @@ type Client = struct {
 ${controllerPropsNames.map(x => `\t${x} *controllers.${x}`).join('\n')}
 }
 
-func getClient(httpClient *http.Client, baseUrl string) *Client {
-	if(httpClient == nil) {
+
+func GetClient(
+	httpClient *http.Client,
+	baseUrl string,
+	transformRequest func(req *http.Request),
+	transformResponse func(res interface{}, httpRes *http.Response, err error),
+) *Client {
+	if httpClient == nil {
 		httpClient = &http.Client{}
 	}
 	httpReq := func(method string, route string, body interface{}, headers map[string]string, result interface{}) (res *http.Response, err error) {
-		fullUrl := (&url.URL{Host: baseUrl}).ResolveReference(&url.URL{Path: route})
+		fullUrl := baseUrl + route
 		var bodyJson *bytes.Buffer
 		if body != nil {
-			jsonValue, _ := json.Marshal(body)
+			jsonValue, err := json.Marshal(body)
+			if err != nil {
+				return nil, err
+			}
 			bodyJson = bytes.NewBuffer(jsonValue)
 		} else {
-			bodyJson = nil
+			bodyJson = bytes.NewBufferString("")
 		}
-		req, err := http.NewRequest(strings.ToUpper(method), fullUrl.String(), bodyJson)
+		req, err := http.NewRequest(strings.ToUpper(method), fullUrl, bodyJson)
 		if err != nil {
 			return nil, err
 		}
@@ -37,12 +46,23 @@ func getClient(httpClient *http.Client, baseUrl string) *Client {
 		for key := range headers {
 			req.Header.Set(key, headers[key])
 		}
+		if transformRequest != nil {
+			transformRequest(req)
+		}
 		resp, err := httpClient.Do(req)
 		if err != nil {
 			return nil, err
 		}
 		defer resp.Body.Close()
-		err = json.NewDecoder(resp.Body).Decode(&result)
+		bodyBytes, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return nil, err
+		}
+		bodyString := string(bodyBytes)
+		err = json.Unmarshal([]byte(bodyString), &result)
+		if transformResponse != nil {
+			transformResponse(result, resp, err)
+		}
 		return resp, err
 	}
 	client := &Client{
@@ -51,7 +71,10 @@ ${controllerPropsNames.map(x => `\t\t${x}: &controllers.${x}{ HttpClient: httpCl
 	return client
 }
 `;
-        writeFileSync(this.mainExportFile, this.addNamespace(mainFileContent, undefined, '\n\t"bytes"\n\tcontrollers "OpenapiDefinitionGenerate/controllers"'));
+        writeFileSync(
+            this.mainExportFile,
+            this.addNamespace(mainFileContent, undefined, '\n\t"io/ioutil"\n\t"bytes"\n\tcontrollers "OpenapiDefinitionGenerate/controllers"'),
+        );
     }
     generateController(controller: string, controlerPaths: ApiPath[]): void {
         const controllerName = this.getControllerName(controller);
@@ -80,19 +103,18 @@ ${controllerPropsNames.map(x => `\t\t${x}: &controllers.${x}{ HttpClient: httpCl
         const bodyParam = controllerPath.body.haveBody ? `body ${requestType}, ` : '';
         const headers = [...controllerPath.cookieParams, ...controllerPath.headerParams];
         const haveHeaderParams = headers.length > 0;
-        const headersParams = haveHeaderParams ? headers.map(x => `string h${capitalize(x.name)}`).join(', ') + `, ` : ``;
+        const headersParams = haveHeaderParams ? headers.map(x => `h${capitalize(x.name)} string`).join(', ') + `, ` : ``;
         const havePathParams = controllerPath.pathParams.length > 0;
         const pathParams = havePathParams
             ? controllerPath.pathParams.map(x => `p${capitalize(x.name)} ${this.getPropDesc(x.schema!, 'models')}`).join(', ') + ', '
             : ``;
-        const pathParamsWithoutTypes =
+        const pathParamsForUrl =
             controllerPath.pathParams.length > 0
-                ? controllerPath.pathParams
-                      .map(x =>
-                          this.getPropDesc(x.schema!, 'models') == 'bool' ? `strconv.FormatBool(p${capitalize(x.name)})` : `string(p${capitalize(x.name)})`,
-                      )
-                      .join(', ') + ', '
-                : ``;
+                ? controllerPath.pathParams.map(x => ({
+                      format: this.getPropDesc(x.schema!, 'models') == 'bool' ? `strconv.FormatBool(p${capitalize(x.name)})` : `string(p${capitalize(x.name)})`,
+                      param: `p${capitalize(x.name)}`,
+                  }))
+                : [];
         let url = controllerPath.path;
         for (const pathParam of controllerPath.pathParams) {
             url = url.replace('{' + pathParam.name + '}', `{p${capitalize(pathParam.name)}}`);
@@ -102,11 +124,12 @@ ${controllerPropsNames.map(x => `\t\t${x}: &controllers.${x}{ HttpClient: httpCl
         const queryParams = haveQueryParams
             ? controllerPath.queryParams.map(x => `q${capitalize(x.name)} ${this.getPropDesc(x.schema!, 'models')}`).join(', ') + ', '
             : ``;
-        const queryParamsWithoutTypes = haveQueryParams
-            ? controllerPath.queryParams
-                  .map(x => (this.getPropDesc(x.schema!, 'models') == 'bool' ? `strconv.FormatBool(q${capitalize(x.name)})` : `string(q${capitalize(x.name)})`))
-                  .join(', ') + ', '
-            : ``;
+        const queryParamsForUrl = haveQueryParams
+            ? controllerPath.queryParams.map(x => ({
+                  format: this.getPropDesc(x.schema!, 'models') == 'bool' ? `strconv.FormatBool(q${capitalize(x.name)})` : `string(q${capitalize(x.name)})`,
+                  param: `q${capitalize(x.name)}`,
+              }))
+            : [];
         const methodParams = `${bodyParam}${pathParams}${queryParams}${headersParams}`;
 
         let methodContent = '';
@@ -122,50 +145,19 @@ ${controllerPropsNames.map(x => `\t\t${x}: &controllers.${x}{ HttpClient: httpCl
                 methodContent += `\theaders["${headerParam.name}"] = h${capitalize(headerParam.name)}\n`;
             }
         }
+        methodContent += `\turl := "${url}"\n`;
+        for (const itemsToReplace of [...queryParamsForUrl, ...pathParamsForUrl]) {
+            methodContent += `\turl = strings.ReplaceAll(url,"{${itemsToReplace.param}}",${itemsToReplace.format})\n`;
+        }
         methodContent += `\thttpRes, error := c.Request(\n`;
         methodContent += `\t\t"${capitalize(controllerPath.method.toLowerCase())}",\n`;
-        if (havePathParams || haveQueryParams) {
-            methodContent += `\t\tstrings.NewReplacer(${pathParamsWithoutTypes}${queryParamsWithoutTypes}).Replace("${url}"),\n`.replace(', )', ')');
-        } else {
-            methodContent += `\t\t"${url}",\n`;
-        }
+        methodContent += `\t\turl,\n`;
         methodContent += `\t\t${controllerPath.body.haveBody ? 'body' : 'nil'},\n`;
         methodContent += `\t\theaders,\n`;
-        methodContent += `\t\tres,\n`;
+        methodContent += `\t\t&res,\n`;
         methodContent += `\t)\n`;
         methodContent += `\treturn res, httpRes, error\n`;
         methodContent += `}\n\n`;
         return methodContent;
-    }
-    generateBaseController() {
-        const controllerBaseFile = join(this.options.output, 'BaseController.go');
-        let baseControllerContent = `public class BaseController
-{
-    public string BaseUrl { get; set; }
-    public HttpClient HttpClient { get; set; } = new HttpClient();
-    public JsonSerializerSettings JsonSerializerSettings { get; set; }
-    protected async Task<S?> Method<T, S>(string method, string path, T? body, Dictionary<string, string?>? headers) where T : class
-    {
-        var json = await Method(method, path, body, headers) ?? string.Empty;
-        var res = JsonConvert.DeserializeObject<S>(json, JsonSerializerSettings);
-        return res;
-    }
-    protected async Task<string?> Method<T>(string method, string path, T? body, Dictionary<string, string?>? headers) where T : class
-    {
-        var req = new HttpRequestMessage
-        {
-            Method = new HttpMethod(method),
-            RequestUri = new Uri($"{BaseUrl.TrimEnd('/')}/{path.TrimStart('/')}"),
-            Content = new StringContent(JsonConvert.SerializeObject(body)),
-        };
-        headers?.Keys.ToList().ForEach(x => req.Headers.TryAddWithoutValidation(x, headers[x]));
-        var res = await HttpClient.SendAsync(req);
-        res.EnsureSuccessStatusCode();
-        var content = await res.Content.ReadAsStringAsync();
-        return content;
-    }
-}`;
-        baseControllerContent = '';
-        writeFileSync(controllerBaseFile, this.addNamespace(baseControllerContent));
     }
 }
