@@ -22,6 +22,9 @@ export async function generate(options: GeneratorsOptions) {
     if (!options.pathOrUrl) {
         throw new Error('pathOrUrl is required');
     }
+    if (Array.isArray(options.output)) {
+        options.output = (options.output as any[])[0];
+    }
     console.log(`get swagger`);
     const swagger = await getSwaggerJson(options.pathOrUrl);
     console.log(`get swagger successfull`);

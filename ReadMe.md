@@ -14,6 +14,9 @@ openapi-toolkit -i https://petstore3.swagger.io/api/v3/openapi.json -g typescrip
 
 # show all options
 openapi-toolkit -h
+
+# with docker
+docker run --rm --name openapi-toolkit -v "$(pwd)/test-go1:/output" -e CLI_PARAMS="-i https://petstore3.swagger.io/api/v3/openapi.json -g typescript-axios --modelNamePrefix My --modelNameSuffix .dto" barnuri/openapi-toolkit
 ```
 
 ### Help output
