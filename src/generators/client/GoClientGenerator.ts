@@ -5,11 +5,12 @@ import { capitalize, makeDirIfNotExist } from '../../helpers';
 import { GoGenerator } from '../GoGenerator';
 
 export class GoClientGenerator extends GoGenerator {
-    mainExportFile = join(this.options.output, 'Client.go');
+    mainExportFile = join(this.options.output, 'main.go');
     generateClient(): void {
         super.generateClient();
         const controllerPropsNames = this.controllersNames.map(x => this.getControllerName(x));
-        let mainFileContent = `
+        const mainFileContent = `package main
+${this.getImportes(`\n\t"io/ioutil"\n\t"bytes"\n\t"reflect"\n\tcontrollers "${this.options.namepsace}/controllers"`)}
 type Client = struct {
 ${controllerPropsNames.map(x => `\t${x} *controllers.${x}`).join('\n')}
 }
@@ -59,6 +60,15 @@ func GetClient(
 			return nil, err
 		}
 		bodyString := string(bodyBytes)
+		pointsToValue := reflect.ValueOf(result)
+		if reflect.ValueOf(result).Kind() == reflect.Ptr {
+			pointsToValue = reflect.Indirect(reflect.ValueOf(result))
+		}
+		if pointsToValue.Type().String() == "*string" {
+			a := &result
+			*a = &bodyString
+			return resp, err
+		}
 		err = json.Unmarshal([]byte(bodyString), &result)
 		if transformResponse != nil {
 			transformResponse(result, resp, err)
@@ -71,37 +81,37 @@ ${controllerPropsNames.map(x => `\t\t${x}: &controllers.${x}{ HttpClient: httpCl
 	return client
 }
 
-/* 
-example: 
-import (
-	client "${this.options.namepsace}"
-)
-clientInstace := client.GetClient(nil, "http://localhost:3000", nil, nil)
-*/
+func main() {
+	clientInstace := GetClient(nil, "http://localhost:3000", nil, nil)
+	b, _httpRes, _err := clientInstace.DefaultController.GetHealthz()
+	if _err != nil {
+
+	}
+	if _httpRes != nil {
+
+	}
+	fmt.Print(b)
+}
 `;
-        writeFileSync(
-            this.mainExportFile,
-            this.addNamespace(mainFileContent, undefined, `\n\t"io/ioutil"\n\t"bytes"\n\tcontrollers "${this.options.namepsace}/controllers"`),
-        );
+        writeFileSync(this.mainExportFile, mainFileContent);
     }
     generateController(controller: string, controlerPaths: ApiPath[]): void {
         const controllerName = this.getControllerName(controller);
         makeDirIfNotExist(this.controllersFolder);
-        let controllerContent = ``;
+        let controllerContent = `package controllers
+${this.getImportes(!this.haveModels ? '' : `\n\tmodels "${this.options.namepsace}/models"`)}`;
         if (this.haveModels) {
             controllerContent += `var _ = models.${this.getFileName([...this.allEnumsEditorInput, ...this.allObjectEditorInputs][0])}\n\n`;
         }
-        controllerContent += `type ${controllerName} struct {
+        controllerContent += `
+type ${controllerName} struct {
     HttpClient *http.Client
     BaseUrl string
     Request func(method string, route string, body interface{}, headers map[string]string, result interface{}) (res *http.Response, err error)
 }\n\n`;
         controllerContent += this.generateControllerMethodsContent(controller, controlerPaths);
         const controllerFile = join(this.controllersFolder, controllerName + this.getFileExtension(false));
-        writeFileSync(
-            controllerFile,
-            '\n' + this.addNamespace(controllerContent, undefined, !this.haveModels ? '' : `\n\tmodels "${this.options.namepsace}/models"`),
-        );
+        writeFileSync(controllerFile, controllerContent);
     }
     generateControllerMethodContent(controller: string, controllerPath: ApiPath): string {
         const controllerName = this.getControllerName(controller);

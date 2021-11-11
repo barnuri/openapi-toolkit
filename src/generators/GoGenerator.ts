@@ -11,10 +11,8 @@ export abstract class GoGenerator extends GeneratorAbstract {
     generateClient(): void {
         writeFileSync(this.options.output + '/go.mod', `module ${this.options.namepsace}\n\ngo 1.17`);
     }
-    addNamespace(content: string, customUsing?: string, extraUsing?: string) {
-        const usings = customUsing
-            ? customUsing
-            : `import (
+    getImportes(extraUsing?: string) {
+        const usings = `import (
     "time"
     "context"
     "fmt"
@@ -27,19 +25,21 @@ export abstract class GoGenerator extends GeneratorAbstract {
 
 var _, _, _, _, _, _, _, _ = time.ANSIC, fmt.Errorf, context.Canceled, strings.Builder{}, json.Compact, http.Client{}, url.Parse, strconv.FormatBool
 `;
-        return 'package ' + this.options.namepsace + '\n\n' + usings + '\n' + content;
+        return '\n\n' + usings + '\n';
     }
     generateObject(objectInput: EditorObjectInput): void {
         if (!this.shouldGenerateModel(objectInput)) {
             return;
         }
         const modelFile = join(this.modelsFolder, this.getFileName(objectInput) + this.getFileExtension(true));
-        const modelFileContent = `type ${this.getFileName(objectInput)} struct {
+        const modelFileContent = `package models
+${this.getImportes()}
+type ${this.getFileName(objectInput)} struct {
 ${this.getObjectProps(objectInput)}
 }`
             .trim()
             .replace(/\n\n/, '\n');
-        writeFileSync(modelFile, this.addNamespace(modelFileContent));
+        writeFileSync(modelFile, modelFileContent);
     }
     getObjectProps(objectInput: EditorObjectInput) {
         let props = objectInput.properties
@@ -105,7 +105,9 @@ ${this.getObjectProps(objectInput)}
         const modelFile = join(this.modelsFolder, this.getFileName(enumInput) + this.getFileExtension(true));
         const isNumberEnum = typeof enumVals[0] === 'number';
         const enumName = `${this.getFileName(enumInput)}Enum`;
-        const modelFileContent = `type ${enumName} ${isNumberEnum ? 'int64' : 'string'}
+        const modelFileContent = `package models
+${this.getImportes()}
+type ${enumName} ${isNumberEnum ? 'int64' : 'string'}
 var ${this.getFileName(enumInput)} = struct {
 ${Object.keys(enumVals)
     .map(x => `\t${x} ${enumName}`)
@@ -115,7 +117,7 @@ ${Object.keys(enumVals)
     .map(x => `\t${x}: ${isNumberEnum ? enumVals[x] : `"${enumVals[x]}"`}`)
     .join(',\n')},
 }`;
-        writeFileSync(modelFile, this.addNamespace(modelFileContent));
+        writeFileSync(modelFile, modelFileContent);
     }
     getFileExtension(isModel: boolean) {
         return '.go';
