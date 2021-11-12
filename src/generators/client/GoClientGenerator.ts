@@ -10,11 +10,68 @@ export class GoClientGenerator extends GoGenerator {
         super.generateClient();
         const controllerPropsNames = this.controllersNames.map(x => this.getControllerName(x));
         const mainFileContent = `package main
-${this.getImportes(`\n\t"io/ioutil"\n\t"bytes"\n\t"reflect"\n\tcontrollers "${this.options.namepsace}/controllers"`)}
+${this.getImportes(`
+    "io"
+    "regexp"
+    "io/ioutil"
+    "bytes"
+    "os"
+    "errors"
+    "encoding/xml"
+    "reflect"
+    controllers "${this.options.namepsace}/controllers"`)}
 type Client = struct {
 ${controllerPropsNames.map(x => `\t${x} *controllers.${x}`).join('\n')}
 }
 
+var (
+	jsonCheck = regexp.MustCompile(\`(?i:(?:application|text)/(?:vnd.[^;]++)?json)\`)
+	xmlCheck  = regexp.MustCompile(\`(?i:(?:application|text)/xml)\`)
+)
+
+
+func decodeResult(resultPointer interface{}, resBodyBytes []byte, contentType string) (err error) {
+	if len(resBodyBytes) == 0 {
+		return nil
+	}
+	if s, ok := resultPointer.(*string); ok {
+		*s = string(resBodyBytes)
+		return nil
+	}
+	if f, ok := resultPointer.(**os.File); ok {
+		*f, err = ioutil.TempFile("", "HttpClientFile")
+		if err != nil {
+			return
+		}
+		_, err = (*f).Write(resBodyBytes)
+		if err != nil {
+			return
+		}
+		_, err = (*f).Seek(0, io.SeekStart)
+		return
+	}
+	if xmlCheck.MatchString(contentType) {
+		if err = xml.Unmarshal(resBodyBytes, resultPointer); err != nil {
+			return err
+		}
+		return nil
+	}
+	if jsonCheck.MatchString(contentType) {
+		if actualObj, ok := resultPointer.(interface{ GetActualInstance() interface{} }); ok { // oneOf, anyOf schemas
+			if unmarshalObj, ok := actualObj.(interface{ UnmarshalJSON([]byte) error }); ok { // make sure it has UnmarshalJSON defined
+				if err = unmarshalObj.UnmarshalJSON(resBodyBytes); err != nil {
+					return err
+				}
+			} else {
+				return errors.New("Unknown type with GetActualInstance but no unmarshalObj.UnmarshalJSON defined")
+			}
+		} else if err = json.Unmarshal(resBodyBytes, resultPointer); err != nil { // simple model
+			return err
+		}
+		return nil
+	}
+	return errors.New("undefined response type")
+}
 
 func GetClient(
 	httpClient *http.Client,
@@ -50,30 +107,23 @@ func GetClient(
 		if transformRequest != nil {
 			transformRequest(req)
 		}
-		resp, err := httpClient.Do(req)
+		httpRes, err := httpClient.Do(req)
 		if err != nil {
 			return nil, err
 		}
-		defer resp.Body.Close()
-		bodyBytes, err := ioutil.ReadAll(resp.Body)
+		defer httpRes.Body.Close()
+		bodyBytes, err := ioutil.ReadAll(httpRes.Body)
 		if err != nil {
 			return nil, err
 		}
-		bodyString := string(bodyBytes)
-		pointsToValue := reflect.ValueOf(result)
-		if reflect.ValueOf(result).Kind() == reflect.Ptr {
-			pointsToValue = reflect.Indirect(reflect.ValueOf(result))
+		err = decodeResult(result,bodyBytes, httpRes.Header.Get("Content-Type"))
+		if err != nil {
+			return nil, err
 		}
-		if pointsToValue.Type().String() == "*string" {
-			a := &result
-			*a = &bodyString
-			return resp, err
-		}
-		err = json.Unmarshal([]byte(bodyString), &result)
 		if transformResponse != nil {
-			transformResponse(result, resp, err)
+			transformResponse(result, httpRes, err)
 		}
-		return resp, err
+		return httpRes, err
 	}
 	client := &Client{
 ${controllerPropsNames.map(x => `\t\t${x}: &controllers.${x}{ HttpClient: httpClient, BaseUrl: baseUrl, Request: httpReq },`).join('\n')}
