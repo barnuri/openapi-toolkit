@@ -11,7 +11,9 @@ build
 openapiSchemaExample.result.json
 openapiSchemaExample.html
 openapiSchemaExample2*
+openapiSchemaExample*
 src/value.json
 dist-test
 test-python.py
 test*
+openapiSchemaExample.json
