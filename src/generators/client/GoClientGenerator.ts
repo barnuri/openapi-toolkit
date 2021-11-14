@@ -18,14 +18,13 @@ ${this.getImportes(`
     "os"
     "errors"
     "encoding/xml"
-    "reflect"
     controllers "${this.options.namepsace}/controllers"`)}
 type Client = struct {
 ${controllerPropsNames.map(x => `\t${x} *controllers.${x}`).join('\n')}
 }
 
 var (
-	jsonCheck = regexp.MustCompile(\`(?i:(?:application|text)/(?:vnd.[^;]++)?json)\`)
+	jsonCheck = regexp.MustCompile(\`(?i:(?:application|text)/(?:vnd\\.[^;]+\\+)?json)\`)
 	xmlCheck  = regexp.MustCompile(\`(?i:(?:application|text)/xml)\`)
 )
 
@@ -132,7 +131,7 @@ ${controllerPropsNames.map(x => `\t\t${x}: &controllers.${x}{ HttpClient: httpCl
 }
 
 func main() {
-	clientInstace := GetClient(nil, "http://localhost:3000", nil, nil)
+	// clientInstace := GetClient(nil, "http://localhost:3000", nil, nil)
 	b, _httpRes, _err := clientInstace.DefaultController.GetHealthz()
 	if _err != nil {
 
@@ -201,12 +200,12 @@ type ${controllerName} struct {
         const methodParams = `${bodyParam}${pathParams}${queryParams}${headersParams}`;
 
         let methodContent = '';
-        methodContent += `func (c ${controllerName}) ${methodName}(${methodParams}) (result *${responseType}, httpRes *http.Response, err error) {\n`.replace(
+        methodContent += `func (c ${controllerName}) ${methodName}(${methodParams}) (result ${responseType}, httpRes *http.Response, err error) {\n`.replace(
             ', )',
             ')',
         );
         methodContent += '\theaders := make(map[string]string)\n';
-        methodContent += `\tvar res *${responseType}\n`;
+        methodContent += `\tvar res ${responseType}\n`;
 
         if (haveHeaderParams) {
             for (const headerParam of headers) {
