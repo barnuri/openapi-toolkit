@@ -281,8 +281,9 @@ ${this.controllersNames.map(x => `\tcontrollers.${this.getControllerName(x)}(e)`
         const controllerContent = `package controllers
 import (
     "github.com/labstack/echo/v4"
-	"errors"
+	"errors"${this.haveModels ? `\n\tmodels "${this.options.namepsace}/models"` : ''}
 )
+${this.haveModels ? `\nvar _ = models.${this.getFileName([...this.allEnumsEditorInput, ...this.allObjectEditorInputs][0])}` : ''}
 
 ${definisions.map(x => x.func).join('\n')}
 
@@ -294,27 +295,19 @@ ${definisions.map(x => '\t' + x.route).join('\n')}
     }
     generateControllerMethodContent(controller: string, controllerPath: ApiPath): any {
         const methodName = capitalize(this.getMethodName(controllerPath));
-        let requestType = controllerPath.body.haveBody ? this.getPropDesc(controllerPath.body.schema) : 'object';
+        let requestType = controllerPath.body.haveBody ? this.getPropDesc(controllerPath.body.schema, 'models') : 'object';
         const responseType = this.getPropDesc(controllerPath.response, 'models');
-        const bodyParam = controllerPath.body.haveBody ? `[FromBody] ${requestType}${!controllerPath.body.required ? `?` : ''} body, ` : '';
         const headers = [...controllerPath.cookieParams, ...controllerPath.headerParams];
-        const headersParams =
-            headers.length > 0 ? headers.map(x => `[FromHeader(Name = "${x.name}")] string${x.required ? '' : '?'} ${x.name} = default`).join(', ') + `, ` : ``;
-        const pathParams =
-            controllerPath.pathParams.length > 0
-                ? controllerPath.pathParams
-                      .map(x => `[FromRoute(Name = "${x.name}")] ${this.getPropDesc(x.schema!)}${x.required ? '' : '?'} ${x.name} = default`)
-                      .join(', ') + ', '
-                : ``;
-
-        const queryParams =
-            controllerPath.queryParams.length > 0
-                ? controllerPath.queryParams
-                      .map(x => `[FromQuery(Name = "${x.name}")] ${this.getPropDesc(x.schema!)}${x.required ? '' : '?'} ${x.name} = default`)
-                      .join(', ') + ', '
-                : ``;
-
-        const methodParams = `${bodyParam}${pathParams}${queryParams}${headersParams}`;
+        const headerVarbs = (headers || []).map(x => `\t// h${capitalize(x.name)} := c.request.Header.Get("${x.name}")`).join('\n');
+        const pathVarbs = (controllerPath.pathParams || []).map(x => `\t// p${capitalize(x.name)} := c.Param("${x.name}")`).join('\n');
+        const queryVarbs = (controllerPath.queryParams || []).map(x => `\t// q${capitalize(x.name)} := c.QueryParam("${x.name}")`).join('\n');
+        const bodyVarb = controllerPath.body.haveBody
+            ? `\treqBody := new(${requestType})
+    if err := c.Bind(reqBody); err != nil {
+        return echo.NewHTTPError(401, err.Error())
+    }`
+            : '';
+        const varbs = [headerVarbs, pathVarbs, queryVarbs, bodyVarb].filter(x => x.trim()).join('\n');
         let func = `// ${methodName} godoc
 // @Tags ${controller}
 // @Accept */*
@@ -322,11 +315,10 @@ ${definisions.map(x => '\t' + x.route).join('\n')}
 // @Success 200 {object} ${responseType}
 // @Router ${controllerPath.path} [${controllerPath.method.toUpperCase()}]
 func ${methodName} (c echo.Context) error {
+${varbs}
     return errors.New("not implemented")
-}`;
+}`.replace(/\n\n/g, '\n');
         const route = `e.${controllerPath.method.toUpperCase()}("${controllerPath.path}", ${methodName})`;
-        // methodContent += `\t[Http${capitalize(controllerPath.method)}("${controllerPath.path}")]\n`;
-        // methodContent += `\tpublic Task<${responseType}> ${methodName}(${methodParams}) \n\t{\n`.replace(', )', ')');
         return { func, route };
     }
 }
