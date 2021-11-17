@@ -126,7 +126,7 @@ ${controllerPropsCtor}
         {
             Method = new HttpMethod(method),
             RequestUri = new Uri($"{BaseUrl.TrimEnd('/')}/{path.TrimStart('/')}"),
-            Content = new StringContent(JsonConvert.SerializeObject(body)),
+            Content = new StringContent(JsonConvert.SerializeObject(body), null, "application/json"),
         };
         headers?.Keys.ToList().ForEach(x => req.Headers.TryAddWithoutValidation(x, headers[x]));
         var res = await HttpClient.SendAsync(req);
