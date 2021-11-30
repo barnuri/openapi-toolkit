@@ -2,11 +2,12 @@ import { OpenApiDocument } from '../index';
 import { resolve } from 'path';
 import { existsSync, mkdirSync, chmodSync, readFileSync } from 'fs';
 import axios from 'axios';
+import * as https from 'https';
 
 export async function getSwaggerJson(pathOrUrl: string): Promise<OpenApiDocument> {
     let swaggerJson = {};
     if (pathOrUrl.toLowerCase().startsWith('http')) {
-        swaggerJson = await axios.get(pathOrUrl).then(res => res.data);
+        swaggerJson = await axios.get(pathOrUrl, { httpsAgent: new https.Agent({ rejectUnauthorized: false }) }).then(res => res.data);
     } else {
         swaggerJson = JSON.parse(readFileSync(pathOrUrl, 'utf8'));
     }
