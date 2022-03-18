@@ -17,3 +17,4 @@ dist-test
 test-python.py
 test*
 openapiSchemaExample.json
+package-lock.json
