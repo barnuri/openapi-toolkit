@@ -1,6 +1,6 @@
 # Install
 
-[![Publish Package to npmjs](https://github.com/barnuri/openapi-toolkit/actions/workflows/publishToNpm.yml/badge.svg)](https://github.com/barnuri/openapi-toolkit/actions/workflows/publishToNpm.yml)
+[![Publish Package to npmjs](https://github.com/barnuri/openapi-toolkit/actions/workflows/publishToNpm.yml/badge.svg?branch=2.0.28)](https://github.com/barnuri/openapi-toolkit/actions/workflows/publishToNpm.yml)
 
 ```bash
 npm i openapi-toolkit
