@@ -24,7 +24,7 @@
         "preupload": "rimraf dist && npm run build && git push",
         "upload": "npm publish",
         "postupload": "npm version patch && git push",
-        "test:typescript": "npm run build && cross-env-shell \"node ./dist/cli-generate.js -i $OPENAPI_TOOLKIT_TESTFILE -g typescript-axios -o ./test --modelNamePrefix My --modelNameSuffix .dto.test && tsc --build tsconfig-test.json\"",
+        "test:typescript": "npm run build && cross-env-shell \"node ./dist/cli-generate.js -i $OPENAPI_TOOLKIT_TESTFILE -g typescript-axios -o ./test-typescript-axios && tsc --build tsconfig-test.json\"",
         "test:csharp": "npm run build && cross-env-shell \"node ./dist/cli-generate.js -i $OPENAPI_TOOLKIT_TESTFILE -g c# -o ./test-csharp --modelNamePrefix My\"",
         "test:python": "npm run build && cross-env-shell \"node ./dist/cli-generate.js -i $OPENAPI_TOOLKIT_TESTFILE -g python -o ./test-python --modelNamePrefix My --modelNameSuffix .dto.test\"",
         "test:go": "npm run build && cross-env-shell \"node ./dist/cli-generate.js -i $OPENAPI_TOOLKIT_TESTFILE -g go -o ./test-go\"",

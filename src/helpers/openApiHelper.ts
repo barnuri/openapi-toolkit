@@ -71,8 +71,12 @@ export function getApiPaths(openApiDocument: OpenApiDocument): ApiPath[] {
             const oldBody = getParamsByType('body').find(_ => true);
             const body = methodDetails.requestBody;
             let response = (methodDetails.responses || {})['200'] || {};
+            let controller = ((methodDetails.tags || []).find(_ => true) || 'Default')
+                .replace(/ /g, '')
+                .replace(/\/|-|{|}|\.|_/g, '')
+                .trim();
             paths.push({
-                controller: (methodDetails.tags || []).find(_ => true) || 'Default',
+                controller,
                 method,
                 path,
                 body: {
