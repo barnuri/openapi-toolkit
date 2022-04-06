@@ -9,18 +9,21 @@ export class TypescriptAxiosClientGenerator extends TypescriptGenerator {
     controllersExportFile = join(this.controllersFolder, 'index.ts');
     mainExportFile = join(this.options.output, 'index.ts');
     generateClient(): void {
-        let mainFileContent = `import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';\n`;
+        let mainFileContent = `import { AxiosRequestConfig } from 'axios';\n`;
         mainFileContent += `import * as controllers from './controllers';\n`;
         mainFileContent += `export * from './models';\n`;
         mainFileContent += `export * from './controllers';\n`;
         mainFileContent += `export * from './ControllerBase';\n`;
-        mainFileContent += `export default (axiosRequestConfig: AxiosRequestConfig) => ({\n`;
+        mainFileContent += `export const createApi = (axiosRequestConfig: AxiosRequestConfig) => ({\n`;
         mainFileContent +=
             this.controllersNames
                 .map(x => this.getControllerName(x))
                 .map(x => `\t${x}: new controllers.${x}(axiosRequestConfig)`)
                 .join(',\n') + '\n';
-        mainFileContent += `});`;
+        mainFileContent += `});\n`;
+        mainFileContent += `const tmp = createApi({});`;
+        mainFileContent += `export type ApiType = typeof tmp;`;
+        mainFileContent += `export default createApi;`;
         writeFileSync(this.mainExportFile, this.disableLinting + mainFileContent);
     }
     generateController(controller: string, controlerPaths: ApiPath[]): void {
@@ -29,7 +32,7 @@ export class TypescriptAxiosClientGenerator extends TypescriptGenerator {
         makeDirIfNotExist(this.controllersFolder);
         appendFileSync(this.controllersExportFile, `export * from './${controllerName}'\n`);
         let controllerContent = `import * as models from '../models';\n`;
-        controllerContent += `import { AxiosRequestConfig } from 'axios';\n`;
+        controllerContent += `import { AxiosRequestConfig, AxiosResponse } from 'axios';\n`;
         controllerContent += `import { ControllerBase } from '../ControllerBase';\n`;
         controllerContent += `export class ${controllerName} extends ControllerBase {\n`;
         controllerContent += this.generateControllerMethodsContent(controller, controlerPaths);
@@ -60,7 +63,7 @@ export class TypescriptAxiosClientGenerator extends TypescriptGenerator {
             : ``;
 
         let methodContent = '';
-        methodContent += `\tasync ${methodName}(${bodyParam}${pathParams}${queryParams}${headersParams}customConfig?: AxiosRequestConfig): Promise<${responseType}> {\n`;
+        methodContent += `\tasync ${methodName}(${bodyParam}${pathParams}${queryParams}${headersParams}customConfig?: AxiosRequestConfig): Promise<AxiosResponse<${responseType}>> {\n`;
         methodContent += `\t\treturn this.method<${requestType},${responseType}>(\n`;
         methodContent += `\t\t\t'${controllerPath.method.toLowerCase()}',\n`;
         methodContent += `\t\t\t\`${url}\`,\n`;
@@ -76,20 +79,26 @@ export class TypescriptAxiosClientGenerator extends TypescriptGenerator {
         if (!this.shouldGenerateFile(controllerBaseFile)) {
             return;
         }
-        const baseControllerContent = `import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
+        const baseControllerContent = `import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 export class ControllerBase {
     axiosInstance: AxiosInstance;
     constructor(public axiosSettings?: AxiosRequestConfig) {
         this.axiosInstance = axios.create(axiosSettings);
     }
-    protected method<T, S>(method: string, path: string, body: T | undefined, headers?: { [key: string]: string | undefined }, customConfig?: AxiosRequestConfig): Promise<S> {
+    protected method<T, S>(
+        method: string,
+        path: string,
+        body: T | undefined,
+        headers?: { [key: string]: string | undefined },
+        customConfig?: AxiosRequestConfig,
+    ): Promise<AxiosResponse<S>> {
         return this.axiosInstance.request<S>({
             url: path,
             method: method as any,
             headers,
             data: body,
             ...customConfig,
-        }).then(res => res.data);
+        });
     }
 }
         `;
