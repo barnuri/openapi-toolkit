@@ -86,31 +86,6 @@ ${Object.keys(enumVals)
             `;
         writeFileSync(modelFile, this.disableLinting + modelFileContent);
     }
-    generateBaseController() {
-        const controllerBaseFile = join(this.options.output, 'ControllerBase.ts');
-        if (!this.shouldGenerateFile(controllerBaseFile)) {
-            return;
-        }
-        const baseControllerContent = `import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
-export class ControllerBase {
-    axiosInstance: AxiosInstance;
-    constructor(public axiosSettings?: AxiosRequestConfig) {
-        this.axiosInstance = axios.create(axiosSettings);
-    }
-    protected method<T, S>(method: string, path: string, body: T | undefined, headers?: { [key: string]: string | undefined }, customConfig?: AxiosRequestConfig): Promise<S> {
-        return this.axiosInstance.request<T, S>({
-            url: path,
-            method: method as any,
-            headers,
-            data: body,
-            ...customConfig,
-        });
-    }
-}
-        `;
-        writeFileSync(controllerBaseFile, this.disableLinting + baseControllerContent);
-    }
-
     getFileExtension(isModel: boolean) {
         return (isModel ? this.getFileAdditionalExtension() + '.ts' : '.ts').replace('..ts', '.ts');
     }
