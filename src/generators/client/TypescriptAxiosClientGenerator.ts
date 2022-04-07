@@ -9,21 +9,28 @@ export class TypescriptAxiosClientGenerator extends TypescriptGenerator {
     controllersExportFile = join(this.controllersFolder, 'index.ts');
     mainExportFile = join(this.options.output, 'index.ts');
     generateClient(): void {
-        let mainFileContent = `import { AxiosRequestConfig } from 'axios';\n`;
-        mainFileContent += `import * as controllers from './controllers';\n`;
-        mainFileContent += `export * from './models';\n`;
-        mainFileContent += `export * from './controllers';\n`;
-        mainFileContent += `export * from './ControllerBase';\n`;
-        mainFileContent += `export const createApi = (axiosRequestConfig: AxiosRequestConfig) => ({\n`;
-        mainFileContent +=
-            this.controllersNames
-                .map(x => this.getControllerName(x))
-                .map(x => `\t${x}: new controllers.${x}(axiosRequestConfig)`)
-                .join(',\n') + '\n';
-        mainFileContent += `});\n`;
-        mainFileContent += `const tmp = createApi({});`;
-        mainFileContent += `export type ApiType = typeof tmp;`;
-        mainFileContent += `export default createApi;`;
+        let mainFileContent = `import { AxiosRequestConfig } from 'axios';
+import * as controllers from './controllers';
+export * from './models';
+export * from './controllers';
+export * from './ControllerBase';
+
+class ApiClient {
+${this.controllersNames
+    .map(x => this.getControllerName(x))
+    .map(x => `\tpublic ${x}: controllers.${x}`)
+    .join(';\n')}
+    
+    constructor(public axiosRequestConfig?: AxiosRequestConfig) {
+        this.axiosRequestConfig = axiosRequestConfig || {};       
+${this.controllersNames
+    .map(x => this.getControllerName(x))
+    .map(x => `\t\tthis.${x} = new controllers.${x}(axiosRequestConfig)`)
+    .join(',\n')}
+    }
+}
+
+export default ApiClient;`;
         writeFileSync(this.mainExportFile, this.disableLinting + mainFileContent);
     }
     generateController(controller: string, controlerPaths: ApiPath[]): void {
