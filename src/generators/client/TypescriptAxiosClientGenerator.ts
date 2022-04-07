@@ -65,8 +65,9 @@ export default ApiClient;`;
         }
         const haveQueryParams = controllerPath.queryParams.length > 0;
         url += !haveQueryParams ? '' : '?' + controllerPath.queryParams.map(x => `${x.name}=\${queryParams['${x.name}']}`).join('&');
+        const queryParamFix = (name: string) => (name.includes('.') || name.includes('-') ? `"${name}"` : name);
         const queryParams = haveQueryParams
-            ? `queryParams: {${controllerPath.queryParams.map(x => `${x.name}${x.required ? '' : '?'}: ${this.getPropDesc(x.schema!)}`)}}, `
+            ? `queryParams: {${controllerPath.queryParams.map(x => `${queryParamFix(x.name)}${x.required ? '' : '?'}: ${this.getPropDesc(x.schema!)}`)}}, `
             : ``;
 
         let methodContent = '';

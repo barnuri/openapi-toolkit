@@ -44,8 +44,10 @@ yargs(process.argv.slice(2))
                 .nargs('controllerNameSuffix', 1)
                 .default('controllerNameSuffix', 'Controller')
                 .nargs('longMethodName', 1)
-                .default('longMethodName', false),
-
+                .default('longMethodName', false)
+                .nargs('debugLogs', 1)
+                .alias('d', 'debugLogs')
+                .default('debugLogs', true),
         argv => {
             generate(argv as any)
                 .then(() => console.log('done succssfully'))

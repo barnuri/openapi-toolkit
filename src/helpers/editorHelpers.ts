@@ -37,9 +37,15 @@ export function editorNameByPath(editorPath: string): string {
     return (editorPath || '').split('.').splice(-1)[0];
 }
 
-export function getAllEditors(openApiDocument: OpenApiDocument): Editor[] {
+export function getAllEditors(openApiDocument: OpenApiDocument, withLogs: boolean = false): Editor[] {
     let definitions = getDefinisions(openApiDocument);
-    const allEditors = Object.keys(definitions || {}).map(x => getEditor(openApiDocument, x, true));
+    const allEditors = [] as Editor[];
+    for (const modelName of Object.keys(definitions || {})) {
+        if (withLogs) {
+            console.log(`parsing model: ${modelName}`);
+        }
+        allEditors.push(getEditor(openApiDocument, modelName, true));
+    }
     return allEditors;
 }
 

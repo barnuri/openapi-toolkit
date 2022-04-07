@@ -17,7 +17,10 @@ export abstract class GeneratorAbstract {
     modelsFolder = join(this.options.output, this.options.modelsFolderName);
     controllersFolder = join(this.options.output, this.options.controllersFolderName);
     generatedFiles: string[];
+    filesNames: string[];
     haveModels: boolean;
+    cleanRegex = /\/| |-|{|}|\.|_|\[|\]|,/g;
+    methodsNames: { [name: string]: number } = {};
     constructor(public swagger: OpenApiDocument, public options: GeneratorsOptions) {
         if (!options.pathOrUrl) {
             throw new Error('pathOrUrl is required');
@@ -40,10 +43,13 @@ export abstract class GeneratorAbstract {
         options.controllerNameSuffix = options.controllerNameSuffix || '';
         options.namepsace = options.namepsace || '';
         this.generatedFiles = [];
+        this.filesNames = [];
         this.swagger = swagger;
-        this.editors = getAllEditors(swagger);
-        this.apiPaths = getApiPaths(swagger);
         this.options.output = fixPath(options.output);
+        console.log('parse models');
+        this.editors = getAllEditors(swagger, options.debugLogs);
+        console.log('parse all api pathes');
+        this.apiPaths = getApiPaths(swagger);
         this.controllersNames = [...new Set(this.apiPaths.map(x => x.controller))];
         this.allEditorInputs = getAllEditorInputsByEditors(this.editors);
         this.allObjectEditorInputs = this.allEditorInputs.filter(x => x.editorType === 'EditorObjectInput').map(x => x as EditorObjectInput);
@@ -54,6 +60,8 @@ export abstract class GeneratorAbstract {
     async generate(): Promise<void> {
         console.log('-----  start generating -----');
         this.generatedFiles = [];
+        this.filesNames = [];
+        this.methodsNames = {};
         rimraf.sync(this.options.output);
         makeDirIfNotExist(this.options.output);
         makeDirIfNotExist(this.modelsFolder);
@@ -89,6 +97,10 @@ export abstract class GeneratorAbstract {
     }
     shouldGenerateModel(editorInput: EditorInput) {
         makeDirIfNotExist(this.modelsFolder);
+        const fileName = this.getFileName(editorInput);
+        if (!fileName) {
+            return false;
+        }
         const modelFile = join(this.modelsFolder, this.getFileName(editorInput) + this.getFileExtension(true));
         return this.shouldGenerateFile(modelFile);
     }
@@ -100,17 +112,32 @@ export abstract class GeneratorAbstract {
         return true;
     }
     getFileName(editorInput: EditorInput) {
-        let name = editorInput.className || (editorInput as any).definistionName || editorInput.title;
-        if (!name || name === 'undefined' || name === '') {
-            name = undefined;
-        }
-        if (!name && editorInput.editorType === 'EditorPrimitiveInput' && (editorInput as EditorPrimitiveInput).enumsOptions.length > 0) {
-            name = editorInput.name;
-        }
-        if (!name || name === 'undefined' || name === '') {
+        const getFileName = () => {
+            let name: string | undefined = editorInput.className || (editorInput as any).definistionName || editorInput.title;
+            if (!name || name === 'undefined' || name === '') {
+                name = undefined;
+            }
+            if (!name && editorInput.editorType === 'EditorPrimitiveInput' && (editorInput as EditorPrimitiveInput).enumsOptions.length > 0) {
+                name = editorInput.name;
+            }
+            if (!name || name === 'undefined' || name === '') {
+                return undefined;
+            }
+            name = name.replace(this.cleanRegex, '');
+            return this.options.modelNamePrefix + capitalize(name) + this.options.modelNameSuffix.split('.')[0];
+        };
+        let fileName = getFileName();
+        if (!fileName) {
             return undefined;
         }
-        return this.options.modelNamePrefix + capitalize(name) + this.options.modelNameSuffix.split('.')[0];
+        const modelFile = join(this.modelsFolder, fileName + this.getFileExtension(true));
+        const path = this.filesNames.find(x => x.toLowerCase() === modelFile.toLowerCase());
+        if (path) {
+            fileName = path.replace(/\\/g, '/').split('/').pop()?.split('.')[0];
+        } else {
+            this.filesNames.push(modelFile);
+        }
+        return fileName;
     }
     getControllerName(controllerName: string) {
         return `${this.options.controllerNamePrefix}${capitalize(controllerName)}${this.options.controllerNameSuffix}`;
@@ -131,23 +158,30 @@ export abstract class GeneratorAbstract {
         return content;
     }
     getMethodName(controllerPath: ApiPath) {
-        const cleanRegex = /\/|-|{|}|\.|_/g;
-        const longName = controllerPath.method.toLowerCase() + capitalize(controllerPath.path.replace(cleanRegex, ''));
-        if (this.options.longMethodName) {
-            return longName;
+        const methodName = () => {
+            const longName = controllerPath.method.toLowerCase() + capitalize(controllerPath.path.replace(this.cleanRegex, ''));
+            if (this.options.longMethodName) {
+                return longName;
+            }
+            let shortName = '';
+            try {
+                shortName = controllerPath.path.split('?')[0];
+                shortName = shortName.toLowerCase().startsWith('/api') ? shortName.substring(4) : shortName;
+                shortName =
+                    shortName.split(`/${controllerPath.controller}/`).length <= 1
+                        ? shortName
+                        : shortName.split(`/${controllerPath.controller}/`).slice(1).join(`/${controllerPath.controller}/`);
+                shortName = shortName.replace(this.cleanRegex, '');
+                shortName = !(shortName || '').trim() ? '' : controllerPath.method.toLowerCase() + capitalize(shortName);
+            } catch {}
+            return !shortName ? longName : shortName.replace(this.cleanRegex, '').trim();
+        };
+        const res = methodName();
+        if (!this.methodsNames[res]) {
+            this.methodsNames[res] = 1;
+            return res;
         }
-        let shortName = '';
-        try {
-            shortName = controllerPath.path.split('?')[0];
-            shortName = shortName.toLowerCase().startsWith('/api') ? shortName.substring(4) : shortName;
-            shortName =
-                shortName.split(`/${controllerPath.controller}/`).length <= 1
-                    ? shortName
-                    : shortName.split(`/${controllerPath.controller}/`).slice(1).join(`/${controllerPath.controller}/`);
-            shortName = shortName.replace(cleanRegex, '');
-            shortName = !(shortName || '').trim() ? '' : controllerPath.method.toLowerCase() + capitalize(shortName);
-        } catch {}
-        return !shortName ? longName : shortName.trim();
+        return `${res}${this.methodsNames[res]++}`;
     }
     abstract getFileExtension(isModel: boolean);
     abstract generateObject(objectInput: EditorObjectInput): void;

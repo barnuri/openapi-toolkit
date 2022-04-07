@@ -31,7 +31,14 @@ export abstract class TypescriptGenerator extends GeneratorAbstract {
                 : ``;
         const modelFileContent = `import * as models from './index';
 export interface ${this.getFileName(objectInput)} ${extendStr} {
-${objectInput.properties.map(x => `\t${x.name.replace(/\[i\]/g, '')}${x.nullable || !x.required ? '?' : ''}: ${this.getPropDesc(x)}`).join(';\n')}
+${objectInput.properties
+    .map(
+        x =>
+            `\t${x.name.includes('-') ? `"` : ''}${x.name.replace(/\[i\]/g, '')}${x.name.includes('-') ? `"` : ''}${
+                x.nullable || !x.required ? '?' : ''
+            }: ${this.getPropDesc(x)}`,
+    )
+    .join(';\n')}
 }`;
         writeFileSync(modelFile, this.disableLinting + modelFileContent);
     }
@@ -77,10 +84,11 @@ ${objectInput.properties.map(x => `\t${x.name.replace(/\[i\]/g, '')}${x.nullable
             return;
         }
         const modelFile = join(this.modelsFolder, this.getFileName(enumInput) + this.getFileExtension(true));
+        const fixName = (name: string) => (name.includes('-') || name.includes(' ') ? `"${name}"` : name);
         const modelFileContent = `   
 export enum ${this.getFileName(enumInput)} {
 ${Object.keys(enumVals)
-    .map(x => `\t${x} = ${typeof enumVals[x] === 'number' ? enumVals[x] : `'${enumVals[x]}'`}`)
+    .map(x => `\t${fixName(x)} = ${typeof enumVals[x] === 'number' ? enumVals[x] : `'${enumVals[x]}'`}`)
     .join(',\n')}
 }
             `;

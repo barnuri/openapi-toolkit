@@ -14,4 +14,5 @@ export default class GeneratorsOptions {
     namepsace: string = 'OpenapiDefinitionGenerate';
     type: string = 'client';
     longMethodName: boolean = false;
+    debugLogs: boolean = true;
 }
