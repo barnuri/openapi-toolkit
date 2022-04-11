@@ -13,7 +13,7 @@ jobs:
         uses: actions/setup-node@v1
         
       - name: download swagger file
-      - run: |
+        run: |
           curl https://petstore.swagger.io/v2/swagger.json -o $OPENAPI_TOOLKIT_TESTFILE
           export OPENAPI_TOOLKIT_TESTFILE="${{ github.workspace }}/swagger.json"
       - name: install dependencies
