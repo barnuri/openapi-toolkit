@@ -6,18 +6,37 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
+      - name: checkout
+        uses: actions/checkout@v2
+
+      - name: install node
+        uses: actions/setup-node@v1
+        
+      - name: download swagger file
       - run: |
           curl https://petstore.swagger.io/v2/swagger.json -o $OPENAPI_TOOLKIT_TESTFILE
-          npm i
-          rm -rf .npmrc
-          npm run build
-          npm run test:typescript
-          npm run test:typescript-reactquery
-          npm run test:csharp
-          npm run test:python
-          npm run test:go
-          npm run test:go-server
-        env:
-          OPENAPI_TOOLKIT_TESTFILE: "${{ github.workspace }}/swagger.json"
+          export OPENAPI_TOOLKIT_TESTFILE="${{ github.workspace }}/swagger.json"
+
+      - name: install dependencies
+        run: rm -rf .npmrc && npm i
+
+      - name: build 
+        run: npm run build
+          
+      - name: run test:typescript
+        run: npm run test:typescript
+
+      - name: run test:typescript-reactquery
+        run: npm run test:typescript-reactquery
+
+      - name: run test:csharp
+        run: npm run test:csharp
+
+      - name: run test:python
+        run: npm run test:python
+
+      - name: run test:go
+        run: npm run test:go
+
+      - name: run test:go-server
+        run: npm run test:go-server
