@@ -1,0 +1,21 @@
+name: runTests
+on:
+  pull_request:
+    branches: [ master ]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+      - run: |
+          curl https://petstore.swagger.io/v2/swagger.json -o $OPENAPI_TOOLKIT_TESTFILE
+          npm run build
+          npm run test:typescript
+          npm run test:typescript-reactquery
+          npm run test:csharp
+          npm run test:python
+          npm run test:go
+          npm run test:go-server
+        env:
+          OPENAPI_TOOLKIT_TESTFILE: "${{ github.workspace }}/swagger.json"
