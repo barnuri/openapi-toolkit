@@ -1,3 +1,4 @@
+import { TypescriptReactQueryClientGenerator } from './client/TypescriptReactQueryClientGenerator';
 import { GoServerGenerator } from './server/GoServerGenerator';
 import { ServerGenerators } from './../models/ServerGenerators';
 import { ClientGenerators } from '../models/ClientGenerators';
@@ -75,6 +76,9 @@ export function clientGeneratorGetter(generator: ClientGenerators | ServerGenera
     }
     if (generator === ClientGenerators.Go) {
         return GoClientGenerator;
+    }
+    if (generator === ClientGenerators.TypescriptReactQuery) {
+        return TypescriptReactQueryClientGenerator;
     }
     throw new Error('not implemented: ' + generator);
 }

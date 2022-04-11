@@ -54,7 +54,7 @@ jobs:
         with:
           path: ./*
           key: ${{ github.sha }}
-      - run: npm run test:typescript-reactquery
+      - run: npm run test:typescript-react-query
         
   test-csharp:
     name: Test C#
