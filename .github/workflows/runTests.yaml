@@ -2,9 +2,12 @@ name: runTests
 on:
   pull_request:
     branches: [ master ]
+env:
+  OPENAPI_TOOLKIT_TESTFILE: "${{ github.workspace }}/swagger.json"
 jobs:
-  runTests:
+  prepare:
     runs-on: ubuntu-latest
+    name: Prepare Environment
     steps:
       - name: checkout
         uses: actions/checkout@v2
@@ -15,9 +18,19 @@ jobs:
           node-version: '16.x'
         
       - name: download swagger file
-        run: |
-          export OPENAPI_TOOLKIT_TESTFILE="${{ github.workspace }}/swagger.json"
-          curl https://petstore.swagger.io/v2/swagger.json -o $OPENAPI_TOOLKIT_TESTFILE
+        run: curl https://petstore.swagger.io/v2/swagger.json -o $OPENAPI_TOOLKIT_TESTFILE
+
+      - uses: actions/cache@v2
+        name: cache node_modules
+        with:
+          path: '**/node_modules'
+          key: ${{ runner.os }}-modules-${{ hashFiles('**/package.json') }}
+
+      - uses: actions/cache@v2
+        name: cache swaggerfile
+        with:
+          path: "${{ github.workspace }}/swagger.json"
+          key: ${{ runner.os }}-swaggerfile
 
       - name: install dependencies
         run: rm -rf .npmrc && npm i
@@ -25,20 +38,44 @@ jobs:
       - name: build 
         run: npm run build
           
-      - name: run test:typescript
-        run: npm run test:typescript
+  test-typescript:
+    name: Test Typescript
+    runs-on: ubuntu-latest
+    needs: [ prepare ]
+    steps:
+      - run: run test:typescript
 
-      - name: run test:typescript-reactquery
-        run: npm run test:typescript-reactquery
-
-      - name: run test:csharp
-        run: npm run test:csharp
-
-      - name: run test:python
-        run: npm run test:python
-
-      - name: run test:go
-        run: npm run test:go
-
-      - name: run test:go-server
-        run: npm run test:go-server
+  test-typescript-reactquery:
+    name: Test Typescript ReactQuery
+    runs-on: ubuntu-latest
+    needs: [ prepare ]
+    steps:
+      - run: npm run test:typescript-reactquery
+        
+  test-csharp:
+    name: Test C#
+    runs-on: ubuntu-latest
+    needs: [ prepare ]
+    steps:
+      - run: run test:csharp
+        
+  test-python:
+    name: Test Python
+    runs-on: ubuntu-latest
+    needs: [ prepare ]
+    steps:
+      - run: run test:python
+        
+  test-go:
+    name: Test Go
+    runs-on: ubuntu-latest
+    needs: [ prepare ]
+    steps:
+      - run: run test:go
+        
+  test-go-server:
+    name: Test Go Server
+    runs-on: ubuntu-latest
+    needs: [ prepare ]
+    steps:
+      - run: run test:go-server
