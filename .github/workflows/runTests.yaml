@@ -10,6 +10,8 @@ jobs:
       - uses: actions/setup-node@v1
       - run: |
           curl https://petstore.swagger.io/v2/swagger.json -o $OPENAPI_TOOLKIT_TESTFILE
+          npm i
+          rm -rf .npmrc
           npm run build
           npm run test:typescript
           npm run test:typescript-reactquery
