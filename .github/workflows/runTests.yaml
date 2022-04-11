@@ -3,7 +3,7 @@ on:
   pull_request:
     branches: [ master ]
 jobs:
-  build:
+  runTests:
     runs-on: ubuntu-latest
     steps:
       - name: checkout
@@ -14,8 +14,8 @@ jobs:
         
       - name: download swagger file
         run: |
-          curl https://petstore.swagger.io/v2/swagger.json -o $OPENAPI_TOOLKIT_TESTFILE
           export OPENAPI_TOOLKIT_TESTFILE="${{ github.workspace }}/swagger.json"
+          curl https://petstore.swagger.io/v2/swagger.json -o $OPENAPI_TOOLKIT_TESTFILE
 
       - name: install dependencies
         run: rm -rf .npmrc && npm i
