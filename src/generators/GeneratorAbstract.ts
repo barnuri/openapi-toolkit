@@ -157,7 +157,7 @@ export abstract class GeneratorAbstract {
         }
         return content;
     }
-    getMethodName(controllerPath: ApiPath) {
+    getMethodName(controllerPath: ApiPath, prefix: string = '', suffix: string = '') {
         const methodName = () => {
             const longName = controllerPath.method.toLowerCase() + capitalize(controllerPath.path.replace(this.cleanRegex, ''));
             if (this.options.longMethodName) {
@@ -176,12 +176,12 @@ export abstract class GeneratorAbstract {
             } catch {}
             return !shortName ? longName : shortName.replace(this.cleanRegex, '').trim();
         };
-        const res = methodName();
+        const res = `${prefix}${methodName()}${suffix}`;
         if (!this.methodsNames[res]) {
-            this.methodsNames[res] = 1;
-            return res;
+            this.methodsNames[res] = 0;
         }
-        return `${res}${this.methodsNames[res]++}`;
+        const extraText = this.methodsNames[res] > 0 ? `${this.methodsNames[res]}` : '';
+        return `${res}${extraText}`;
     }
     abstract getFileExtension(isModel: boolean);
     abstract generateObject(objectInput: EditorObjectInput): void;

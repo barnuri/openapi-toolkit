@@ -9,7 +9,7 @@ export class TypescriptAxiosClientGenerator extends TypescriptGenerator {
     controllersExportFile = join(this.controllersFolder, 'index.ts');
     mainExportFile = join(this.options.output, 'index.ts');
     generateClient(): void {
-        let mainFileContent = `import { AxiosRequestConfig } from 'axios';
+        let mainFileContent = `import axios, { AxiosRequestConfig, AxiosInstance } from 'axios';
 import * as controllers from './controllers';
 export * from './models';
 export * from './controllers';
@@ -21,11 +21,12 @@ ${this.controllersNames
     .map(x => `\tpublic ${x}: controllers.${x}`)
     .join(';\n')}
     
-    constructor(public axiosRequestConfig?: AxiosRequestConfig) {
-        this.axiosRequestConfig = axiosRequestConfig || {};       
+    constructor(public axiosRequestConfig?: AxiosRequestConfig, public axiosInstance?: AxiosInstance) {
+        this.axiosRequestConfig = axiosRequestConfig || {}; 
+        this.axiosInstance = axiosInstance || axios.create(this.axiosRequestConfig);   
 ${this.controllersNames
     .map(x => this.getControllerName(x))
-    .map(x => `\t\tthis.${x} = new controllers.${x}(axiosRequestConfig)`)
+    .map(x => `\t\tthis.${x} = new controllers.${x}(this.axiosInstance)`)
     .join(',\n')}
     }
 }
@@ -33,14 +34,17 @@ ${this.controllersNames
 export default ApiClient;`;
         writeFileSync(this.mainExportFile, this.disableLinting + mainFileContent);
     }
+    getControllersImports() {
+        return `import * as models from '../models';
+import { AxiosRequestConfig, AxiosResponse } from 'axios';
+import { ControllerBase } from '../ControllerBase';`;
+    }
     generateController(controller: string, controlerPaths: ApiPath[]): void {
         const controllerName = this.getControllerName(controller);
         this.generateBaseController();
         makeDirIfNotExist(this.controllersFolder);
         appendFileSync(this.controllersExportFile, `export * from './${controllerName}'\n`);
-        let controllerContent = `import * as models from '../models';\n`;
-        controllerContent += `import { AxiosRequestConfig, AxiosResponse } from 'axios';\n`;
-        controllerContent += `import { ControllerBase } from '../ControllerBase';\n`;
+        let controllerContent = this.getControllersImports() + `\n\n`;
         controllerContent += `export class ${controllerName} extends ControllerBase {\n`;
         controllerContent += this.generateControllerMethodsContent(controller, controlerPaths);
         controllerContent += `}`;
@@ -87,12 +91,9 @@ export default ApiClient;`;
         if (!this.shouldGenerateFile(controllerBaseFile)) {
             return;
         }
-        const baseControllerContent = `import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
+        const baseControllerContent = `import { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 export class ControllerBase {
-    axiosInstance: AxiosInstance;
-    constructor(public axiosSettings?: AxiosRequestConfig) {
-        this.axiosInstance = axios.create(axiosSettings);
-    }
+    constructor(public axiosInstance: AxiosInstance) { }
     protected method<T, S>(
         method: string,
         path: string,
