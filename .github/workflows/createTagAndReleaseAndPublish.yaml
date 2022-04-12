@@ -8,6 +8,8 @@ jobs:
   createTagAndRelease:
     runs-on: ubuntu-latest
     name: Create Tag And Release
+    outputs:
+      tagName: ${{ steps.setTag.outputs.tagName }}
     steps:
       - name: checkout
         uses: actions/checkout@v2
@@ -51,7 +53,7 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
       - run: npm i
       - run: npm run build
-      - run: npm version ${{ needs.createTagAndRelease.steps.setTag.outputs.tagName }} --allow-same-version true --commit-hooks false --git-tag-version false
+      - run: npm version ${{ needs.createTagAndRelease.outputs.tagName }} --allow-same-version true --commit-hooks false --git-tag-version false
       - run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
