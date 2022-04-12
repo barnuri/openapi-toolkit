@@ -11,8 +11,6 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v2
-        with:
-          persist-credentials: false 
         
       - name: Set Tag Name
         run: |           
@@ -25,6 +23,7 @@ jobs:
       
       - name: Create tag & Release
         uses: actions/github-script@v6
+        # https://docs.github.com/en/rest/reference/releases#create-a-release
         with:
           script: |
             console.log("newTagName=${{ env.newTagName }}")
@@ -34,5 +33,6 @@ jobs:
               tag_name: "${{ env.newTagName }}",
               name: "${{ env.newTagName }}",
               body: "Version ${{ env.newTagName }}",
+              target_commitish: context.sha
             });
             
