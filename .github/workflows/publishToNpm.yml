@@ -1,8 +1,8 @@
 name: Publish Package to npmjs
 on:
   push:
-    tags:        
-      - *
+    tags:
+    - '*'
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -15,7 +15,7 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
       - run: npm i
       - run: npm run build
-      - run: npm version ${{ github.event.release.tag_name }} --allow-same-version true --commit-hooks false --git-tag-version false
+      - run: npm version ${{ github.ref_name }} --allow-same-version true --commit-hooks false --git-tag-version false
       - run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
