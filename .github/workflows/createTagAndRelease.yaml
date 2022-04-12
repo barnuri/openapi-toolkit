@@ -1,5 +1,5 @@
            
-name: Create Tag And Release
+name: Create Tag And Release And Publish To NPM
 on:
   push:
     branches:
@@ -36,3 +36,20 @@ jobs:
               target_commitish: context.sha
             });
             
+  publish:
+    needs: [ createTagAndRelease ]
+    name: Publish Package to npmjs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      # Setup .npmrc file to publish to npm
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '16.x'
+          registry-url: 'https://registry.npmjs.org'
+      - run: npm i
+      - run: npm run build
+      - run: npm version ${{ env.newTagName }} --allow-same-version true --commit-hooks false --git-tag-version false
+      - run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
