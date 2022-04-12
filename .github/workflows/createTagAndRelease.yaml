@@ -27,7 +27,7 @@ jobs:
             github.rest.git.createRef({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              ref: 'refs/tags/${{ env.newTagName }}',
+              ref: 'refs/tags/v${{ env.newTagName }}',
               sha: context.sha
             })
       - name: Create Release
@@ -36,9 +36,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
         with:
-          tag_name: ${{ env.newTagName }}
+          tag_name: v${{ env.newTagName }}
           release_name: Release ${{ env.newTagName }}
           body: |
-            Version ${{ env.newTagName }}
+            Version v${{ env.newTagName }}
           draft: false
           prerelease: false
