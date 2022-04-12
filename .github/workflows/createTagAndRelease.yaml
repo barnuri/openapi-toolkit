@@ -21,22 +21,24 @@ jobs:
           echo "newTag=$newTag"
           echo "newTagName=$newTag" >> $GITHUB_ENV
       
-      - name: Create tag
-        run: |
-           git config user.name "GitHub Actions Bot"
-           git config user.email "<>"
-           git tag ${{ env.newTagName }} -a
-           git push origin --tags
-            
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
+      - name: Create tag & Release
+        uses: actions/github-script@v6
         with:
-          tag_name: ${{ env.newTagName }}
-          release_name: Release ${{ env.newTagName }}
-          body: |
-            Version ${{ env.newTagName }}
-          draft: false
-          prerelease: false
+          script: |
+            github.rest.git.createRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: 'refs/tags/${{ env.newTagName }}',
+              sha: context.sha
+            });
+            github.repos.createRelease({
+                 owner: context.repo.owner,
+                 repo: context.repo.repo,
+                 tag_name: "${{ env.newTagName }}",
+                 name: "${{ env.newTagName }}",
+                 body: "Version ${{ env.newTagName }}",
+                 draft: false,
+                 prerelease: false,
+                 target_commitish: context.sha
+            });
+            
