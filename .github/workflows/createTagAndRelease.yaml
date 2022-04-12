@@ -23,7 +23,7 @@ jobs:
       
       - name: Create tag
         run: |
-           git tag ${{ env.newTag }} -a
+           git tag ${{ env.newTagName }} -a
            git push origin --tags
             
       - name: Create Release
