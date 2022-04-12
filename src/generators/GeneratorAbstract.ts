@@ -181,6 +181,7 @@ export abstract class GeneratorAbstract {
             this.methodsNames[res] = 0;
         }
         const extraText = this.methodsNames[res] > 0 ? `${this.methodsNames[res]}` : '';
+        this.methodsNames[res]++;
         return `${res}${extraText}`;
     }
     abstract getFileExtension(isModel: boolean);
