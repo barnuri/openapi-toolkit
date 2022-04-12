@@ -15,7 +15,7 @@ jobs:
           repo: "${{ github.server_url }}/${{ github.repository }}"
       - name: Set Tag Name
         run: |           
-          newestTag="${{ steps.STEP_NAME.outputs.tag }}"
+          newestTag="${{ steps.getNewestTag.outputs.tag }}"
           newTag=$(newestTag| awk -F. -v OFS=. 'NF==1{print ++$NF}; NF>1{if(length($NF+1)>length($NF))$(NF-1)++; $NF=sprintf("%0*d", length($NF), ($NF+1)%(10^length($NF))); print}')
           echo "newTagName=$newTag" >> $GITHUB_ENV
       - name: Create tag
