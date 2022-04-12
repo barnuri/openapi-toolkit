@@ -25,12 +25,6 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
-            github.rest.git.createRef({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              ref: 'refs/tags/${{ env.newTagName }}',
-              sha: context.sha
-            });
             github.rest.repos.createRelease({
                  owner: context.repo.owner,
                  repo: context.repo.repo,
