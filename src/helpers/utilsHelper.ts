@@ -130,16 +130,16 @@ export async function upgradeSwaggers(swaggers: OpenApiDocument[]): Promise<Open
 }
 
 export async function mergeSwaggers(swaggers: OpenApiDocument[]): Promise<OpenApiDocument> {
-    swaggers = await upgradeSwaggers();
+    swaggers = await upgradeSwaggers(swaggers);
     let finalSwagger = swaggers[0];
     prepareSwagger(finalSwagger);
     for (const swagger of swaggers.slice(1)) {
         prepareSwagger(swagger);
         finalSwagger.components!.schemas = { ...finalSwagger.components!.schemas, ...swagger.components!.schemas, ...swagger.definitions };
         finalSwagger.components!.securitySchemes = { ...finalSwagger.components!.securitySchemes, ...swagger.components!.securitySchemes };
-        finalSwagger.security = [...finalSwagger.security, ...swagger.security];
-        finalSwagger.tags = [...finalSwagger.tags, ...swagger.tags];
-        finalSwagger.paths = { ...finalSwagger.paths, ...swagger.paths };
+        finalSwagger.security = [ ...finalSwagger.security!, ...swagger.security! ];
+        finalSwagger.tags = [ ...finalSwagger.tags!, ...swagger.tags! ];
+        finalSwagger.paths = { ...finalSwagger.paths!, ...swagger.paths! };
     }
     return finalSwagger;
 }
