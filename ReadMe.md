@@ -1,8 +1,7 @@
 # Install
 
-[![Create Tag And Release And Publish To NPM](https://github.com/barnuri/openapi-toolkit/actions/workflows/createTagAndReleaseAndPublish.yaml/badge.svg?event=push)](https://github.com/barnuri/openapi-toolkit/actions/workflows/createTagAndReleaseAndPublish.yaml)
+[![Run Tests](https://github.com/barnuri/openapi-toolkit/actions/workflows/runTests.yaml/badge.svg?event=push)](https://github.com/barnuri/openapi-toolkit/actions/workflows/runTests.yaml) [![Create Tag And Release And Publish To NPM](https://github.com/barnuri/openapi-toolkit/actions/workflows/createTagAndReleaseAndPublish.yaml/badge.svg?event=push)](https://github.com/barnuri/openapi-toolkit/actions/workflows/createTagAndReleaseAndPublish.yaml)
 
-[![Run Tests](https://github.com/barnuri/openapi-toolkit/actions/workflows/runTests.yaml/badge.svg?event=push)](https://github.com/barnuri/openapi-toolkit/actions/workflows/runTests.yaml)
 
 ```bash
 npm i openapi-toolkit
