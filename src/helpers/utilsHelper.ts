@@ -1,6 +1,9 @@
+import swaggerUpgrade = require('swagger2openapi');
+import JSONPath = require('jsonpath-plus');
+import { OpenApiDocument } from '../index';
+
 const reISO = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2}(?:\.\d*))(?:Z|(\+|-)([\d|:]*))?$/;
 const reMsAjax = /^\/Date\((d|-|.*)\)[\/|\\]$/;
-import JSONPath = require('jsonpath-plus');
 
 const dateParser = function (key, value) {
     try {
@@ -104,3 +107,50 @@ export function camelCase(str: string) {
         })
         .replace(/\s+/g, '');
 }
+
+export async function upgradeSwaggers(swaggers: OpenApiDocument[]): Promise<OpenApiDocument[]> {
+    const promises: Promise<OpenApiDocument>[] = [];
+    for (const swagger of swaggers) {
+        promises.push(
+            new Promise((resolve, reject) => {
+                if (swagger.openapi || `${swagger.openapi}`.startsWith('3.')) {
+                    resolve(swagger as any as OpenApiDocument);
+                    return;
+                }
+                swaggerUpgrade.convertObj(swagger, {}, function (err, options) {
+                    if (err) {
+                        reject(err);
+                    }
+                    resolve(options.openapi as any as OpenApiDocument);
+                });
+            }),
+        );
+    }
+    return await Promise.all(promises);
+}
+
+export async function mergeSwaggers(swaggers: OpenApiDocument[]): Promise<OpenApiDocument> {
+    swaggers = await upgradeSwaggers(swaggers);
+    let finalSwagger = swaggers[0];
+    prepareSwagger(finalSwagger);
+    for (const swagger of swaggers.slice(1)) {
+        prepareSwagger(swagger);
+        finalSwagger.components!.schemas = { ...finalSwagger.components!.schemas, ...swagger.components!.schemas, ...swagger.definitions };
+        finalSwagger.components!.securitySchemes = { ...finalSwagger.components!.securitySchemes, ...swagger.components!.securitySchemes };
+        finalSwagger.security = [ ...finalSwagger.security!, ...swagger.security! ];
+        finalSwagger.tags = [ ...finalSwagger.tags!, ...swagger.tags! ];
+        finalSwagger.paths = { ...finalSwagger.paths!, ...swagger.paths! };
+    }
+    return finalSwagger;
+}
+
+const prepareSwagger = (swagger: OpenApiDocument): OpenApiDocument => {
+    swagger.components = swagger.components || {};
+    swagger.components.schemas = swagger.components.schemas || {};
+    swagger.components.securitySchemes = swagger.components.securitySchemes || {};
+    swagger.security = swagger.security || [];
+    swagger.tags = swagger.tags || [];
+    swagger.paths = swagger.paths || {};
+    swagger.definitions = swagger.definitions || {};
+    return swagger;
+};
