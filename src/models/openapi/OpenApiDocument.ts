@@ -5,7 +5,9 @@ export class OpenApiDocument {
     // support version 2
     definitions?: OpenApiDefinitionsDictionary;
     // support version 3
-    components?: { schemas: OpenApiDefinitionsDictionary };
+    components?: { schemas?: OpenApiDefinitionsDictionary, securitySchemes?: any };
+    security?: any[];
+    tags?: any[];
     paths?: {
         [path: string]: {
             [methodType: string]: {
