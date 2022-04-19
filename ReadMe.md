@@ -1,6 +1,8 @@
 # Install
 
-[![Publish Package to npmjs](https://github.com/barnuri/openapi-toolkit/actions/workflows/publishToNpm.yml/badge.svg?branch=2.0.28)](https://github.com/barnuri/openapi-toolkit/actions/workflows/publishToNpm.yml)
+[![Create Tag And Release And Publish To NPM](https://github.com/barnuri/openapi-toolkit/actions/workflows/createTagAndReleaseAndPublish.yaml/badge.svg?event=push)](https://github.com/barnuri/openapi-toolkit/actions/workflows/createTagAndReleaseAndPublish.yaml)
+
+[![Run Tests](https://github.com/barnuri/openapi-toolkit/actions/workflows/runTests.yaml/badge.svg?event=push)](https://github.com/barnuri/openapi-toolkit/actions/workflows/runTests.yaml)
 
 ```bash
 npm i openapi-toolkit
