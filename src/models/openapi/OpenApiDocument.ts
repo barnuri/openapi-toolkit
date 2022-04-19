@@ -2,10 +2,11 @@ import { OpenApiDefinition } from './OpenApiDefinition';
 import { OpenApiDefinitionsDictionary } from './OpenApiDefinitionsDictionary';
 
 export class OpenApiDocument {
+    openapi?: number;
     // support version 2
     definitions?: OpenApiDefinitionsDictionary;
     // support version 3
-    components?: { schemas?: OpenApiDefinitionsDictionary, securitySchemes?: any };
+    components?: { schemas?: OpenApiDefinitionsDictionary; securitySchemes?: any };
     security?: any[];
     tags?: any[];
     paths?: {
