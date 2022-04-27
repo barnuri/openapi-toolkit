@@ -137,11 +137,18 @@ export async function mergeSwaggers(swaggers: OpenApiDocument[]): Promise<OpenAp
         prepareSwagger(swagger);
         finalSwagger.components!.schemas = { ...finalSwagger.components!.schemas, ...swagger.components!.schemas, ...swagger.definitions };
         finalSwagger.components!.securitySchemes = { ...finalSwagger.components!.securitySchemes, ...swagger.components!.securitySchemes };
-        finalSwagger.security = [ ...finalSwagger.security!, ...swagger.security! ];
-        finalSwagger.tags = [ ...finalSwagger.tags!, ...swagger.tags! ];
         finalSwagger.paths = { ...finalSwagger.paths!, ...swagger.paths! };
+        finalSwagger.security = [...swagger.security!, ...finalSwagger.security!];
+        finalSwagger.tags = mergeArrays(finalSwagger.tags!, swagger.tags!);
     }
     return finalSwagger;
+}
+
+function mergeArrays<T>(arr1: T[], arr2: T[], keyGetter: (T item) => string) {
+    const dict = {} as any;
+    arr1.map(x => (dict[keyGetter(x)] = x));
+    arr2.map(x => (dict[keyGetter(x)] = x));
+    return Object.keys(dict).map(x => dict[x]) as T[];
 }
 
 const prepareSwagger = (swagger: OpenApiDocument): OpenApiDocument => {
