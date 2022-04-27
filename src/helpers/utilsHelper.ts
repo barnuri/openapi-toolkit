@@ -146,8 +146,8 @@ export async function mergeSwaggers(swaggers: OpenApiDocument[]): Promise<OpenAp
 
 function mergeArrays<T>(arr1: T[], arr2: T[], keySelector: (item: T) => string): T[] {
     const dict = {} as any;
-    arr1.map(x => (dict[keyGetter(x)] = x));
-    arr2.map(x => (dict[keyGetter(x)] = x));
+    arr1.map(x => (dict[keySelector(x)] = x));
+    arr2.map(x => (dict[keySelector(x)] = x));
     return Object.keys(dict).map(x => dict[x]) as T[];
 }
 
