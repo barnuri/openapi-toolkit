@@ -144,7 +144,7 @@ export async function mergeSwaggers(swaggers: OpenApiDocument[]): Promise<OpenAp
     return finalSwagger;
 }
 
-function mergeArrays<T>(arr1: T[], arr2: T[], keyGetter: (T item) => string) {
+function mergeArrays<T>(arr1: T[], arr2: T[], keySelector: (item: T) => string) {
     const dict = {} as any;
     arr1.map(x => (dict[keyGetter(x)] = x));
     arr2.map(x => (dict[keyGetter(x)] = x));
