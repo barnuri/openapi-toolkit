@@ -139,7 +139,7 @@ export async function mergeSwaggers(swaggers: OpenApiDocument[]): Promise<OpenAp
         finalSwagger.components!.securitySchemes = { ...finalSwagger.components!.securitySchemes, ...swagger.components!.securitySchemes };
         finalSwagger.paths = { ...finalSwagger.paths!, ...swagger.paths! };
         finalSwagger.security = [...swagger.security!, ...finalSwagger.security!];
-        finalSwagger.tags = mergeArrays(finalSwagger.tags!, swagger.tags!);
+        finalSwagger.tags = mergeArrays(finalSwagger.tags!, swagger.tags!, x => x.name);
     }
     return finalSwagger;
 }
