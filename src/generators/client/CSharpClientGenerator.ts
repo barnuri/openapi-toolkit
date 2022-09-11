@@ -48,14 +48,7 @@ ${controllerPropsCtor}
         controllerContent += this.generateControllerMethodsContent(controller, controlerPaths);
         controllerContent += `}`;
         const controllerFile = join(this.controllersFolder, controllerName + this.getFileExtension(false));
-        const usings = `using System;
-        using Newtonsoft.Json;
-        using System.Collections.Generic;
-        using System.Linq;
-        using System.Net.Http;
-        using System.Threading.Tasks;
-        using System.Runtime.Serialization;`
-        writeFileSync(controllerFile, '\n' + this.addNamespace(controllerContent, usings));
+        writeFileSync(controllerFile, '\n' + this.addNamespace(controllerContent));
     }
     generateControllerMethodContent(controller: string, controllerPath: ApiPath): string {
         const methodName = capitalize(this.getMethodName(controllerPath));
@@ -167,6 +160,13 @@ public class ExceptionWithRequest : Exception
     }
 }
 `;
-        writeFileSync(controllerBaseFile, this.addNamespace(baseControllerContent));
+        const usings = `using System;
+using Newtonsoft.Json;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.Http;
+using System.Threading.Tasks;
+using System.Runtime.Serialization;`;
+        writeFileSync(controllerBaseFile, this.addNamespace(baseControllerContent, usings));
     }
 }
