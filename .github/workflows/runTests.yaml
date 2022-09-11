@@ -63,6 +63,8 @@ jobs:
     name: Test C#
     runs-on: ubuntu-latest
     needs: [ prepare ]
+    env:
+      DOTNET_NOLOGO: true
     steps:
       - uses: actions/cache@v2
         id: restore-build
@@ -70,6 +72,12 @@ jobs:
           path: ./*
           key: ${{ github.sha }}
       - run: npm run test:csharp
+      - name: install dotnet
+        uses: actions/setup-dotnet@v2
+      - name: build csharp
+        run: |
+          cp ./.github/dotnet-test.csproj ./test-csharp/test-csharp.csproj
+          dotnet build ./test-csharp/test-csharp.csproj -clp:ErrorsOnly
         
   test-python:
     name: Test Python
