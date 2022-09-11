@@ -108,7 +108,39 @@ ${controllerPropsCtor}
         return methodContent;
     }
     generateBaseController() {
-        const controllerBaseFile = join(this.options.output, 'BaseController.cs');
+        const usings = `using System;
+using Newtonsoft.Json;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.Http;
+using System.Threading.Tasks;
+`;
+
+        const errorClass = `public class ExceptionWithRequest : Exception
+{
+    public HttpResponseMessage Response { get; set; }
+    public HttpRequestMessage Request { get; set; }
+    public ExceptionWithRequest()
+    {
+    }
+
+    public ExceptionWithRequest(string? message) : base(message)
+    {
+    }
+
+    public ExceptionWithRequest(string? message, Exception? innerException) : base(message, innerException)
+    {
+    }
+
+    protected ExceptionWithRequest(SerializationInfo info, StreamingContext context) : base(info, context)
+    {
+    }
+}`;
+        const exUsing = `using System;
+using System.Net.Http;
+using System.Runtime.Serialization;
+`
+        writeFileSync(join(this.options.output, 'ExceptionWithRequest.cs'), this.addNamespace(errorClass, exUsing));
         const baseControllerContent = `public class BaseController
 {
     public string BaseUrl { get; set; }
@@ -138,35 +170,7 @@ ${controllerPropsCtor}
         return content;
     }
 }
-
-public class ExceptionWithRequest : Exception
-{
-    public HttpResponseMessage Response { get; set; }
-    public HttpRequestMessage Request { get; set; }
-    public ExceptionWithRequest()
-    {
-    }
-
-    public ExceptionWithRequest(string? message) : base(message)
-    {
-    }
-
-    public ExceptionWithRequest(string? message, Exception? innerException) : base(message, innerException)
-    {
-    }
-
-    protected ExceptionWithRequest(SerializationInfo info, StreamingContext context) : base(info, context)
-    {
-    }
-}
 `;
-        const usings = `using System;
-using Newtonsoft.Json;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
-using System.Threading.Tasks;
-using System.Runtime.Serialization;`;
-        writeFileSync(controllerBaseFile, this.addNamespace(baseControllerContent, usings));
+        writeFileSync(join(this.options.output, 'BaseController.cs'), this.addNamespace(baseControllerContent));
     }
 }

@@ -71,13 +71,9 @@ jobs:
         with:
           path: ./*
           key: ${{ github.sha }}
-      - run: npm run test:csharp
       - name: install dotnet
         uses: actions/setup-dotnet@v2
-      - name: build csharp
-        run: |
-          cp ./.github/dotnet-test.csproj ./test-csharp/test-csharp.csproj
-          dotnet build ./test-csharp/test-csharp.csproj -clp:ErrorsOnly
+      - run: npm run test:csharp
         
   test-python:
     name: Test Python
