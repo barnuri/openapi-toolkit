@@ -26,7 +26,7 @@
         "postupload": "npm version patch && git push",
         "test:typescript": "npm run build && cross-env-shell \"node ./dist/cli-generate.js -i $OPENAPI_TOOLKIT_TESTFILE -g typescript-axios -o ./test-typescript-axios && tsc --build tsconfig-test.json\"",
         "test:typescript-react-query": "npm run build && cross-env-shell \"node ./dist/cli-generate.js -i $OPENAPI_TOOLKIT_TESTFILE -g typescript-react-query -o ./test-typescript-react-query && tsc --build tsconfig-test.json\"",
-        "test:csharp": "npm run build && cross-env-shell \"node ./dist/cli-generate.js -i $OPENAPI_TOOLKIT_TESTFILE -g c# -o ./test-csharp --modelNamePrefix My\"",
+        "test:csharp": "npm run build && cross-env-shell \"node ./dist/cli-generate.js -i $OPENAPI_TOOLKIT_TESTFILE -g c# -o ./test-csharp --modelNamePrefix My\" && cpy ./.github/dotnet-test.csproj ./test-csharp --flat --rename=test-csharp.csproj && dotnet build ./test-csharp/test-csharp.csproj -clp:ErrorsOnly",
         "test:python": "npm run build && cross-env-shell \"node ./dist/cli-generate.js -i $OPENAPI_TOOLKIT_TESTFILE -g python -o ./test-python --modelNamePrefix My --modelNameSuffix .dto.test\"",
         "test:go": "npm run build && cross-env-shell \"node ./dist/cli-generate.js -i $OPENAPI_TOOLKIT_TESTFILE -g go -o ./test-go\"",
         "test:go-server": "npm run build && cross-env-shell \"node ./dist/cli-generate.js -i $OPENAPI_TOOLKIT_TESTFILE -g go -o ./test-go-server -t server\""
@@ -35,13 +35,14 @@
         "axios": "^0.21.1",
         "jsonpath-plus": "^6.0.1",
         "rimraf": "^3.0.2",
-        "yargs": "^17.0.1",
-        "swagger2openapi": "^7.0.8"
+        "swagger2openapi": "^7.0.8",
+        "yargs": "^17.0.1"
     },
     "devDependencies": {
         "@types/jsonpath": "^0.2.0",
         "@types/node": "^16.4.7",
         "@types/yargs": "^17.0.2",
+        "cpy-cli": "^4.2.0",
         "cross-env": "^7.0.3",
         "nodemon": "^2.0.12",
         "prettier": "^2.3.2",
