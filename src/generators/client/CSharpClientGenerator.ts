@@ -48,7 +48,14 @@ ${controllerPropsCtor}
         controllerContent += this.generateControllerMethodsContent(controller, controlerPaths);
         controllerContent += `}`;
         const controllerFile = join(this.controllersFolder, controllerName + this.getFileExtension(false));
-        writeFileSync(controllerFile, '\n' + this.addNamespace(controllerContent));
+        const usings = `using System;
+        using Newtonsoft.Json;
+        using System.Collections.Generic;
+        using System.Linq;
+        using System.Net.Http;
+        using System.Threading.Tasks;
+        using System.Runtime.Serialization;`
+        writeFileSync(controllerFile, '\n' + this.addNamespace(controllerContent, usings));
     }
     generateControllerMethodContent(controller: string, controllerPath: ApiPath): string {
         const methodName = capitalize(this.getMethodName(controllerPath));
