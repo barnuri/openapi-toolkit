@@ -130,11 +130,36 @@ ${controllerPropsCtor}
         };
         headers?.Keys.ToList().ForEach(x => req.Headers.TryAddWithoutValidation(x, headers[x]));
         var res = await HttpClient.SendAsync(req);
-        res.EnsureSuccessStatusCode();
+        if ((int)res.StatusCode > 299)
+        {
+            throw new ExceptionWithRequest($"http error {res.StatusCode}") { Request = req, Response = res };
+        }
         var content = await res.Content.ReadAsStringAsync();
         return content;
     }
-}`;
+}
+
+public class ExceptionWithRequest : Exception
+{
+    public HttpResponseMessage Response { get; set; }
+    public HttpRequestMessage Request { get; set; }
+    public ExceptionWithRequest()
+    {
+    }
+
+    public ExceptionWithRequest(string? message) : base(message)
+    {
+    }
+
+    public ExceptionWithRequest(string? message, Exception? innerException) : base(message, innerException)
+    {
+    }
+
+    protected ExceptionWithRequest(SerializationInfo info, StreamingContext context) : base(info, context)
+    {
+    }
+}
+`;
         writeFileSync(controllerBaseFile, this.addNamespace(baseControllerContent));
     }
 }
