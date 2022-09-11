@@ -130,11 +130,43 @@ ${controllerPropsCtor}
         };
         headers?.Keys.ToList().ForEach(x => req.Headers.TryAddWithoutValidation(x, headers[x]));
         var res = await HttpClient.SendAsync(req);
-        res.EnsureSuccessStatusCode();
+        if ((int)res.StatusCode > 299)
+        {
+            throw new ExceptionWithRequest($"http error {res.StatusCode}") { Request = req, Response = res };
+        }
         var content = await res.Content.ReadAsStringAsync();
         return content;
     }
-}`;
-        writeFileSync(controllerBaseFile, this.addNamespace(baseControllerContent));
+}
+
+public class ExceptionWithRequest : Exception
+{
+    public HttpResponseMessage Response { get; set; }
+    public HttpRequestMessage Request { get; set; }
+    public ExceptionWithRequest()
+    {
+    }
+
+    public ExceptionWithRequest(string? message) : base(message)
+    {
+    }
+
+    public ExceptionWithRequest(string? message, Exception? innerException) : base(message, innerException)
+    {
+    }
+
+    protected ExceptionWithRequest(SerializationInfo info, StreamingContext context) : base(info, context)
+    {
+    }
+}
+`;
+        const usings = `using System;
+using Newtonsoft.Json;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.Http;
+using System.Threading.Tasks;
+using System.Runtime.Serialization;`;
+        writeFileSync(controllerBaseFile, this.addNamespace(baseControllerContent, usings));
     }
 }
