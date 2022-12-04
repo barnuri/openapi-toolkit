@@ -29,26 +29,28 @@
         "test:csharp": "npm run build && cross-env-shell \"node ./dist/cli-generate.js -i $OPENAPI_TOOLKIT_TESTFILE -g c# -o ./test-csharp --modelNamePrefix My\" && cpy ./.github/dotnet-test.csproj ./test-csharp --flat --rename=test-csharp.csproj && dotnet build ./test-csharp/test-csharp.csproj -clp:ErrorsOnly",
         "test:python": "npm run build && cross-env-shell \"node ./dist/cli-generate.js -i $OPENAPI_TOOLKIT_TESTFILE -g python -o ./test-python --modelNamePrefix My --modelNameSuffix .dto.test\"",
         "test:go": "npm run build && cross-env-shell \"node ./dist/cli-generate.js -i $OPENAPI_TOOLKIT_TESTFILE -g go -o ./test-go\"",
-        "test:go-server": "npm run build && cross-env-shell \"node ./dist/cli-generate.js -i $OPENAPI_TOOLKIT_TESTFILE -g go -o ./test-go-server -t server\""
+        "test:go-server": "npm run build && cross-env-shell \"node ./dist/cli-generate.js -i $OPENAPI_TOOLKIT_TESTFILE -g go -o ./test-go-server -t server\"",
+        "updateDep": "npm-check-updates -u"
     },
     "dependencies": {
-        "axios": "^0.21.1",
-        "jsonpath-plus": "^6.0.1",
+        "axios": "^1.2.0",
+        "jsonpath-plus": "^7.2.0",
         "rimraf": "^3.0.2",
         "swagger2openapi": "^7.0.8",
-        "tslib": "^2.3.0",
-        "yargs": "^17.0.1"
+        "tslib": "^2.4.1",
+        "yargs": "^17.6.2"
     },
     "devDependencies": {
         "@types/jsonpath": "^0.2.0",
-        "@types/node": "^16.4.7",
-        "@types/yargs": "^17.0.2",
+        "@types/node": "^18.11.10",
+        "@types/yargs": "^17.0.15",
         "cpy-cli": "^4.2.0",
         "cross-env": "^7.0.3",
-        "nodemon": "^2.0.12",
-        "prettier": "^2.3.2",
-        "react-query": "^3.34.19",
-        "typescript": "^4.3.5"
+        "nodemon": "^2.0.20",
+        "prettier": "^2.8.0",
+        "react-query": "^3.39.2",
+        "typescript": "^4.9.3",
+        "npm-check-updates": "^16.4.3"
     },
     "publishConfig": {
         "registry": "https://registry.npmjs.org"
