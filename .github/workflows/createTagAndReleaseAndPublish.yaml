@@ -60,7 +60,7 @@ jobs:
 
   publishToDockerHub:
     needs: [ createTagAndRelease ]
-    name: Publish Package to npmjs
+    name: Publish to docker hub
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
