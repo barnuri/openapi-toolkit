@@ -1,8 +1,7 @@
 import { EditorArrayInput, EditorInput, ApiPath } from '../../models';
-import { capitalize, getEditorInput2 } from '../../helpers';
+import { deleteFilesByPath, getEditorInput2 } from '../../helpers';
 import { GeneratorAbstract } from '../GeneratorAbstract';
 import { EditorObjectInput, EditorPrimitiveInput, OpenApiDefinition } from '../../models';
-import rimraf from 'rimraf';
 import { writeFileSync } from 'fs';
 
 export class PythonClientGenerator extends GeneratorAbstract {
@@ -24,7 +23,7 @@ ${objectInput.properties
         if (objectInput.properties.length <= 0) {
             modelFileContent += '\tpass';
         }
-        const declare = classDeclare + ' pass\n\n';
+        const declare = classDeclare + ' pass # type: ignore\n\n';
         this.declaresContent = this.declaresContent.includes(`(${extendStr}): `) ? declare + this.declaresContent : this.declaresContent + declare;
         this.fileContent += modelFileContent + '\n\n';
     }
@@ -36,12 +35,12 @@ ${objectInput.properties
         let modelFileContent = `   
 ${classDeclare}
 ${Object.keys(enumVals)
-    .map(x => `\t${x} = ${typeof enumVals[x] === 'number' ? enumVals[x] : `'${enumVals[x]}'`}`)
+    .map(x => `\t${x == 'None' ? '_None' : x} = ${typeof enumVals[x] === 'number' ? enumVals[x] : `'${enumVals[x]}'`}`)
     .join('\n')}`;
         if (Object.keys(enumVals).length <= 0) {
             modelFileContent += '\tpass';
         }
-        this.declaresContent = classDeclare + ' pass\n\n' + this.declaresContent;
+        this.declaresContent = classDeclare + ' pass # type: ignore\n\n' + this.declaresContent;
         this.fileContent = modelFileContent + '\n\n' + this.fileContent;
     }
     generateClient(): void {
@@ -50,25 +49,26 @@ from enum import Enum
 from datetime import datetime
 from datetime import datetime
 from requests import request
-from typing import Optional
+from typing import Optional, Any
 `;
         let baseController = `
 class BaseController(object):
-    def method(self, method: str, path: str, body: Optional[object], headers: Optional[dict], **kwargs):
-        return request(
-            kwargs,
+    def method(self, method: str, path: str, body: Any | None, headers: Optional[dict], **kwargs):
+        res = request(
+            **kwargs,
             url=path,
             method=method,
             headers=headers,
             data=body,
-        )`;
+        )
+        return res.json()`;
         this.fileContent = imports + '\n' + baseController + '\n\n#declares start\n' + this.declaresContent + '\n#declares end\n\n' + this.fileContent;
         let filePath = this.options.output.replace(/\\/g, '/').replace(/\/\//, '/');
-        filePath = filePath.endsWith('/') ? filePath.substr(0, filePath.length - 1) : filePath;
-        filePath += '.py';
-        rimraf.sync(this.controllersFolder);
-        rimraf.sync(this.modelsFolder);
-        rimraf.sync(filePath);
+        filePath = !filePath.endsWith('/') ? `${filePath}/` : filePath;
+        filePath += 'client.py';
+        deleteFilesByPath(this.controllersFolder);
+        deleteFilesByPath(this.modelsFolder);
+        deleteFilesByPath(filePath);
         writeFileSync(filePath, this.fileContent);
     }
     generateController(controller: string, controlerPaths: ApiPath[]): void {

@@ -1,8 +1,7 @@
 import { EditorInput } from '../models/editor/EditorInput';
-import { fixPath, makeDirIfNotExist } from '../helpers/generatorHelpers';
+import { deleteFilesByPath, fixPath, makeDirIfNotExist } from '../helpers/generatorHelpers';
 import { getAllEditors, getApiPaths, getAllEditorInputsByEditors, capitalize } from '../helpers';
 import { OpenApiDocument, Editor, ApiPath, EditorPrimitiveInput, EditorObjectInput } from '../models/index';
-import rimraf from 'rimraf';
 import GeneratorsOptions from '../models/GeneratorsOptions';
 import { join } from 'path';
 
@@ -62,7 +61,7 @@ export abstract class GeneratorAbstract {
         this.generatedFiles = [];
         this.filesNames = [];
         this.methodsNames = {};
-        rimraf.sync(this.options.output);
+        deleteFilesByPath(this.options.output);
         makeDirIfNotExist(this.options.output);
         makeDirIfNotExist(this.modelsFolder);
         makeDirIfNotExist(this.controllersFolder);

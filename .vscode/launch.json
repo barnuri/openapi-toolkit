@@ -29,7 +29,18 @@
             "program": "${workspaceFolder}\\src\\cli-generate.ts",
             "preLaunchTask": "tsc: build - tsconfig.json",
             "outFiles": ["${workspaceFolder}/dist/**/*.js"],
-            "args": ["-i", "D:\\Projects\\Checkpoint\\ApiCompareAutomation\\swagger.json", "-g", "typescript-axios", "-o", "./test", "-d", "true"],
+            "args": ["-i", "https://petstore3.swagger.io/api/v3/openapi.json", "-g", "typescript-axios", "-o", "./test", "-d", "true"],
+            "console": "integratedTerminal"
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Cli-python-client",
+            "skipFiles": ["<node_internals>/**"],
+            "program": "${workspaceFolder}\\src\\cli-generate.ts",
+            "preLaunchTask": "tsc: build - tsconfig.json",
+            "outFiles": ["${workspaceFolder}/dist/**/*.js"],
+            "args": ["-i", "https://petstore3.swagger.io/api/v3/openapi.json", "-g", "python", "-o", "./test-python", "-d", "true"],
             "console": "integratedTerminal"
         },
         {

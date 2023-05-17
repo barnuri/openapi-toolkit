@@ -3,6 +3,7 @@ import { resolve } from 'path';
 import { existsSync, mkdirSync, chmodSync, readFileSync } from 'fs';
 import axios from 'axios';
 import * as https from 'https';
+import { rimrafSync } from 'rimraf';
 
 export async function getSwaggerJson(pathOrUrl: string): Promise<OpenApiDocument> {
     let swaggerJson = {};
@@ -33,6 +34,10 @@ export function makeDirIfNotExist(dir: string): void {
     }
     setFullPermission(dir);
 }
+
+export const deleteFilesByPath = (path: string) => {
+    rimrafSync(path);
+};
 
 export function setFullPermission(path: string): void {
     try {

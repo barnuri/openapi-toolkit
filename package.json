@@ -30,27 +30,27 @@
         "test:python": "npm run build && cross-env-shell \"node ./dist/cli-generate.js -i $OPENAPI_TOOLKIT_TESTFILE -g python -o ./test-python --modelNamePrefix My --modelNameSuffix .dto.test\"",
         "test:go": "npm run build && cross-env-shell \"node ./dist/cli-generate.js -i $OPENAPI_TOOLKIT_TESTFILE -g go -o ./test-go\"",
         "test:go-server": "npm run build && cross-env-shell \"node ./dist/cli-generate.js -i $OPENAPI_TOOLKIT_TESTFILE -g go -o ./test-go-server -t server\"",
-        "updateDep": "npm-check-updates -u"
+        "upgradeDep": "npm-check-updates -u"
     },
     "dependencies": {
-        "axios": "^1.2.0",
+        "axios": "^1.4.0",
         "jsonpath-plus": "^7.2.0",
-        "rimraf": "^3.0.2",
+        "rimraf": "^5.0.0",
         "swagger2openapi": "^7.0.8",
-        "tslib": "^2.4.1",
-        "yargs": "^17.6.2"
+        "tslib": "^2.5.0",
+        "yargs": "^17.7.2"
     },
     "devDependencies": {
         "@types/jsonpath": "^0.2.0",
-        "@types/node": "^18.11.10",
-        "@types/yargs": "^17.0.15",
+        "@types/node": "^20.1.7",
+        "@types/yargs": "^17.0.24",
         "cpy-cli": "^4.2.0",
         "cross-env": "^7.0.3",
-        "nodemon": "^2.0.20",
-        "prettier": "^2.8.0",
-        "react-query": "^3.39.2",
-        "typescript": "^4.9.3",
-        "npm-check-updates": "^16.4.3"
+        "nodemon": "^2.0.22",
+        "prettier": "^2.8.8",
+        "react-query": "^3.39.3",
+        "typescript": "^5.0.4",
+        "npm-check-updates": "^16.10.12"
     },
     "publishConfig": {
         "registry": "https://registry.npmjs.org"
