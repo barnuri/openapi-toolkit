@@ -1,21 +1,21 @@
 import { EditorArrayInput, EditorInput, ApiPath } from '../../models';
-import { deleteFilesByPath, getEditorInput2 } from '../../helpers';
+import { getEditorInput2 } from '../../helpers';
 import { GeneratorAbstract } from '../GeneratorAbstract';
 import { EditorObjectInput, EditorPrimitiveInput, OpenApiDefinition } from '../../models';
 import { writeFileSync } from 'fs';
+import { join } from 'path';
 
 export class PythonClientGenerator extends GeneratorAbstract {
-    fileContent = '';
-    declaresContent = '';
     generateObject(objectInput: EditorObjectInput): void {
         const extendStr =
             objectInput.implements.length > 0
-                ? `${this.options.modelNamePrefix}${objectInput.implements[0]}${this.options.modelNameSuffix.split('.')[0]}`
+                ? `models.${this.options.modelNamePrefix}${objectInput.implements[0]}${this.options.modelNameSuffix.split('.')[0]}`
                 : `object`;
         const classDeclare = `class ${this.getFileName(objectInput)}(${extendStr}):`;
-        if (this.fileContent.includes(classDeclare)) {
+        if (!this.shouldGenerateModel(objectInput)) {
             return;
         }
+        const modelFile = join(this.modelsFolder, this.getFileName(objectInput) + this.getFileExtension(true));
         let modelFileContent = `${classDeclare}
 ${objectInput.properties
     .map(x => `\t${x.name.replace(/\[i\]/g, '')}: ${x.nullable || !x.required ? 'Optional[' + this.getPropDesc(x) + ']' : this.getPropDesc(x)}`)
@@ -23,15 +23,14 @@ ${objectInput.properties
         if (objectInput.properties.length <= 0) {
             modelFileContent += '\tpass';
         }
-        const declare = classDeclare + ' pass # type: ignore\n\n';
-        this.declaresContent = this.declaresContent.includes(`(${extendStr}): `) ? declare + this.declaresContent : this.declaresContent + declare;
-        this.fileContent += modelFileContent + '\n\n';
+        writeFileSync(modelFile, this.appendModelsImports(modelFileContent));
     }
     generateEnum(enumInput: EditorPrimitiveInput, enumVals: { [name: string]: string | number }): void {
-        const classDeclare = `class ${this.getFileName(enumInput)}(Enum):`;
-        if (this.fileContent.includes(classDeclare)) {
+        if (!this.shouldGenerateModel(enumInput)) {
             return;
         }
+        const modelFile = join(this.modelsFolder, this.getFileName(enumInput) + this.getFileExtension(false));
+        const classDeclare = `class ${this.getFileName(enumInput)}(Enum):`;
         let modelFileContent = `   
 ${classDeclare}
 ${Object.keys(enumVals)
@@ -40,18 +39,45 @@ ${Object.keys(enumVals)
         if (Object.keys(enumVals).length <= 0) {
             modelFileContent += '\tpass';
         }
-        this.declaresContent = classDeclare + ' pass # type: ignore\n\n' + this.declaresContent;
-        this.fileContent = modelFileContent + '\n\n' + this.fileContent;
+        writeFileSync(modelFile, this.appendModelsImports(modelFileContent));
+    }
+    appendModelsImports(fileContent: string): string {
+        let imports = ``;
+        const modelsRefs = [...(fileContent.matchAll(/models\.(\w+)/g) || [])];
+        for (const match of modelsRefs) {
+            const modelName = match[1];
+            imports += `from ..models.${modelName} import ${modelName}\n`;
+        }
+
+        const haveAnyType = fileContent.includes(': Any') || fileContent.includes('[Any]');
+        const haveOptionalType = fileContent.includes(': Optional') || fileContent.includes('[Optional]');
+        if (haveAnyType && haveOptionalType) {
+            imports += `from typing import Optional, Any\n`;
+        } else if (haveOptionalType) {
+            imports += `from typing import Optional\n`;
+        } else if (haveAnyType) {
+            imports += `from typing import Any\n`;
+        }
+
+        if (fileContent.includes(': datetime') || fileContent.includes('[datetime]')) {
+            imports += `from datetime import datetime\n`;
+        }
+        if (fileContent.includes('(Enum):') || fileContent.includes('[Enum]')) {
+            imports += `from enum import Enum\n`;
+        }
+        if (fileContent.includes('(BaseController):')) {
+            imports += `from .BaseController import BaseController\n`;
+        }
+        return (imports + '\n' + fileContent.replace(/models\./g, '')).trim();
     }
     generateClient(): void {
-        const imports = `
-from enum import Enum
-from datetime import datetime
-from datetime import datetime
-from requests import request
+        writeFileSync(join(this.options.output, '__init__.py'), '');
+        writeFileSync(join(this.modelsFolder, '__init__.py'), '');
+        writeFileSync(join(this.controllersFolder, '__init__.py'), '');
+
+        let baseController = `from requests import request
 from typing import Optional, Any
-`;
-        let baseController = `
+
 class BaseController(object):
     def method(self, method: str, path: str, body: Any | None, headers: Optional[dict], **kwargs):
         res = request(
@@ -62,20 +88,29 @@ class BaseController(object):
             data=body,
         )
         return res.json()`;
-        this.fileContent = imports + '\n' + baseController + '\n\n#declares start\n' + this.declaresContent + '\n#declares end\n\n' + this.fileContent;
-        let filePath = this.options.output.replace(/\\/g, '/').replace(/\/\//, '/');
-        filePath = !filePath.endsWith('/') ? `${filePath}/` : filePath;
-        filePath += 'client.py';
-        deleteFilesByPath(this.controllersFolder);
-        deleteFilesByPath(this.modelsFolder);
-        deleteFilesByPath(filePath);
-        writeFileSync(filePath, this.fileContent);
+        const baseControllerFile = join(this.controllersFolder, 'BaseController' + this.getFileExtension(false));
+        writeFileSync(baseControllerFile, baseController);
+
+        let mainFileContent = `${this.controllersNames
+            .map(x => this.getControllerName(x))
+            .map(x => `from .controllers.${x} import ${x}`)
+            .join('\n')}
+
+class Client(object):
+    def __init__(self):
+${this.controllersNames
+    .map(x => this.getControllerName(x))
+    .map(x => `        self.${x} = ${x}()`)
+    .join('\n')}`;
+        const mainFile = join(this.options.output, 'client.py');
+        writeFileSync(mainFile, mainFileContent);
     }
     generateController(controller: string, controlerPaths: ApiPath[]): void {
         const controllerName = this.getControllerName(controller);
         let controllerContent = `class ${controllerName}(BaseController):\n`;
         controllerContent += this.generateControllerMethodsContent(controller, controlerPaths);
-        this.fileContent += controllerContent;
+        const controllerFile = join(this.controllersFolder, controllerName + this.getFileExtension(false));
+        writeFileSync(controllerFile, this.appendModelsImports(controllerContent));
     }
     generateControllerMethodContent(controller: string, controllerPath: ApiPath): string {
         const methodName = this.getMethodName(controllerPath);
@@ -140,7 +175,7 @@ class BaseController(object):
                     if (!fileName) {
                         return 'object';
                     }
-                    return `${fileName}`;
+                    return `models.${fileName}`;
             }
         }
         if (editorInput.editorType === 'EditorArrayInput') {
@@ -153,7 +188,7 @@ class BaseController(object):
                 if (!fileName) {
                     return 'object';
                 }
-                return `${fileName}`;
+                return `models.${fileName}`;
             }
             return `dict[${objectInput.dictionaryKeyInput ? this.getPropDesc(objectInput.dictionaryKeyInput) : 'object'}, ${
                 objectInput.dictionaryInput ? this.getPropDesc(objectInput.dictionaryInput) : 'object'
