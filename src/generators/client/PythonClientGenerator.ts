@@ -79,7 +79,7 @@ ${Object.keys(enumVals)
 from typing import Optional, Any
 
 class BaseController(object):
-    def method(self, method: str, path: str, body: Any | None, headers: Optional[dict], **kwargs):
+    def method(self, method: str, path: str, body: Optional[Any], headers: Optional[dict], **kwargs):
         res = request(
             **kwargs,
             url=path,
