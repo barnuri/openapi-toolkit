@@ -68,7 +68,7 @@ import { ControllerBase } from '../ControllerBase';`;
             url = url.replace('{' + pathParam.name + '}', "${pathParams['" + pathParam.name + "']}");
         }
         const haveQueryParams = controllerPath.queryParams.length > 0;
-        url += !haveQueryParams ? '' : '?' + controllerPath.queryParams.map(x => `${x.name}=\${queryParams['${x.name}']}`).join('&');
+        url += !haveQueryParams ? '' : '?' + controllerPath.queryParams.map(x => `${x.name}=\${queryParams['${x.name}'] !== undefined ? queryParams['${x.name}'] : ''}`).join('&');
         const queryParamFix = (name: string) => (name.includes('.') || name.includes('-') ? `"${name}"` : name);
         const queryParams = haveQueryParams
             ? `queryParams: {${controllerPath.queryParams.map(x => `${queryParamFix(x.name)}${x.required ? '' : '?'}: ${this.getPropDesc(x.schema!)}`)}}, `
@@ -94,7 +94,7 @@ import { ControllerBase } from '../ControllerBase';`;
         const baseControllerContent = `import { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 export class ControllerBase {
     constructor(public axiosInstance: AxiosInstance) { }
-    protected method<T, S>(
+    public method<T, S>(
         method: string,
         path: string,
         body: T | undefined,
