@@ -14,7 +14,7 @@ jobs:
     name: Create Tag And Release
     permissions: write-all
     outputs:
-      tagName: ${{ steps.setTag.outputs.tagName }}
+      tagName: ${{ env.newTagName }}
     steps:
       - name: checkout
         uses: actions/checkout@v3
@@ -37,7 +37,7 @@ jobs:
               body: "Version ${{ env.newTagName }}",
               target_commitish: context.sha
             });
-            
+        
   publishToNpm:
     needs: [ createTagAndRelease ]
     name: Publish Package to npmjs
