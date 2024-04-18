@@ -96,6 +96,11 @@ export function distinct<T>(arr: T[]): T[] {
     return [...new Set(arr)];
 }
 
+export function distinctByProp<T, U>(arr: T[], callbackfn: (value: T) => U): T[] {
+    const map = new Map(arr.map(item => [callbackfn(item), item]));
+    return [...map.values()];
+}
+
 export function capitalize(s: string): string {
     return s.charAt(0).toUpperCase() + s.slice(1);
 }

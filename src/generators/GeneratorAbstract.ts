@@ -1,6 +1,6 @@
 import { EditorInput } from '../models/editor/EditorInput';
 import { deleteFilesByPath, fixPath, makeDirIfNotExist } from '../helpers/generatorHelpers';
-import { getAllEditors, getApiPaths, getAllEditorInputsByEditors, capitalize } from '../helpers';
+import { getAllEditors, getApiPaths, getAllEditorInputsByEditors, capitalize, distinctByProp } from '../helpers';
 import { OpenApiDocument, Editor, ApiPath, EditorPrimitiveInput, EditorObjectInput } from '../models/index';
 import GeneratorsOptions from '../models/GeneratorsOptions';
 import { join } from 'path';
@@ -49,7 +49,7 @@ export abstract class GeneratorAbstract {
         this.editors = getAllEditors(swagger, options.debugLogs);
         console.log('parse all api pathes');
         this.apiPaths = getApiPaths(swagger);
-        this.controllersNames = [...new Set(this.apiPaths.map(x => x.controller))];
+        this.controllersNames = distinctByProp([...new Set(this.apiPaths.map(x => x.controller))], x => x.toLowerCase());
         this.allEditorInputs = getAllEditorInputsByEditors(this.editors);
         this.allObjectEditorInputs = this.allEditorInputs.filter(x => x.editorType === 'EditorObjectInput').map(x => x as EditorObjectInput);
         this.allPrimitiveEditorInput = this.allEditorInputs.filter(x => x.editorType === 'EditorPrimitiveInput').map(x => x as EditorPrimitiveInput);
@@ -86,7 +86,7 @@ export abstract class GeneratorAbstract {
         }
         console.log('----- start generating controllers -----');
         for (const controllerName of this.controllersNames) {
-            const controllerPaths = this.apiPaths.filter(x => x.controller === controllerName);
+            const controllerPaths = this.apiPaths.filter(x => x.controller.toLowerCase() === controllerName.toLowerCase());
             console.log(`${controllerName} - ${controllerPaths.length}`);
             await this.generateController(controllerName, controllerPaths);
         }
