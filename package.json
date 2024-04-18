@@ -1,6 +1,6 @@
 {
     "name": "openapi-toolkit",
-    "version": "2.1.0",
+    "version": "2.4.7",
     "description": "generation of API client libraries (SDK generation)",
     "main": "./dist/index.js",
     "types": "./dist/index.d.ts",
