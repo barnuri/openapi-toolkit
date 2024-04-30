@@ -173,7 +173,7 @@ export abstract class GeneratorAbstract {
         for (const controllerPath of controllerPaths) {
             const res = this.generateControllerMethodContent(controller, controllerPath);
             content += res.methodContent;
-            console.log(`\t${controllerPath.method} - ${controllerPath.path} => ${controller}.${res.methodName}`);
+            console.log(`\t${this.httpMethodFormat(controllerPath.method)} - ${controllerPath.path} => ${controller}.${res.methodName}`);
         }
         return content;
     }
