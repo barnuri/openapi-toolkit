@@ -173,7 +173,7 @@ export abstract class GeneratorAbstract {
         for (const controllerPath of controllerPaths) {
             const res = this.generateControllerMethodContent(controller, controllerPath);
             content += res.methodContent;
-            console.log(`\t${controllerPath.method} - ${controllerPath.path} - ${res.methodName}`);
+            console.log(`\t${controllerPath.method.toUpperCase()} - ${controllerPath.path} - ${res.methodName}`);
         }
         return content;
     }
