@@ -216,6 +216,7 @@ export abstract class GeneratorAbstract {
                 shortName = !shortName.toLowerCase().startsWith(`/${controllerPath.controller}/`.toLowerCase())
                     ? shortName
                     : shortName.substring(`/${controllerPath.controller}/`.length);
+                shortName = capitalize(shortName);
                 shortName = shortName.replace(this.cleanRegex, '');
                 shortName = controllerPath.method.toLowerCase() + capitalize(shortName);
             } catch {}
