@@ -102,6 +102,7 @@ export function distinctByProp<T, U>(arr: T[], callbackfn: (value: T) => U): T[]
 }
 
 export function capitalize(s: string): string {
+    s = camelCase(s);
     return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
@@ -111,6 +112,18 @@ export function camelCase(str: string) {
             return index === 0 ? word.toLowerCase() : word.toUpperCase();
         })
         .replace(/\s+/g, '');
+}
+
+function createDelimiterRegex(delimiters) {
+    // Escape special characters in each delimiter and join them with the "or" operator
+    const regexString = delimiters.map(delimiter => escapeRegExp(delimiter)).join('|');
+    // Create the regex with global flag to match all occurrences
+    return new RegExp(regexString, 'g');
+}
+
+// Function to escape special characters in a string to be used in a regex
+function escapeRegExp(string) {
+    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
 export async function upgradeSwaggers(swaggers: OpenApiDocument[]): Promise<OpenApiDocument[]> {
