@@ -112,7 +112,7 @@ ${this.controllersNames
         const controllerFile = join(this.controllersFolder, controllerName + this.getFileExtension(false));
         writeFileSync(controllerFile, this.appendModelsImports(controllerContent));
     }
-    generateControllerMethodContent(controller: string, controllerPath: ApiPath): string {
+    generateControllerMethodContent(controller: string, controllerPath: ApiPath) {
         const methodName = this.getMethodName(controllerPath);
         let requestType = controllerPath.body.haveBody ? this.getPropDesc(controllerPath.body.schema) : 'None';
         const responseType = this.getPropDesc(controllerPath.response);
@@ -152,7 +152,7 @@ ${this.controllersNames
         methodContent += `\t\t\t${haveHeaders ? headersMethodParam : 'None'},\n`;
         methodContent += `\t\t\t**kwargs\n`;
         methodContent += `\t\t)\n`;
-        return methodContent;
+        return { methodContent, methodName };
     }
     getPropDesc(obj: EditorInput | OpenApiDefinition) {
         const editorInput = (obj as EditorInput)?.editorType ? (obj as EditorInput) : getEditorInput2(this.swagger, obj as OpenApiDefinition);

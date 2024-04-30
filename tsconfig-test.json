@@ -31,6 +31,6 @@
         "lib": ["es2015", "dom"],
         "rootDir": "test"
     },
-    "include": ["test-typescript-axios", "test-typescript-react-query"],
+    "include": ["test-typescript-axios", "test-typescript-models", "test-typescript-react-query"],
     "exclude": ["node_modules", "dist", "dist-test"]
 }

@@ -24,7 +24,8 @@
         "preupload": "rimraf dist && npm run build && git push",
         "upload": "npm publish",
         "postupload": "npm version patch && git push",
-        "test:typescript": "npm run build && cross-env-shell \"node ./dist/cli-generate.js -i $OPENAPI_TOOLKIT_TESTFILE -g typescript-axios -o ./test-typescript-axios && tsc --build tsconfig-test.json\"",
+        "test:typescript-models": "npm run build && cross-env-shell \"node ./dist/cli-generate.js -i $OPENAPI_TOOLKIT_TESTFILE -g typescript-axios -o ./test-typescript-models --modelsOnly true && tsc --build tsconfig-test.json\"",
+        "test:typescript-axios": "npm run build && cross-env-shell \"node ./dist/cli-generate.js -i $OPENAPI_TOOLKIT_TESTFILE -g typescript-axios -o ./test-typescript-axios && tsc --build tsconfig-test.json\"",
         "test:typescript-react-query": "npm run build && cross-env-shell \"node ./dist/cli-generate.js -i $OPENAPI_TOOLKIT_TESTFILE -g typescript-react-query -o ./test-typescript-react-query && tsc --build tsconfig-test.json\"",
         "test:csharp": "npm run build && cross-env-shell \"node ./dist/cli-generate.js -i $OPENAPI_TOOLKIT_TESTFILE -g c# -o ./test-csharp --modelNamePrefix My\" && cpy ./.github/dotnet-test.csproj ./test-csharp --flat --rename=test-csharp.csproj && dotnet build ./test-csharp/test-csharp.csproj -clp:ErrorsOnly",
         "test:python": "npm run build && cross-env-shell \"node ./dist/cli-generate.js -i $OPENAPI_TOOLKIT_TESTFILE -g python -o ./test-python --modelNamePrefix My --modelNameSuffix .dto.test\" && python -m pylint --errors-only ./test-python",
@@ -33,24 +34,25 @@
         "upgradeDep": "npm-check-updates -u"
     },
     "dependencies": {
-        "axios": "^1.4.0",
-        "jsonpath-plus": "^7.2.0",
-        "rimraf": "^5.0.1",
+        "axios": "^1.6.8",
+        "colors-ext": "^1.0.3",
+        "jsonpath-plus": "^8.1.0",
+        "rimraf": "^5.0.5",
         "swagger2openapi": "^7.0.8",
-        "tslib": "^2.5.3",
+        "tslib": "^2.6.2",
         "yargs": "^17.7.2"
     },
     "devDependencies": {
-        "@types/jsonpath": "^0.2.0",
-        "@types/node": "^20.2.5",
-        "@types/yargs": "^17.0.24",
-        "cpy-cli": "^4.2.0",
+        "@types/jsonpath": "^0.2.4",
+        "@types/node": "^20.12.7",
+        "@types/yargs": "^17.0.32",
+        "cpy-cli": "^5.0.0",
         "cross-env": "^7.0.3",
-        "nodemon": "^2.0.22",
-        "prettier": "^2.8.8",
+        "nodemon": "^3.1.0",
+        "npm-check-updates": "^16.14.20",
+        "prettier": "^3.2.5",
         "react-query": "^3.39.3",
-        "typescript": "^5.1.3",
-        "npm-check-updates": "^16.10.12"
+        "typescript": "^5.4.5"
     },
     "publishConfig": {
         "registry": "https://registry.npmjs.org"

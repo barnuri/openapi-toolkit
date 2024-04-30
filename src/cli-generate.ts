@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import 'colors-ext';
 import { ServerGenerators } from './models/ServerGenerators';
 import { ClientGenerators } from './models/ClientGenerators';
 import { generate } from './generators';
@@ -47,11 +48,13 @@ yargs(process.argv.slice(2))
                 .default('longMethodName', false)
                 .nargs('debugLogs', 1)
                 .alias('d', 'debugLogs')
-                .default('debugLogs', true),
+                .default('debugLogs', true)
+                .nargs('modelsOnly', 1)
+                .default('modelsOnly', false),
         argv => {
             generate(argv as any)
-                .then(() => console.log('done succssfully'))
-                .catch(err => console.error(`failed ${err}`));
+                .then(() => console.log('done succssfully'.green()))
+                .catch(err => console.error(`failed ${err}`.red()));
         },
     )
     .command(

@@ -28,9 +28,9 @@ export async function generate(options: GeneratorsOptions) {
     if (Array.isArray(options.output)) {
         options.output = (options.output as any[])[0];
     }
-    console.log(`get swagger`);
+    console.log(`get swagger`.cyan());
     const swagger = await getSwaggerJson(options.pathOrUrl);
-    console.log(`get swagger successfull`);
+    console.log(`get swagger successfull`.green());
     const constractor = options.type === 'server' ? serverGeneratorGetter(options.generator) : clientGeneratorGetter(options.generator);
     const generator = new constractor(swagger, options);
     console.log(`start ${generator.constructor.name}`);

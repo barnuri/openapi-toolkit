@@ -15,4 +15,5 @@ export default class GeneratorsOptions {
     type: string = 'client';
     longMethodName: boolean = false;
     debugLogs: boolean = true;
+    modelsOnly: boolean = false;
 }

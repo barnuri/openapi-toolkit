@@ -162,7 +162,7 @@ type ${controllerName} struct {
         const controllerFile = join(this.controllersFolder, controllerName + this.getFileExtension(false));
         writeFileSync(controllerFile, controllerContent);
     }
-    generateControllerMethodContent(controller: string, controllerPath: ApiPath): string {
+    generateControllerMethodContent(controller: string, controllerPath: ApiPath) {
         const controllerName = this.getControllerName(controller);
         const methodName = capitalize(this.getMethodName(controllerPath));
         let requestType = controllerPath.body.haveBody ? this.getPropDesc(controllerPath.body.schema, 'models') : 'interface{}';
@@ -225,6 +225,6 @@ type ${controllerName} struct {
         methodContent += `\t)\n`;
         methodContent += `\treturn res, httpRes, error\n`;
         methodContent += `}\n\n`;
-        return methodContent;
+        return { methodContent, methodName };
     }
 }

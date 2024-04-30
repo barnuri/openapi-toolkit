@@ -22,7 +22,7 @@ export class TypescriptNestServerGenerator extends TypescriptGenerator {
         const controllerFile = join(this.controllersFolder, controllerName + this.getFileExtension(false));
         writeFileSync(controllerFile, this.disableLinting + controllerContent);
     }
-    generateControllerMethodContent(controller: string, controllerPath: ApiPath): string {
+    generateControllerMethodContent(controller: string, controllerPath: ApiPath) {
         const methodName = this.getMethodName(controllerPath);
         let requestType = controllerPath.body.haveBody ? this.getPropDesc(controllerPath.body.schema) : 'undefined';
         const responseType = this.getPropDesc(controllerPath.response);
@@ -50,6 +50,6 @@ export class TypescriptNestServerGenerator extends TypescriptGenerator {
         methodContent += `\tasync ${methodName}(${bodyParam}${pathParams}${queryParams}${headersParams}): ${responseType}> {\n`.replace(', )', ')');
         methodContent += `\t\tthrow Error('NotImplemented');\n`;
         methodContent += `\t}\n`;
-        return methodContent;
+        return { methodContent, methodName };
     }
 }

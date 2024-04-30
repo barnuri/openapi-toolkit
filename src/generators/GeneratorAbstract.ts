@@ -20,6 +20,7 @@ export abstract class GeneratorAbstract {
     haveModels: boolean;
     cleanRegex = /\/| |-|{|}|\.|_|\[|\]|,/g;
     methodsNames: { [name: string]: number } = {};
+
     constructor(public swagger: OpenApiDocument, public options: GeneratorsOptions) {
         if (!options.pathOrUrl) {
             throw new Error('pathOrUrl is required');
@@ -45,7 +46,8 @@ export abstract class GeneratorAbstract {
         this.filesNames = [];
         this.swagger = swagger;
         this.options.output = fixPath(options.output);
-        console.log('parse models');
+        console.log('-----  start parsing -----'.cyan());
+        console.log('parsing models');
         this.editors = getAllEditors(swagger, options.debugLogs);
         console.log('parse all api pathes');
         this.apiPaths = getApiPaths(swagger);
@@ -56,23 +58,45 @@ export abstract class GeneratorAbstract {
         this.allEnumsEditorInput = this.allPrimitiveEditorInput.filter(x => x.enumNames.length + x.enumsOptions.length + x.enumValues.length > 0);
         this.haveModels = this.allObjectEditorInputs.length + this.allEnumsEditorInput.length > 0;
     }
+
     async generate(): Promise<void> {
-        console.log('-----  start generating -----');
+        console.log('-----  start generating -----'.cyan());
         this.generatedFiles = [];
         this.filesNames = [];
         this.methodsNames = {};
         deleteFilesByPath(this.options.output);
         makeDirIfNotExist(this.options.output);
         makeDirIfNotExist(this.modelsFolder);
-        makeDirIfNotExist(this.controllersFolder);
-        console.log('-----  start generating object models -----');
+        if (!this.options.modelsOnly) {
+            makeDirIfNotExist(this.controllersFolder);
+        }
+        await this.generateModels();
+        if (!this.options.modelsOnly) {
+            await this.generateControllers();
+            console.log('----- generating client -----'.cyan());
+            this.generateClient();
+        }
+        console.log('----- done -----'.green());
+    }
+
+    private async generateControllers() {
+        console.log('----- generating controllers -----'.cyan());
+        for (const controllerName of this.controllersNames) {
+            const controllerPaths = this.apiPaths.filter(x => x.controller.toLowerCase() === controllerName.toLowerCase());
+            console.log(`${controllerName} - ${controllerPaths.length}`);
+            await this.generateController(controllerName, controllerPaths);
+        }
+    }
+
+    private async generateModels() {
+        console.log('-----  generating object models -----'.cyan());
         for (const objectInput of this.allObjectEditorInputs) {
             if (objectInput.isDictionary) {
                 continue;
             }
             await this.generateObject(objectInput);
         }
-        console.log('-----  start generating enum models -----');
+        console.log('-----  generating enum models -----'.cyan());
         for (const enumInput of this.allEnumsEditorInput) {
             const enumVals = {};
             if (enumInput.enumNames.length === enumInput.enumValues.length) {
@@ -84,16 +108,8 @@ export abstract class GeneratorAbstract {
             }
             await this.generateEnum(enumInput, enumVals);
         }
-        console.log('----- start generating controllers -----');
-        for (const controllerName of this.controllersNames) {
-            const controllerPaths = this.apiPaths.filter(x => x.controller.toLowerCase() === controllerName.toLowerCase());
-            console.log(`${controllerName} - ${controllerPaths.length}`);
-            await this.generateController(controllerName, controllerPaths);
-        }
-        console.log('----- start generating client -----');
-        this.generateClient();
-        console.log('----- done -----');
     }
+
     shouldGenerateModel(editorInput: EditorInput) {
         makeDirIfNotExist(this.modelsFolder);
         const fileName = this.getFileName(editorInput);
@@ -103,6 +119,7 @@ export abstract class GeneratorAbstract {
         const modelFile = join(this.modelsFolder, this.getFileName(editorInput) + this.getFileExtension(true));
         return this.shouldGenerateFile(modelFile);
     }
+
     shouldGenerateFile(path: string) {
         if (this.generatedFiles.filter(x => x.toLowerCase() === path.toLowerCase()).length > 0) {
             return false;
@@ -110,6 +127,7 @@ export abstract class GeneratorAbstract {
         this.generatedFiles.push(path);
         return true;
     }
+
     getFileName(editorInput: EditorInput) {
         const getFileName = () => {
             let name: string | undefined = editorInput.className || (editorInput as any).definistionName || editorInput.title;
@@ -138,9 +156,11 @@ export abstract class GeneratorAbstract {
         }
         return fileName;
     }
+
     getControllerName(controllerName: string) {
         return `${this.options.controllerNamePrefix}${capitalize(controllerName)}${this.options.controllerNameSuffix}`;
     }
+
     getFileAdditionalExtension() {
         const suffix = this.options.modelNameSuffix.split('.').filter(x => x);
         if (suffix.length < 1) {
@@ -148,45 +168,79 @@ export abstract class GeneratorAbstract {
         }
         return ('.' + this.options.modelNameSuffix.split('.').slice(1).join('.')).replace('..ts', '');
     }
+
     generateControllerMethodsContent(controller: string, controllerPaths: ApiPath[]): string {
         let content = '';
         for (const controllerPath of controllerPaths) {
-            console.log(`\t${controllerPath.method} - ${controllerPath.path}`);
-            content += this.generateControllerMethodContent(controller, controllerPath);
+            const res = this.generateControllerMethodContent(controller, controllerPath);
+            content += res.methodContent;
+            console.log(`\t${this.httpMethodFormat(controllerPath.method)} - ${controllerPath.path} => ${controller}.${res.methodName}`);
         }
         return content;
     }
+
+    private httpMethodFormat(httpMethod: string) {
+        httpMethod = httpMethod.toUpperCase();
+        if (httpMethod === 'GET') {
+            return httpMethod.blue();
+        }
+        if (httpMethod === 'POST') {
+            return httpMethod.green();
+        }
+        if (httpMethod === 'PUT') {
+            return httpMethod.yellow();
+        }
+        if (httpMethod === 'DELETE') {
+            return httpMethod.red();
+        }
+        if (httpMethod === 'PATCH') {
+            return httpMethod.magenta();
+        }
+        if (httpMethod === 'HEAD') {
+            return httpMethod.cyan();
+        }
+        return httpMethod;
+    }
+
     getMethodName(controllerPath: ApiPath, prefix: string = '', suffix: string = '') {
-        const methodName = () => {
-            const longName = controllerPath.method.toLowerCase() + capitalize(controllerPath.path.replace(this.cleanRegex, ''));
+        const generateMethodName = () => {
+            let longName = controllerPath.method.toLowerCase() + capitalize(controllerPath.path);
+            longName = longName.replace(this.cleanRegex, '');
             if (this.options.longMethodName) {
                 return longName;
             }
             let shortName = '';
             try {
                 shortName = controllerPath.path.split('?')[0];
-                shortName = shortName.toLowerCase().startsWith('/api') ? shortName.substring(4) : shortName;
-                shortName =
-                    shortName.split(`/${controllerPath.controller}/`).length <= 1
-                        ? shortName
-                        : shortName.split(`/${controllerPath.controller}/`).slice(1).join(`/${controllerPath.controller}/`);
+                shortName = shortName.toLowerCase().startsWith('/api') ? shortName.substring('/api'.length) : shortName;
+                shortName = !shortName.toLowerCase().startsWith(`/${controllerPath.controller}/`.toLowerCase())
+                    ? shortName
+                    : shortName.substring(`/${controllerPath.controller}/`.length);
+                shortName = capitalize(shortName);
                 shortName = shortName.replace(this.cleanRegex, '');
-                shortName = !(shortName || '').trim() ? '' : controllerPath.method.toLowerCase() + capitalize(shortName);
+                shortName = controllerPath.method.toLowerCase() + capitalize(shortName);
             } catch {}
             return !shortName ? longName : shortName.replace(this.cleanRegex, '').trim();
         };
-        const res = `${prefix}${methodName()}${suffix}`;
-        if (!this.methodsNames[res]) {
-            this.methodsNames[res] = 0;
+        const methodName = `${prefix}${generateMethodName()}${suffix}`;
+        const key = `${controllerPath.controller}_${methodName}`;
+        if (!this.methodsNames[key]) {
+            this.methodsNames[key] = 0;
         }
-        const extraText = this.methodsNames[res] > 0 ? `${this.methodsNames[res]}` : '';
-        this.methodsNames[res]++;
-        return `${res}${extraText}`;
+        const extraText = this.methodsNames[key] > 0 ? `${this.methodsNames[key]}` : '';
+        this.methodsNames[key]++;
+        return `${methodName}${extraText}`;
     }
+
     abstract getFileExtension(isModel: boolean);
+
     abstract generateObject(objectInput: EditorObjectInput): void;
+
     abstract generateEnum(enumInput: EditorPrimitiveInput, enumVals: { [name: string]: string | number }): void;
+
     abstract generateController(controller: string, controllerPaths: ApiPath[]): void;
-    abstract generateControllerMethodContent(controller: string, controllerPath: ApiPath): string;
+
+    abstract generateControllerMethodContent(controller: string, controllerPath: ApiPath): { methodContent: string; methodName: string };
+
     abstract generateClient(): void;
 }
