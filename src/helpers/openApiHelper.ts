@@ -1,5 +1,6 @@
 import { OpenApiPathParamInVals } from './../models/openapi/OpenApiDocument';
 import { OpenApiDefinition, OpenApiDocument, OpenApiDefinitionReference, OpenApiDefinitionObject, OpenApiDefinitionsDictionary, ApiPath } from '../models';
+import { cleanString } from '..';
 
 export function getOpenApiDefinitionObject(
     definition: OpenApiDefinition,
@@ -71,10 +72,8 @@ export function getApiPaths(openApiDocument: OpenApiDocument): ApiPath[] {
             const oldBody = getParamsByType('body').find(_ => true);
             const body = methodDetails.requestBody;
             let response = (methodDetails.responses || {})['200'] || {};
-            let controller = ((methodDetails.tags || []).find(_ => true) || 'Default')
-                .replace(/ /g, '')
-                .replace(/\/|-|{|}|\.|_/g, '')
-                .trim();
+            let controller = ((methodDetails.tags || []).find(_ => true) || 'Default').trim();
+            controller = cleanString(controller);
             paths.push({
                 controller,
                 method,

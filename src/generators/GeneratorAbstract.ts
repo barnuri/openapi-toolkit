@@ -1,6 +1,6 @@
 import { EditorInput } from '../models/editor/EditorInput';
 import { deleteFilesByPath, fixPath, makeDirIfNotExist } from '../helpers/generatorHelpers';
-import { getAllEditors, getApiPaths, getAllEditorInputsByEditors, capitalize, distinctByProp } from '../helpers';
+import { getAllEditors, getApiPaths, getAllEditorInputsByEditors, capitalize, distinctByProp, cleanString } from '../helpers';
 import { OpenApiDocument, Editor, ApiPath, EditorPrimitiveInput, EditorObjectInput } from '../models/index';
 import GeneratorsOptions from '../models/GeneratorsOptions';
 import { join } from 'path';
@@ -18,7 +18,6 @@ export abstract class GeneratorAbstract {
     generatedFiles: string[];
     filesNames: string[];
     haveModels: boolean;
-    cleanRegex = /\/| |-|{|}|\.|_|\[|\]|,/g;
     methodsNames: { [name: string]: number } = {};
 
     constructor(public swagger: OpenApiDocument, public options: GeneratorsOptions) {
@@ -57,6 +56,7 @@ export abstract class GeneratorAbstract {
         this.allPrimitiveEditorInput = this.allEditorInputs.filter(x => x.editorType === 'EditorPrimitiveInput').map(x => x as EditorPrimitiveInput);
         this.allEnumsEditorInput = this.allPrimitiveEditorInput.filter(x => x.enumNames.length + x.enumsOptions.length + x.enumValues.length > 0);
         this.haveModels = this.allObjectEditorInputs.length + this.allEnumsEditorInput.length > 0;
+        console.log('-----  done parsing -----'.green());
     }
 
     async generate(): Promise<void> {
@@ -140,7 +140,7 @@ export abstract class GeneratorAbstract {
             if (!name || name === 'undefined' || name === '') {
                 return undefined;
             }
-            name = name.replace(this.cleanRegex, '');
+            name = cleanString(name);
             return this.options.modelNamePrefix + capitalize(name) + this.options.modelNameSuffix.split('.')[0];
         };
         let fileName = getFileName();
@@ -205,7 +205,7 @@ export abstract class GeneratorAbstract {
     getMethodName(controllerPath: ApiPath, prefix: string = '', suffix: string = '') {
         const generateMethodName = () => {
             let longName = controllerPath.method.toLowerCase() + capitalize(controllerPath.path);
-            longName = longName.replace(this.cleanRegex, '');
+            longName = cleanString(longName);
             if (this.options.longMethodName) {
                 return longName;
             }
@@ -217,10 +217,10 @@ export abstract class GeneratorAbstract {
                     ? shortName
                     : shortName.substring(`/${controllerPath.controller}/`.length);
                 shortName = capitalize(shortName);
-                shortName = shortName.replace(this.cleanRegex, '');
+                shortName = cleanString(shortName);
                 shortName = controllerPath.method.toLowerCase() + capitalize(shortName);
             } catch {}
-            return !shortName ? longName : shortName.replace(this.cleanRegex, '').trim();
+            return !shortName ? longName : cleanString(shortName);
         };
         const methodName = `${prefix}${generateMethodName()}${suffix}`;
         const key = `${controllerPath.controller}_${methodName}`;
