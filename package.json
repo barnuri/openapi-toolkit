@@ -24,7 +24,7 @@
         "preupload": "rimraf dist && npm run build && git push",
         "upload": "npm publish",
         "postupload": "npm version patch && git push",
-        "test:typescript-models": "npm run build && cross-env-shell \"node ./dist/cli-generate.js -i $OPENAPI_TOOLKIT_TESTFILE -g typescript-axios -o ./test-typescript-models --modelsOnly && tsc --build tsconfig-test.json\"",
+        "test:typescript-models": "npm run build && cross-env-shell \"node ./dist/cli-generate.js -i $OPENAPI_TOOLKIT_TESTFILE -g typescript-axios -o ./test-typescript-models --modelsOnly true && tsc --build tsconfig-test.json\"",
         "test:typescript-axios": "npm run build && cross-env-shell \"node ./dist/cli-generate.js -i $OPENAPI_TOOLKIT_TESTFILE -g typescript-axios -o ./test-typescript-axios && tsc --build tsconfig-test.json\"",
         "test:typescript-react-query": "npm run build && cross-env-shell \"node ./dist/cli-generate.js -i $OPENAPI_TOOLKIT_TESTFILE -g typescript-react-query -o ./test-typescript-react-query && tsc --build tsconfig-test.json\"",
         "test:csharp": "npm run build && cross-env-shell \"node ./dist/cli-generate.js -i $OPENAPI_TOOLKIT_TESTFILE -g c# -o ./test-csharp --modelNamePrefix My\" && cpy ./.github/dotnet-test.csproj ./test-csharp --flat --rename=test-csharp.csproj && dotnet build ./test-csharp/test-csharp.csproj -clp:ErrorsOnly",
