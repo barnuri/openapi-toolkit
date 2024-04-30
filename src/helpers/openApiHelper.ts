@@ -1,6 +1,6 @@
 import { OpenApiPathParamInVals } from './../models/openapi/OpenApiDocument';
 import { OpenApiDefinition, OpenApiDocument, OpenApiDefinitionReference, OpenApiDefinitionObject, OpenApiDefinitionsDictionary, ApiPath } from '../models';
-import { cleanString } from '..';
+import { cleanString } from '../helpers/utilsHelper';
 
 export function getOpenApiDefinitionObject(
     definition: OpenApiDefinition,
