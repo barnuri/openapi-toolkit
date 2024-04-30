@@ -46,7 +46,8 @@ export abstract class GeneratorAbstract {
         this.filesNames = [];
         this.swagger = swagger;
         this.options.output = fixPath(options.output);
-        console.log('parse models');
+        console.log('-----  start parsing -----'.cyan());
+        console.log('parsing models');
         this.editors = getAllEditors(swagger, options.debugLogs);
         console.log('parse all api pathes');
         this.apiPaths = getApiPaths(swagger);
@@ -59,7 +60,7 @@ export abstract class GeneratorAbstract {
     }
 
     async generate(): Promise<void> {
-        console.log('-----  start generating -----');
+        console.log('-----  start generating -----'.cyan());
         this.generatedFiles = [];
         this.filesNames = [];
         this.methodsNames = {};
@@ -72,14 +73,14 @@ export abstract class GeneratorAbstract {
         await this.generateModels();
         if (!this.options.modelsOnly) {
             await this.generateControllers();
-            console.log('----- start generating client -----');
+            console.log('----- generating client -----'.cyan());
             this.generateClient();
         }
-        console.log('----- done -----');
+        console.log('----- done -----'.green());
     }
 
     private async generateControllers() {
-        console.log('----- start generating controllers -----');
+        console.log('----- generating controllers -----'.cyan());
         for (const controllerName of this.controllersNames) {
             const controllerPaths = this.apiPaths.filter(x => x.controller.toLowerCase() === controllerName.toLowerCase());
             console.log(`${controllerName} - ${controllerPaths.length}`);
@@ -88,14 +89,14 @@ export abstract class GeneratorAbstract {
     }
 
     private async generateModels() {
-        console.log('-----  start generating object models -----');
+        console.log('-----  generating object models -----'.cyan());
         for (const objectInput of this.allObjectEditorInputs) {
             if (objectInput.isDictionary) {
                 continue;
             }
             await this.generateObject(objectInput);
         }
-        console.log('-----  start generating enum models -----');
+        console.log('-----  generating enum models -----'.cyan());
         for (const enumInput of this.allEnumsEditorInput) {
             const enumVals = {};
             if (enumInput.enumNames.length === enumInput.enumValues.length) {
