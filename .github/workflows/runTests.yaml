@@ -35,8 +35,8 @@ jobs:
           path: ./*
           key: ${{ github.sha }}
 
-  test-typescript:
-    name: Test Typescript
+  test-typescript-axios:
+    name: Test Typescript Axios
     runs-on: ubuntu-latest
     needs: [ prepare ]
     steps:
@@ -45,7 +45,19 @@ jobs:
         with:
           path: ./*
           key: ${{ github.sha }}
-      - run: npm run test:typescript
+      - run: npm run test:typescript-axios
+
+  test-typescript-models:
+    name: Test Typescript Models
+    runs-on: ubuntu-latest
+    needs: [ prepare ]
+    steps:
+      - uses: actions/cache@v3
+        id: restore-build
+        with:
+          path: ./*
+          key: ${{ github.sha }}
+      - run: npm run test:typescript-models
 
   test-typescript-reactquery:
     name: Test Typescript ReactQuery
