@@ -5,7 +5,7 @@ export class TypescriptReactQueryClientGenerator extends TypescriptAxiosClientGe
     getControllersImports() {
         return super.getControllersImports() + `\nimport { useQuery, useMutation, UseQueryOptions, UseMutationOptions } from 'react-query';`;
     }
-    generateControllerMethodContent(controller: string, controllerPath: ApiPath): string {
+    generateControllerMethodContent(controller: string, controllerPath: ApiPath) {
         const isGetMethod = controllerPath.method.toLowerCase() === 'get';
         const methodName = this.getMethodName(controllerPath, '', isGetMethod ? 'Query' : 'Mutation');
         const queryKey = `${controller}_${methodName}`;
@@ -48,6 +48,7 @@ export class TypescriptReactQueryClientGenerator extends TypescriptAxiosClientGe
         methodContent += isGetMethod ? `queryOptions` : `mutationOptions`;
         methodContent += `)\n`;
         methodContent += `\t}\n`;
-        return methodContent + '\n' + super.generateControllerMethodContent(controller, controllerPath);
+        methodContent += '\n' + super.generateControllerMethodContent(controller, controllerPath);
+        return { methodContent, methodName };
     }
 }

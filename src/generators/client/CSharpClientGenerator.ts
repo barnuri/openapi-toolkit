@@ -50,7 +50,7 @@ ${controllerPropsCtor}
         const controllerFile = join(this.controllersFolder, controllerName + this.getFileExtension(false));
         writeFileSync(controllerFile, '\n' + this.addNamespace(controllerContent));
     }
-    generateControllerMethodContent(controller: string, controllerPath: ApiPath): string {
+    generateControllerMethodContent(controller: string, controllerPath: ApiPath) {
         const methodName = capitalize(this.getMethodName(controllerPath));
         let requestType = controllerPath.body.haveBody ? this.getPropDesc(controllerPath.body.schema) : 'object';
         const responseType = this.getPropDesc(controllerPath.response);
@@ -105,7 +105,7 @@ ${controllerPropsCtor}
         methodContent += `\tpublic Task<string?> ${methodName}ContentAsync(${methodParams}) \n\t{\n`.replace(', )', ')');
         methodContent += `\t\treturn Method<${requestType}>(\n`;
         methodContent += methodCommonText;
-        return methodContent;
+        return { methodContent, methodName };
     }
     generateBaseController() {
         const usings = `using System;

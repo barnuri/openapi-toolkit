@@ -51,7 +51,7 @@ import { ControllerBase } from '../ControllerBase';`;
         const controllerFile = join(this.controllersFolder, controllerName + this.getFileExtension(false));
         writeFileSync(controllerFile, this.disableLinting + controllerContent);
     }
-    generateControllerMethodContent(controller: string, controllerPath: ApiPath): string {
+    generateControllerMethodContent(controller: string, controllerPath: ApiPath) {
         const methodName = this.getMethodName(controllerPath);
         let requestType = controllerPath.body.haveBody ? this.getPropDesc(controllerPath.body.schema) : 'undefined';
         const responseType = this.getPropDesc(controllerPath.response);
@@ -84,7 +84,7 @@ import { ControllerBase } from '../ControllerBase';`;
         methodContent += `\t\t\tcustomConfig\n`;
         methodContent += `\t\t);\n`;
         methodContent += `\t}\n`;
-        return methodContent;
+        return { methodContent, methodName };
     }
     generateBaseController() {
         const controllerBaseFile = join(this.options.output, 'ControllerBase.ts');

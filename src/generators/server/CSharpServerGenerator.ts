@@ -22,8 +22,8 @@ export class CSharpServerGenerator extends CSharpGenerator {
         const controllerFile = join(this.controllersFolder, controllerName + this.getFileExtension(false));
         writeFileSync(controllerFile, '\n' + this.addNamespace(controllerContent));
     }
-    generateControllerMethodContent(controller: string, controllerPath: ApiPath): string {
-        const methodName = capitalize(this.getMethodName(controllerPath)) + 'Async';
+    generateControllerMethodContent(controller: string, controllerPath: ApiPath) {
+        const methodName = capitalize(this.getMethodName(controllerPath, '', 'Async'));
         let requestType = controllerPath.body.haveBody ? this.getPropDesc(controllerPath.body.schema) : 'object';
         const responseType = this.getPropDesc(controllerPath.response);
         const bodyParam = controllerPath.body.haveBody ? `[FromBody] ${requestType}${!controllerPath.body.required ? `?` : ''} body, ` : '';
@@ -50,6 +50,6 @@ export class CSharpServerGenerator extends CSharpGenerator {
         methodContent += `\tpublic Task<${responseType}> ${methodName}(${methodParams}) \n\t{\n`.replace(', )', ')');
         methodContent += `\t\tthrow new NotImplementedException();\n`;
         methodContent += `\t}\n`;
-        return methodContent;
+        return { methodContent, methodName };
     }
 }

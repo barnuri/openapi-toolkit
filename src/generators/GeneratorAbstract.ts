@@ -171,8 +171,9 @@ export abstract class GeneratorAbstract {
     generateControllerMethodsContent(controller: string, controllerPaths: ApiPath[]): string {
         let content = '';
         for (const controllerPath of controllerPaths) {
-            console.log(`\t${controllerPath.method} - ${controllerPath.path}`);
-            content += this.generateControllerMethodContent(controller, controllerPath);
+            const res = this.generateControllerMethodContent(controller, controllerPath);
+            content += res.methodContent;
+            console.log(`\t${controllerPath.method} - ${controllerPath.path} - ${res.methodName}`);
         }
         return content;
     }
@@ -215,7 +216,7 @@ export abstract class GeneratorAbstract {
 
     abstract generateController(controller: string, controllerPaths: ApiPath[]): void;
 
-    abstract generateControllerMethodContent(controller: string, controllerPath: ApiPath): string;
+    abstract generateControllerMethodContent(controller: string, controllerPath: ApiPath): { methodContent: string; methodName: string };
 
     abstract generateClient(): void;
 }
