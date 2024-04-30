@@ -48,7 +48,7 @@ export class TypescriptReactQueryClientGenerator extends TypescriptAxiosClientGe
         methodContent += isGetMethod ? `queryOptions` : `mutationOptions`;
         methodContent += `)\n`;
         methodContent += `\t}\n`;
-        methodContent += '\n' + super.generateControllerMethodContent(controller, controllerPath);
+        methodContent += '\n' + super.generateControllerMethodContent(controller, controllerPath).methodContent;
         return { methodContent, methodName };
     }
 }
