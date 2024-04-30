@@ -90,6 +90,7 @@ export abstract class GeneratorAbstract {
             console.log('-'.repeat(controllerDisplay.length).cyan());
             await this.generateController(controllerName, controllerPaths);
         }
+        console.log(' ');
     }
 
     private async generateModels() {
