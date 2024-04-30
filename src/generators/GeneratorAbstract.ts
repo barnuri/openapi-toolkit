@@ -173,9 +173,32 @@ export abstract class GeneratorAbstract {
         for (const controllerPath of controllerPaths) {
             const res = this.generateControllerMethodContent(controller, controllerPath);
             content += res.methodContent;
-            console.log(`\t${controllerPath.method.toUpperCase()} - ${controllerPath.path} => ${controller}.${res.methodName}`);
+            console.log(`\t${controllerPath.method} - ${controllerPath.path} => ${controller}.${res.methodName}`);
         }
         return content;
+    }
+
+    private httpMethodFormat(httpMethod: string) {
+        httpMethod = httpMethod.toUpperCase();
+        if (httpMethod === 'GET') {
+            return httpMethod.blue();
+        }
+        if (httpMethod === 'POST') {
+            return httpMethod.green();
+        }
+        if (httpMethod === 'PUT') {
+            return httpMethod.yellow();
+        }
+        if (httpMethod === 'DELETE') {
+            return httpMethod.red();
+        }
+        if (httpMethod === 'PATCH') {
+            return httpMethod.magenta();
+        }
+        if (httpMethod === 'HEAD') {
+            return httpMethod.cyan();
+        }
+        return httpMethod;
     }
 
     getMethodName(controllerPath: ApiPath, prefix: string = '', suffix: string = '') {
