@@ -84,6 +84,8 @@ export abstract class GeneratorAbstract {
         for (const controllerName of this.controllersNames) {
             const controllerPaths = this.apiPaths.filter(x => x.controller.toLowerCase() === controllerName.toLowerCase());
             const controllerDisplay = `${this.getControllerName(controllerName)} - methods: ${controllerPaths.length}`;
+            console.log(' ');
+            console.log('-'.repeat(controllerDisplay.length).cyan());
             console.log(controllerDisplay);
             console.log('-'.repeat(controllerDisplay.length).cyan());
             await this.generateController(controllerName, controllerPaths);
