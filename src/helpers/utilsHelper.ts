@@ -114,6 +114,46 @@ export function camelCase(str: string) {
         .replace(/\s+/g, '');
 }
 
+export function cleanString(str: string): string {
+    const charsToRemove = [
+        '/',
+        ' ',
+        '-',
+        '{',
+        '}',
+        '.',
+        '_',
+        '[',
+        ']',
+        ',',
+        '(',
+        ')',
+        ':',
+        ';',
+        '?',
+        '!',
+        '@',
+        '#',
+        '$',
+        '%',
+        '^',
+        '&',
+        '*',
+        '+',
+        '=',
+        '|',
+        '\\',
+        '<',
+        '>',
+        '~',
+        '`',
+    ];
+    for (const char of charsToRemove) {
+        str = str.replace(new RegExp(escapeRegExp(char), 'g'), '');
+    }
+    return str.trim();
+}
+
 function createDelimiterRegex(delimiters) {
     // Escape special characters in each delimiter and join them with the "or" operator
     const regexString = delimiters.map(delimiter => escapeRegExp(delimiter)).join('|');

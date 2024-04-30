@@ -33,7 +33,7 @@ export async function generate(options: GeneratorsOptions) {
     console.log(`get swagger successfull`.green());
     const constractor = options.type === 'server' ? serverGeneratorGetter(options.generator) : clientGeneratorGetter(options.generator);
     const generator = new constractor(swagger, options);
-    console.log(`start ${generator.constructor.name}`);
+    console.log(`start ${generator.constructor.name}`.cyan());
     await generator.generate();
 }
 
