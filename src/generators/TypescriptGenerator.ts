@@ -89,7 +89,7 @@ ${objectInput.properties
         const shouldWrapName = (name: string) => {
             if (specialChars.filter(x => name.includes(x)).length > 0) { return true; }
             if (specialKeywords.filter(x => name === x).length > 0) { return true; }
-            if (!isNaN(name) && !isNaN(parseFloat(name))) { return true; }
+            if (!isNaN(parseFloat(name))) { return true; }
             return false;
         };
         const fixName = (name: string) => shouldWrapName(name) ? `"${name}"` : name;
