@@ -20,6 +20,8 @@ export * from './TypescriptGenerator';
 export * from './GeneratorAbstract';
 
 export async function generate(options: GeneratorsOptions) {
+    const defaultVals = new GeneratorsOptions();
+    options = { ...defaultVals, ...options };
     options.longMethodName = (options.longMethodName as any) === 'true' || options.longMethodName === true;
     options.debugLogs = (options.debugLogs as any) === 'true' || options.debugLogs === true;
     if (!options.pathOrUrl) {
