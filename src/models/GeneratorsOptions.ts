@@ -9,7 +9,7 @@ export default class GeneratorsOptions {
     modelNamePrefix: string = '';
     modelNameSuffix: string = '';
     controllersFolderName: string = 'controllers';
-    controllerNamePrefix: string = 'Controller';
+    controllerNamePrefix: string = '';
     controllerNameSuffix: string = '';
     namepsace: string = 'OpenapiDefinitionGenerate';
     type: string = 'client';
