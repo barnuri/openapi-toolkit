@@ -92,7 +92,6 @@ ${objectInput.properties
             if (!isNaN(parseFloat(name))) { return `Num${name}`; }
             return name;
         };
-        const fixName = (name: string) => shouldWrapName(name) ? `"${name}"` : name;
         const modelFileContent = `
 export enum ${this.getFileName(enumInput)} {
 ${Object.keys(enumVals)
