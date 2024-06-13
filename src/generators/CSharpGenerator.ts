@@ -5,7 +5,7 @@ import { join } from 'path';
 import { getEditorInput2 } from '../helpers';
 import { GeneratorAbstract } from './GeneratorAbstract';
 import { EditorObjectInput, EditorPrimitiveInput, OpenApiDefinition } from '../models';
-import { capitalize } from '../helpers';
+import { capitalize, cleanString } from '../helpers';
 
 export abstract class CSharpGenerator extends GeneratorAbstract {
     addNamespace(content: string, customUsing?: string) {
@@ -17,6 +17,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
+using System.Runtime.Serialization;
+using Newtonsoft.Json.Converters;
 `;
         return usings + '\n#nullable enable' + '\nnamespace ' + this.options.namespace + '\n{\n\t' + content.replace(/\n/g, '\n\t') + '\n}';
     }
@@ -32,12 +34,12 @@ using System.Threading.Tasks;
         const modelFileContent = `public class ${this.getFileName(objectInput)} ${extendStr}\n{
 ${objectInput.properties
     .map(x => {
-        let attributes = ``;
         let propName = x.name.replace(/\[i\]/g, '');
-        const specialChars = ['-', ' ', '!'];
-        if (specialChars.filter(x => propName.includes(x)).length > 0) { 
-            attributes = `[JsonProperty("${propName}")] `;
-            propName = capitalize(propName);
+        let attributes = `[JsonProperty("${propName}")] `;
+        propName = capitalize(propName);
+        const propType = this.getPropDesc(x);
+        if (objectInput.editorType === 'EditorPrimitiveInput' && propType !== 'object') {
+            attributes += `[JsonConverter(typeof(StringEnumConverter))] `
         }
         return `\t ${attributes}public ${this.getPropDesc(x)}${x.nullable || !x.required ? '?' : ''} ${propName} { get; set; }`;
     })
@@ -95,7 +97,11 @@ ${objectInput.properties
         const modelFileContent = `public enum ${this.getFileName(enumInput)} 
 {
 ${Object.keys(enumVals)
-    .map(x => `\t${this.getEnumValueName(x)}${typeof enumVals[x] === 'number' ? ' = ' + enumVals[x] : ``}`)
+    .map(x => {
+        let enumValName = cleanString(this.getEnumValueName(x));
+        const attributes = `[EnumMember(Value = "${enumVals[x]}")]`;
+        return `\t${enumValName} = ${typeof enumVals[x] === 'number' ? enumVals[x] : enumVals.indexOf(x)}`;
+    })
     .join(',\n')}
 }`;
         writeFileSync(modelFile, this.addNamespace(modelFileContent));
