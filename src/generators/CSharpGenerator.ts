@@ -98,7 +98,7 @@ ${objectInput.properties
         const cleanNameCounter = {} as any;
         for (let index = 0; index < enumKeys.length; index++) {
             const enumKey = enumKeys[index];
-            let enumCleanName = cleanString(this.getEnumValueName(enumKey)).replace(/"/g, "");
+            let enumCleanName = cleanString(this.getEnumValueName(capitalize(enumKey))).replace(/"/g, "");
             const enumAssignment = typeof enumVals[enumKey] === 'number' ? ` = ${enumVals[enumVals[enumKey]]}` : ``;
             if (cleanNameCounter[enumCleanName] === undefined) {
                 cleanNameCounter[enumCleanName] = 0;
@@ -120,7 +120,7 @@ ${objectInput.properties
 {
 ${enumValsAgg
     .map(x => {
-        const attributes = `[EnumMember(Value = "${x.realValue}")]`;
+        const attributes = `[EnumMember(Value = "${x.realValue}")] `;
         return `\t${attributes}${x.enumCleanName}${x.enumAssignment}`;
     })
     .join(',\n')}

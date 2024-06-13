@@ -146,13 +146,13 @@ using System.Runtime.Serialization;
     public string BaseUrl { get; set; }
     public HttpClient HttpClient { get; set; } = new HttpClient();
     public JsonSerializerSettings JsonSerializerSettings { get; set; }
-    protected async Task<S?> Method<T, S>(string method, string path, T? body, Dictionary<string, string?>? headers) where T : class
+    protected async Task<S?> Method<T, S>(string method, string path, T? body, Dictionary<string, string?>? headers)
     {
         var json = await Method(method, path, body, headers) ?? string.Empty;
         var res = JsonConvert.DeserializeObject<S>(json, JsonSerializerSettings);
         return res;
     }
-    protected async Task<string?> Method<T>(string method, string path, T? body, Dictionary<string, string?>? headers) where T : class
+    protected async Task<string?> Method<T>(string method, string path, T? body, Dictionary<string, string?>? headers)
     {
         var req = new HttpRequestMessage
         {
