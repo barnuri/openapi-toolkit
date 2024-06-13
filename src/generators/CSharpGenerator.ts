@@ -100,7 +100,7 @@ ${Object.keys(enumVals)
     .map(x => {
         let enumValName = cleanString(this.getEnumValueName(x));
         const attributes = `[EnumMember(Value = "${enumVals[x]}")]`;
-        return `\t${enumValName} = ${typeof enumVals[x] === 'number' ? enumVals[x] : enumVals.indexOf(x)}`;
+        return `\t${enumValName} = ${typeof enumVals[x] === 'number' ? enumVals[x] : Object.keys(enumVals).indexOf(x)}`;
     })
     .join(',\n')}
 }`;
