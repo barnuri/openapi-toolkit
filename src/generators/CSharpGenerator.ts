@@ -18,7 +18,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 `;
-        return usings + '\n#nullable enable' + '\nnamespace ' + this.options.namepsace + '\n{\n\t' + content.replace(/\n/g, '\n\t') + '\n}';
+        return usings + '\n#nullable enable' + '\nnamespace ' + this.options.namespace + '\n{\n\t' + content.replace(/\n/g, '\n\t') + '\n}';
     }
     generateObject(objectInput: EditorObjectInput): void {
         if (!this.shouldGenerateModel(objectInput)) {

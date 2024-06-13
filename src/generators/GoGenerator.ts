@@ -9,7 +9,7 @@ import { camelCase, capitalize } from '../helpers/utilsHelper';
 
 export abstract class GoGenerator extends GeneratorAbstract {
     generateClient(): void {
-        writeFileSync(this.options.output + '/go.mod', `module ${this.options.namepsace}\n\ngo 1.17`);
+        writeFileSync(this.options.output + '/go.mod', `module ${this.options.namespace}\n\ngo 1.17`);
     }
     getImportes(extraUsing?: string) {
         const usings = `import (

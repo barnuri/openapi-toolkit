@@ -40,7 +40,7 @@ Options:
   -o, --output                 output path                            [required]
   -g, --generator              generator name      [default: "typescript-axios"]
   -t, --type                   [choices: "client", "server"] [default: "client"]
-  -n, --namepsace                         [default: "OpenapiDefinitionGenerate"]
+  -n, --namespace                         [default: "OpenapiDefinitionGenerate"]
       --modelsFolderName                                     [default: "models"]
       --modelNamePrefix                                            [default: ""]
       --modelNameSuffix                                            [default: ""]

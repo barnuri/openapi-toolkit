@@ -11,7 +11,7 @@ export default class GeneratorsOptions {
     controllersFolderName: string = 'controllers';
     controllerNamePrefix: string = '';
     controllerNameSuffix: string = 'Controller';
-    namepsace: string = 'OpenapiDefinitionGenerate';
+    namespace: string = 'OpenapiDefinitionGenerate';
     type: string = 'client';
     longMethodName: boolean = false;
     debugLogs: boolean = true;

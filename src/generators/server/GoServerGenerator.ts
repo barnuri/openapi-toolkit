@@ -8,7 +8,7 @@ export class GoServerGenerator extends GoGenerator {
     mainExportFile = join(this.options.output, 'main.go');
     generateClient() {
         const mod = `
-module ${this.options.namepsace}
+module ${this.options.namespace}
 
 go 1.17
 
@@ -224,8 +224,8 @@ import (
     "github.com/swaggo/echo-swagger"
     "strings"
 	"fmt"
-    _ "${this.options.namepsace}/docs"
-    controllers "${this.options.namepsace}/controllers"
+    _ "${this.options.namespace}/docs"
+    controllers "${this.options.namespace}/controllers"
 )
 
 // @title Echo Swagger Example API
@@ -281,7 +281,7 @@ ${this.controllersNames.map(x => `\tcontrollers.${this.getControllerName(x)}(e)`
         const controllerContent = `package controllers
 import (
     "github.com/labstack/echo/v4"
-	"errors"${this.haveModels ? `\n\tmodels "${this.options.namepsace}/models"` : ''}
+	"errors"${this.haveModels ? `\n\tmodels "${this.options.namespace}/models"` : ''}
 )
 ${this.haveModels ? `\nvar _ = models.${this.getFileName([...this.allEnumsEditorInput, ...this.allObjectEditorInputs][0])}` : ''}
 

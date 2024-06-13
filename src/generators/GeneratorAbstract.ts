@@ -40,7 +40,7 @@ export abstract class GeneratorAbstract {
         options.controllersFolderName = options.controllersFolderName || '';
         options.controllerNamePrefix = options.controllerNamePrefix || '';
         options.controllerNameSuffix = options.controllerNameSuffix || '';
-        options.namepsace = options.namepsace || '';
+        options.namespace = options.namespace || '';
         this.generatedFiles = [];
         this.filesNames = [];
         this.swagger = swagger;

@@ -18,7 +18,7 @@ ${this.getImportes(`
     "os"
     "errors"
     "encoding/xml"
-    controllers "${this.options.namepsace}/controllers"`)}
+    controllers "${this.options.namespace}/controllers"`)}
 type Client = struct {
 ${controllerPropsNames.map(x => `\t${x} *controllers.${x}`).join('\n')}
 }
@@ -148,7 +148,7 @@ func main() {
         const controllerName = this.getControllerName(controller);
         makeDirIfNotExist(this.controllersFolder);
         let controllerContent = `package controllers
-${this.getImportes(!this.haveModels ? '' : `\n\tmodels "${this.options.namepsace}/models"`)}`;
+${this.getImportes(!this.haveModels ? '' : `\n\tmodels "${this.options.namespace}/models"`)}`;
         if (this.haveModels) {
             controllerContent += `var _ = models.${this.getFileName([...this.allEnumsEditorInput, ...this.allObjectEditorInputs][0])}\n\n`;
         }
