@@ -39,7 +39,7 @@ ${objectInput.properties
             attributes = `[JsonProperty("${propName}")] `;
             propName = capitalize(propName);
         }
-        return `\t ${attributes}public ${this.getPropDesc(x)}${x.nullable || !x.required ? '?' : ''} ${propName)} { get; set; }`;
+        return `\t ${attributes}public ${this.getPropDesc(x)}${x.nullable || !x.required ? '?' : ''} ${propName} { get; set; }`;
     })
     .join('\n')}
 }`;
