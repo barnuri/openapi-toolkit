@@ -107,11 +107,13 @@ export function capitalize(s: string): string {
 }
 
 export function camelCase(str: string) {
-    return str
+    res = str
         .replace(/(?:^\w|[A-Z]|\b\w)/g, function (word, index) {
             return index === 0 ? word.toLowerCase() : word.toUpperCase();
         })
         .replace(/\s+/g, '');
+    res = cleanString(res);
+    return res;
 }
 
 export function cleanString(str: string): string {
