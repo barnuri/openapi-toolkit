@@ -237,6 +237,15 @@ export abstract class GeneratorAbstract {
         return `${methodName}${extraText}`;
     }
 
+    getEnumValueName(name: string) {
+        const specialChars = ['-', ' ', '!'];
+        const specialKeywords = ['in', 'public', 'private', 'readonly'];
+        if (specialChars.filter(x => name.includes(x)).length > 0) { return `"${name}"`; }
+        if (specialKeywords.filter(x => name === x).length > 0) { return `"${name}"`; }
+        if (!isNaN(parseFloat(name))) { return `Num${name}`; }
+        return name;        
+    }
+
     abstract getFileExtension(isModel: boolean);
 
     abstract generateObject(objectInput: EditorObjectInput): void;
