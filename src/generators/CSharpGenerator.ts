@@ -93,14 +93,35 @@ ${objectInput.properties
         if (!this.shouldGenerateModel(enumInput)) {
             return;
         }
+        const enumValsAgg = [];
+        const enumKeys = Object.keys(enumVals);
+        const cleanNameCounter = {};
+        for (let index = 0; index < enumKeys.length; index++) {
+            const enumKey = enumKeys[index];
+            let enumCleanName = cleanString(this.getEnumValueName(x)).replace(/"/g, "");
+            const enumAssignment = typeof enumVals[enumKey] === 'number' ? ` = ${enumVals[enumVals[enumKey]]}` : ``;
+            if (cleanNameCounter[enumCleanName] === undefined) {
+                cleanNameCounter[enumCleanName] = 0;
+            }
+            let cleanNameSuffix = '';
+            if (cleanNameCounter[enumCleanName] > 0) {
+                cleanNameSuffix = cleanNameCounter[enumCleanName];
+            }
+            cleanNameCounter[enumCleanName]++;
+            enumValsAgg.push({ 
+                index, 
+                enumCleanName: `${enumCleanName}${cleanNameSuffix}`,
+                enumAssignment, 
+                realValue: enumVals[enumKey]
+            });
+        }
         const modelFile = join(this.modelsFolder, this.getFileName(enumInput) + this.getFileExtension(true));
         const modelFileContent = `public enum ${this.getFileName(enumInput)} 
 {
-${Object.keys(enumVals)
+${enumValsAgg
     .map(x => {
-        let enumValName = cleanString(this.getEnumValueName(x));
-        const attributes = `[EnumMember(Value = "${enumVals[x]}")]`;
-        return `\t${enumValName} = ${typeof enumVals[x] === 'number' ? enumVals[x] : Object.keys(enumVals).indexOf(x)}`;
+        const attributes = `[EnumMember(Value = "${x.realValue}")]`;
+        return `\t${attributes}${x.enumCleanName}${x.enumAssignment}`;
     })
     .join(',\n')}
 }`;
