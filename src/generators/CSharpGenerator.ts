@@ -35,7 +35,7 @@ ${objectInput.properties
         let attributes = ``;
         let propName = x.name.replace(/\[i\]/g, '');
         const specialChars = ['-', ' ', '!'];
-        if (specialChars.filter(x => x.name.includes(x)).length > 0) { 
+        if (specialChars.filter(x => propName.includes(x)).length > 0) { 
             attributes = `[JsonProperty("${propName}")] `;
             propName = capitalize(propName);
         }
