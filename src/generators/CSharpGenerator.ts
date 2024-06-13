@@ -98,7 +98,7 @@ ${objectInput.properties
         const cleanNameCounter = {};
         for (let index = 0; index < enumKeys.length; index++) {
             const enumKey = enumKeys[index];
-            let enumCleanName = cleanString(this.getEnumValueName(x)).replace(/"/g, "");
+            let enumCleanName = cleanString(this.getEnumValueName(enumKey)).replace(/"/g, "");
             const enumAssignment = typeof enumVals[enumKey] === 'number' ? ` = ${enumVals[enumVals[enumKey]]}` : ``;
             if (cleanNameCounter[enumCleanName] === undefined) {
                 cleanNameCounter[enumCleanName] = 0;
