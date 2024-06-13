@@ -110,11 +110,11 @@ ${this.getImportes()}
 type ${enumName} ${isNumberEnum ? 'int64' : 'string'}
 var ${this.getFileName(enumInput)} = struct {
 ${Object.keys(enumVals)
-    .map(x => `\t${x} ${enumName}`)
+    .map(x => `\t${this.getEnumValueName(x)} ${enumName}`)
     .join('\n')}
 } {
 ${Object.keys(enumVals)
-    .map(x => `\t${x}: ${isNumberEnum ? enumVals[x] : `"${enumVals[x]}"`}`)
+    .map(x => `\t${this.getEnumValueName(x)}: ${isNumberEnum ? enumVals[x] : `"${enumVals[x]}"`}`)
     .join(',\n')},
 }`;
         writeFileSync(modelFile, modelFileContent);

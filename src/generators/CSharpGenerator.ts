@@ -5,6 +5,7 @@ import { join } from 'path';
 import { getEditorInput2 } from '../helpers';
 import { GeneratorAbstract } from './GeneratorAbstract';
 import { EditorObjectInput, EditorPrimitiveInput, OpenApiDefinition } from '../models';
+import { capitalize } from '../helpers';
 
 export abstract class CSharpGenerator extends GeneratorAbstract {
     addNamespace(content: string, customUsing?: string) {
@@ -30,7 +31,16 @@ using System.Threading.Tasks;
                 : ``;
         const modelFileContent = `public class ${this.getFileName(objectInput)} ${extendStr}\n{
 ${objectInput.properties
-    .map(x => `\t public ${this.getPropDesc(x)}${x.nullable || !x.required ? '?' : ''} ${x.name.replace(/\[i\]/g, '')} { get; set; }`)
+    .map(x => {
+        let attributes = ``;
+        let propName = x.name.replace(/\[i\]/g, '');
+        const specialChars = ['-', ' ', '!'];
+        if (specialChars.filter(x => name.includes(x)).length > 0) { 
+            attributes = `[JsonProperty("${propName}")] `;
+            propName = capitalize(propName);
+        }
+        return `\t ${attributes}public ${this.getPropDesc(x)}${x.nullable || !x.required ? '?' : ''} ${propName)} { get; set; }`;
+    })
     .join('\n')}
 }`;
         writeFileSync(modelFile, this.addNamespace(modelFileContent));
@@ -85,7 +95,7 @@ ${objectInput.properties
         const modelFileContent = `public enum ${this.getFileName(enumInput)} 
 {
 ${Object.keys(enumVals)
-    .map(x => `\t${x}${typeof enumVals[x] === 'number' ? ' = ' + enumVals[x] : ``}`)
+    .map(x => `\t${this.getEnumValueName(x)}${typeof enumVals[x] === 'number' ? ' = ' + enumVals[x] : ``}`)
     .join(',\n')}
 }`;
         writeFileSync(modelFile, this.addNamespace(modelFileContent));

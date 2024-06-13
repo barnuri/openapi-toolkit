@@ -84,18 +84,10 @@ ${objectInput.properties
             return;
         }
         const modelFile = join(this.modelsFolder, this.getFileName(enumInput) + this.getFileExtension(true));
-        const specialChars = ['-', ' ', '!'];
-        const specialKeywords = ['in', 'public', 'private', 'readonly'];
-        const fixName = (name: string) => {
-            if (specialChars.filter(x => name.includes(x)).length > 0) { return `"${name}"`; }
-            if (specialKeywords.filter(x => name === x).length > 0) { return `"${name}"`; }
-            if (!isNaN(parseFloat(name))) { return `Num${name}`; }
-            return name;
-        };
         const modelFileContent = `
 export enum ${this.getFileName(enumInput)} {
 ${Object.keys(enumVals)
-    .map(x => `\t${fixName(x)} = ${typeof enumVals[x] === 'number' ? enumVals[x] : `'${enumVals[x]}'`}`)
+    .map(x => `\t${this.getEnumValueName(x)} = ${typeof enumVals[x] === 'number' ? enumVals[x] : `'${enumVals[x]}'`}`)
     .join(',\n')}
 }
             `;
