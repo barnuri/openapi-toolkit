@@ -93,9 +93,9 @@ ${objectInput.properties
         if (!this.shouldGenerateModel(enumInput)) {
             return;
         }
-        const enumValsAgg = [];
+        const enumValsAgg = [] as any[];
         const enumKeys = Object.keys(enumVals);
-        const cleanNameCounter = {};
+        const cleanNameCounter = {} as any;
         for (let index = 0; index < enumKeys.length; index++) {
             const enumKey = enumKeys[index];
             let enumCleanName = cleanString(this.getEnumValueName(enumKey)).replace(/"/g, "");
