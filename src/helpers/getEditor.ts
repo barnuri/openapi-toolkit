@@ -43,7 +43,7 @@ export function getEditorInput(
     existingObjectEditorInputs: existingObjectEditorInputs = {},
 ): EditorInput {
     const defDetails = getOpenApiDefinitionObject(definition, definitions);
-    let definitionObj = defDetails.def;
+    let definitionObj = defDetails.def || {};
     definitionObj.anyOf = definitionObj.anyOf ? definitionObj.anyOf.filter(x => x.title != definitionObj.title) : definitionObj.anyOf;
     defDetails.refName = defDetails.refName || customRefName || '';
     if (Array.isArray(definitionObj.type)) {
