@@ -44,7 +44,7 @@ export function getEditorInput(
 ): EditorInput {
     const defDetails = getOpenApiDefinitionObject(definition, definitions);
     let definitionObj = defDetails.def;
-    definitionObj.anyOf = definitionObj.anyOf?.filter(x => x.title != definitionObj.title);
+    definitionObj.anyOf = definitionObj.anyOf ? definitionObj.anyOf.filter(x => x.title != definitionObj.title) : definitionObj.anyOf;
     defDetails.refName = defDetails.refName || customRefName || '';
     if (Array.isArray(definitionObj.type)) {
         definitionObj.type = [...definitionObj.type, 'string'].filter(x => x != 'null')[0] as OpenApiDefinitionType;
@@ -98,7 +98,7 @@ export function getEditorInput(
             (switchableObject as EditorObjectInput).implements = distinct([
                 ...(switchableObject as EditorObjectInput).implements,
                 objectInput.definistionName,
-                ...(objectInput.openApiDefinition.anyOf?.map(x => x.type || x['$ref']?.split('/').slice(-1)[0]) || []),
+                ...((objectInput.openApiDefinition.anyOf || []).map(x => x.type || x['$ref']?.split('/').slice(-1)[0]) || []),
             ]).filter(x => x);
         }
         switchableObjects.push(switchableObject);
