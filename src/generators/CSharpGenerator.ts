@@ -20,7 +20,12 @@ using System.Threading.Tasks;
 using System.Runtime.Serialization;
 using Newtonsoft.Json.Converters;
 `;
-        return usings + '\n#nullable enable' + '\nnamespace ' + this.options.namespace + '\n{\n\t' + content.replace(/\n/g, '\n\t') + '\n}';
+        let combineContent = usings;
+        if (!this.options.disableNullable) {
+            combineContent += '\n#nullable enable';
+        }
+        combineContent += '\nnamespace ' + this.options.namespace + '\n{\n\t' + content.replace(/\n/g, '\n\t') + '\n}'
+        return combineContent;
     }
     generateObject(objectInput: EditorObjectInput): void {
         if (!this.shouldGenerateModel(objectInput)) {
@@ -41,7 +46,11 @@ ${objectInput.properties
         if (objectInput.editorType === 'EditorPrimitiveInput' && propType !== 'object') {
             attributes += `[JsonConverter(typeof(StringEnumConverter))] `
         }
-        return `\t ${attributes}public ${this.getPropDesc(x)}${x.nullable || !x.required ? '?' : ''} ${propName} { get; set; }`;
+        let shouldMarkNullable = x.nullable || !x.required;
+        if (this.options.disableNullable && shouldMarkNullable && (propType === 'object' || propType === 'string')) {
+            shouldMarkNullable = false;
+        }
+        return `\t ${attributes}public ${this.getPropDesc(x)}${shouldMarkNullable ? '?' : ''} ${propName} { get; set; }`;
     })
     .join('\n')}
 }`;
