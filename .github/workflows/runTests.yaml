@@ -106,7 +106,7 @@ jobs:
       - run: npm run test:csharp
 
   test-csharp-nullable-false:
-    name: Test C#
+    name: Test C# nullable false
     runs-on: ubuntu-latest
     needs: [ prepare ]
     env:
