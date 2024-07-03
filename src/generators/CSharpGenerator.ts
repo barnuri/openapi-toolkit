@@ -52,7 +52,7 @@ ${objectInput.properties
         }
         cleanNameCounter[propName]++;
         const propType = this.getPropDesc(x);
-        const isEnum = x.editorType === 'EditorPrimitiveInput' && propType !== 'object';
+        const isEnum = x.editorType === 'EditorPrimitiveInput' && (x as EditorPrimitiveInput).type === 'enum' && propType !== 'object';
         const isPrimitiveWithNullableSupp = x.editorType === 'EditorPrimitiveInput' && propType !== 'string';
         if (isEnum) {
             attributes += `[JsonConverter(typeof(StringEnumConverter))] `

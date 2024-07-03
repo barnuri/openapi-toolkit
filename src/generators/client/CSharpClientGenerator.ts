@@ -8,6 +8,7 @@ export class CSharpClientGenerator extends CSharpGenerator {
     mainExportFile = join(this.options.output, 'Client.cs');
     generateClient(): void {
         this.generateBaseController();
+        const nullableMark = !this.options.disableNullable ? '?' : ''
         const controllerPropsNames = this.controllersNames.map(x => this.getControllerName(x));
         const controllerProps = controllerPropsNames.map(x => `\tpublic ${x} ${x} { get; private set; }`).join('\n') + '\n';
         const controllerPropsCtor =
@@ -23,7 +24,7 @@ public class Client
     public JsonSerializerSettings JsonSerializerSettings { get; set; }
 ${controllerProps}
 
-    public Client(string baseUrl, HttpClient? httpClient = null, JsonSerializerSettings? jsonSerializerSettings = null)
+    public Client(string baseUrl, HttpClient${nullableMark} httpClient = null, JsonSerializerSettings${nullableMark} jsonSerializerSettings = null)
     {
         BaseUrl = baseUrl;
         HttpClient = httpClient ?? new HttpClient();
@@ -149,7 +150,7 @@ using System.Runtime.Serialization;
     public string BaseUrl { get; set; }
     public HttpClient HttpClient { get; set; } = new HttpClient();
     public JsonSerializerSettings JsonSerializerSettings { get; set; }
-    protected async Task<S?> Method<T, S>(string method, string path, T${nullableMark} body, Dictionary<string, string${nullableMark}>${nullableMark} headers)
+    protected async Task<S${nullableMark}> Method<T, S>(string method, string path, T${nullableMark} body, Dictionary<string, string${nullableMark}>${nullableMark} headers)
     {
         var json = await Method(method, path, body, headers) ?? string.Empty;
         var res = JsonConvert.DeserializeObject<S>(json, JsonSerializerSettings);
