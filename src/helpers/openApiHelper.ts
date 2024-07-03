@@ -13,7 +13,7 @@ export function getOpenApiDefinitionObject(
     if (Object.keys(definition).includes('$ref')) {
         const refPath = (definition as OpenApiDefinitionReference).$ref;
         if (refPath.includes('/anyOf/') || refPath.includes('/oneOf/') || refPath.includes('/allOf/')) {
-            const refJsonPath = refPath.trim('#').replace(/\//g, '.');
+            const refJsonPath = refPath.replace(/#/g, '').replace(/\//g, '.');
             let def = jsonPath(openApiDocument, refJsonPath);
             if (Object.keys(definition).includes('$ref')) {
                 return getOpenApiDefinitionObject(openApiDocument, def, definitions);
