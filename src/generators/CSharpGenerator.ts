@@ -34,7 +34,7 @@ using Newtonsoft.Json.Converters;
         const modelFile = join(this.modelsFolder, this.getFileName(objectInput) + this.getFileExtension(true));
         const extendStr =
             objectInput.implements.length > 0
-                ? `: ${this.options.modelNamePrefix}${objectInput.implements[0]}${this.options.modelNameSuffix.split('.')[0]}`
+                ? `: ${this.options.modelNamePrefix}${capitalize(objectInput.implements[0])}${this.options.modelNameSuffix.split('.')[0]}`
                 : ``;
         const modelFileContent = `public class ${this.getFileName(objectInput)} ${extendStr}\n{
 ${objectInput.properties
