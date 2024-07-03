@@ -135,10 +135,10 @@ export abstract class GeneratorAbstract {
         if (!this.shouldGenerateModel(editorInput)) {
             return;
         }
-        if (editorInput.type === 'EditorPrimitiveInput') {
+        if (editorInput.editorType === 'EditorPrimitiveInput') {
             await this._generateEnum(editorInput as EditorPrimitiveInput);
         }
-        if (editorInput.type === 'EditorObjectInput') {
+        if (editorInput.editorType === 'EditorObjectInput') {
             await this._generateEnum(editorInput as EditorObjectInput);
         }
     }
