@@ -184,6 +184,7 @@ export abstract class GeneratorAbstract {
         if (!fileName) {
             return undefined;
         }
+        fileName = capitalize(fileName);
         const modelFile = join(this.modelsFolder, fileName + this.getFileExtension(true));
         const path = this.filesNames.find(x => x.toLowerCase() === modelFile.toLowerCase());
         if (path) {
