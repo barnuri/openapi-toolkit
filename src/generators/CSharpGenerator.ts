@@ -36,14 +36,13 @@ using Newtonsoft.Json.Converters;
             objectInput.implements.length > 0
                 ? `: ${this.options.modelNamePrefix}${capitalize(objectInput.implements[0])}${this.options.modelNameSuffix.split('.')[0]}`
                 : ``;
-        let propsNames = {};
+        const cleanNameCounter = {} as any;
         const modelFileContent = `public class ${this.getFileName(objectInput)} ${extendStr}\n{
 ${objectInput.properties
     .map(x => {
         let propName = x.name.replace(/\[i\]/g, '');
         let attributes = `[JsonProperty("${propName}")] `;
         propName = capitalize(propName);
-        const cleanNameCounter = {} as any;
         if (cleanNameCounter[propName] === undefined) {
             cleanNameCounter[propName] = 0;
         }
