@@ -143,7 +143,7 @@ export abstract class GeneratorAbstract {
     shouldGenerateModel(editorInput: EditorInput) {
         makeDirIfNotExist(this.modelsFolder);
         if ((editorInput as EditorObjectInput)?.isDictionary === true) {
-            return;
+            return false;
         }
         const fileName = this.getFileName(editorInput);
         if (!fileName) {
