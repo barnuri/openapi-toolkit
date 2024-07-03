@@ -126,7 +126,7 @@ export abstract class GeneratorAbstract {
             return;
         }
         await this.generateObject(objectInput);
-        for (const item of objectInput.properties) {
+        for (const editorInput of objectInput.properties) {
             await this.generateByInput(editorInput);
         }
     }
