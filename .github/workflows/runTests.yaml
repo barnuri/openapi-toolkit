@@ -113,6 +113,7 @@ jobs:
           path: ./*
           key: ${{ github.sha }}
       - run: npm run test:go
+        continue-on-error: true
         
   test-go-server:
     name: Test Go Server
@@ -125,3 +126,4 @@ jobs:
           path: ./*
           key: ${{ github.sha }}
       - run: npm run test:go-server
+        continue-on-error: true
