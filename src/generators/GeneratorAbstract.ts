@@ -145,7 +145,7 @@ export abstract class GeneratorAbstract {
                 name = undefined;
             }
             if (!name && editorInput.editorType === 'EditorPrimitiveInput' && (editorInput as EditorPrimitiveInput).enumsOptions.length > 0) {
-                name = editorInput.name;
+                name = editorInput.name + 'Enum';
             }
             if (!name || name === 'undefined' || name === '') {
                 return undefined;
