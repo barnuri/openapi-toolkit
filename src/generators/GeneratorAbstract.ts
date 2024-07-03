@@ -126,9 +126,12 @@ export abstract class GeneratorAbstract {
             return;
         }
         await this.generateObject(objectInput);
+        for (const item of objectInput.properties) {
+            await this.generateByInput(editorInput);
+        }
     }
 
-    private generateByInput(editorInput: EditorInput) {
+    private async generateByInput(editorInput: EditorInput) {
         if (!this.shouldGenerateModel(editorInput)) {
             return;
         }
@@ -183,7 +186,6 @@ export abstract class GeneratorAbstract {
             fileName = path.replace(/\\/g, '/').split('/').pop()?.split('.')[0];
         } else {
             this.filesNames.push(modelFile);
-            this.generateByInput(editorInput);
         }
         return fileName;
     }
