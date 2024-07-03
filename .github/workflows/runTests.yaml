@@ -31,7 +31,7 @@ jobs:
         run: |
           if [[ "${{ github.event_name }}" == "workflow_dispatch" && "${{ github.event.inputs.useComplexSwagger }}" == "true" ]]; then
             echo "::set-output name=useComplexSwagger::true"
-          elif [[ "${{ github.event_name }}" == "pull_request" && "${{ github.event.pull_request.title }}" =~ \+ complex ut ]]; then
+          elif [[ "${{ github.event_name }}" == "pull_request" && "${{ github.event.pull_request.title }}" == *"+ complex ut"* ]]; then
             echo "::set-output name=useComplexSwagger::true"
           else
             echo "::set-output name=useComplexSwagger::false"
