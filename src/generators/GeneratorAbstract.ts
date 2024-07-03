@@ -1,5 +1,5 @@
 import { EditorInput } from '../models/editor/EditorInput';
-import { deleteFilesByPath, fixPath, makeDirIfNotExist } from '../helpers/generatorHelpers';
+import { deleteFilesByPath, fixPath, makeDirIfNotExist, isExists } from '../helpers/generatorHelpers';
 import { getAllEditors, getApiPaths, getAllEditorInputsByEditors, capitalize, distinctByProp, cleanString } from '../helpers';
 import { OpenApiDocument, Editor, ApiPath, EditorPrimitiveInput, EditorObjectInput } from '../models/index';
 import GeneratorsOptions from '../models/GeneratorsOptions';
@@ -154,8 +154,11 @@ export abstract class GeneratorAbstract {
     }
 
     shouldGenerateFile(path: string) {
-        if (this.generatedFiles.filter(x => x.toLowerCase() === path.toLowerCase()).length > 0) {
-            return false;
+        // if (this.generatedFiles.filter(x => x.toLowerCase() === path.toLowerCase()).length > 0) {
+        //     return false;
+        // }
+        if (isExists(path)) {
+            return;
         }
         this.generatedFiles.push(path);
         return true;

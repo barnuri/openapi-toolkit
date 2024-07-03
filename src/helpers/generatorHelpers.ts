@@ -46,3 +46,7 @@ export function setFullPermission(path: string): void {
         console.error(`setFullPermission error path = ${path}`, e);
     }
 }
+
+export const isExists = (path: string) => {
+    return existsSync(path);
+}; 
