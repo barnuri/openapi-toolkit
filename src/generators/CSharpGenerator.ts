@@ -36,12 +36,22 @@ using Newtonsoft.Json.Converters;
             objectInput.implements.length > 0
                 ? `: ${this.options.modelNamePrefix}${capitalize(objectInput.implements[0])}${this.options.modelNameSuffix.split('.')[0]}`
                 : ``;
+        let propsNames = {};
         const modelFileContent = `public class ${this.getFileName(objectInput)} ${extendStr}\n{
 ${objectInput.properties
     .map(x => {
         let propName = x.name.replace(/\[i\]/g, '');
         let attributes = `[JsonProperty("${propName}")] `;
         propName = capitalize(propName);
+        const cleanNameCounter = {} as any;
+        if (cleanNameCounter[propName] === undefined) {
+            cleanNameCounter[propName] = 0;
+        }
+        let cleanNameSuffix = '';
+        if (cleanNameCounter[propName] > 0) {
+            cleanNameSuffix = cleanNameCounter[propName];
+        }
+        cleanNameCounter[propName]++;
         const propType = this.getPropDesc(x);
         if (objectInput.editorType === 'EditorPrimitiveInput' && propType !== 'object') {
             attributes += `[JsonConverter(typeof(StringEnumConverter))] `
@@ -50,7 +60,7 @@ ${objectInput.properties
         if (this.options.disableNullable && shouldMarkNullable && (propType === 'object' || propType === 'string')) {
             shouldMarkNullable = false;
         }
-        return `\t ${attributes}public ${this.getPropDesc(x)}${shouldMarkNullable ? '?' : ''} ${propName} { get; set; }`;
+        return `\t ${attributes}public ${this.getPropDesc(x)}${shouldMarkNullable ? '?' : ''} ${propName}${cleanNameSuffix} { get; set; }`;
     })
     .join('\n')}
 }`;
