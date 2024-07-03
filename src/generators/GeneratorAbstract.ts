@@ -53,6 +53,11 @@ export abstract class GeneratorAbstract {
         this.controllersNames = distinctByProp([...new Set(this.apiPaths.map(x => x.controller))], x => x.toLowerCase());
         this.allEditorInputs = getAllEditorInputsByEditors(this.editors);
         this.allObjectEditorInputs = this.allEditorInputs.filter(x => x.editorType === 'EditorObjectInput').map(x => x as EditorObjectInput);
+        for (const objectInput of this.allObjectEditorInputs) {
+            if (objectInput.implements) {
+                objectInput.implements = objectInput.implements.map(x => capitalize(x));
+            }
+        }
         this.allPrimitiveEditorInput = this.allEditorInputs.filter(x => x.editorType === 'EditorPrimitiveInput').map(x => x as EditorPrimitiveInput);
         this.allEnumsEditorInput = this.allPrimitiveEditorInput.filter(x => x.enumNames.length + x.enumsOptions.length + x.enumValues.length > 0);
         this.haveModels = this.allObjectEditorInputs.length + this.allEnumsEditorInput.length > 0;
