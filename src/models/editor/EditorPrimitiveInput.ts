@@ -1,7 +1,7 @@
 import { OpenApiDefinitionsDictionary } from './../openapi/OpenApiDefinitionsDictionary';
 import { OpenApiDefinitionObject } from './../openapi/OpenApiDefinitionObject';
 import { EditorInput } from './EditorInput';
-import { OpenApiDocument } from './../openapi';
+import { OpenApiDocument } from './../openapi/OpenApiDocument';
 
 export class EditorPrimitiveInput extends EditorInput {
     public readonly type: 'number' | 'date' | 'string' | 'enum' | 'boolean';

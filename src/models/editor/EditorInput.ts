@@ -1,6 +1,7 @@
 import { OpenApiDefinitionsDictionary } from './../openapi/OpenApiDefinitionsDictionary';
 import { cloneHelper, editorNameByPath, getOpenApiDefinitionPropGetter } from '../../helpers';
-import { OpenApiDefinitionObject, OpenApiDocument } from './../openapi';
+import { OpenApiDefinitionObject } from './../openapi/OpenApiDefinitionObject';
+import { OpenApiDocument } from './../openapi/OpenApiDocument';
 
 export class EditorInput {
     public path: string;

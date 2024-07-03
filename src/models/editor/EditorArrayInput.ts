@@ -1,7 +1,7 @@
 import { OpenApiDefinitionsDictionary } from './../openapi/OpenApiDefinitionsDictionary';
 import { OpenApiDefinitionObject } from './../openapi/OpenApiDefinitionObject';
 import { EditorInput } from './EditorInput';
-import { OpenApiDocument } from './../openapi';
+import { OpenApiDocument } from './../openapi/OpenApiDocument';
 
 export class EditorArrayInput extends EditorInput {
     public itemInput: EditorInput;
