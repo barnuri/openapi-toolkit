@@ -20,7 +20,7 @@ export function getOpenApiDefinitionObject(
             }
             return { def, refName: def.title, ignoreInherit };
         } else {
-            return { definitions[refName], refName: refPath.split('/').splice(-1)[0], ignoreInherit };
+            return { def: definitions[refName], refName: refPath.split('/').splice(-1)[0], ignoreInherit };
         }
     }
     if (Object.keys(definition).includes('oneOf')) {
