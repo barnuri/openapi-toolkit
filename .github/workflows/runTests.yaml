@@ -6,7 +6,7 @@ on:
   pull_request:
     branches: [ master ]
 env:
-  OPENAPI_TOOLKIT_TESTFILE: "${{ github.workspace }}/swagger.json"
+  OPENAPI_TOOLKIT_TESTFILE: "${{ github.workspace }}/.github/complexSwagger.json"
 jobs:
   prepare:
     runs-on: ubuntu-latest
