@@ -1,5 +1,5 @@
 import { EditorInput } from '../models/editor/EditorInput';
-import { deleteFilesByPath, fixPath, makeDirIfNotExist } from '../helpers/generatorHelpers';
+import { deleteFilesByPath, fixPath, makeDirIfNotExist, isExists } from '../helpers/generatorHelpers';
 import { getAllEditors, getApiPaths, getAllEditorInputsByEditors, capitalize, distinctByProp, cleanString } from '../helpers';
 import { OpenApiDocument, Editor, ApiPath, EditorPrimitiveInput, EditorObjectInput } from '../models/index';
 import GeneratorsOptions from '../models/GeneratorsOptions';
@@ -15,7 +15,6 @@ export abstract class GeneratorAbstract {
     allEnumsEditorInput: EditorPrimitiveInput[];
     modelsFolder = join(this.options.output, this.options.modelsFolderName);
     controllersFolder = join(this.options.output, this.options.controllersFolderName);
-    generatedFiles: string[];
     filesNames: string[];
     haveModels: boolean;
     methodsNames: { [name: string]: number } = {};
@@ -41,7 +40,6 @@ export abstract class GeneratorAbstract {
         options.controllerNamePrefix = options.controllerNamePrefix || '';
         options.controllerNameSuffix = options.controllerNameSuffix || '';
         options.namespace = options.namespace || '';
-        this.generatedFiles = [];
         this.filesNames = [];
         this.swagger = swagger;
         this.options.output = fixPath(options.output);
@@ -66,7 +64,6 @@ export abstract class GeneratorAbstract {
 
     async generate(): Promise<void> {
         console.log('-----  start generating -----'.cyan());
-        this.generatedFiles = [];
         this.filesNames = [];
         this.methodsNames = {};
         deleteFilesByPath(this.options.output);
@@ -101,27 +98,53 @@ export abstract class GeneratorAbstract {
     private async generateModels() {
         console.log('-----  generating object models -----'.cyan());
         for (const objectInput of this.allObjectEditorInputs) {
-            if (objectInput.isDictionary) {
-                continue;
-            }
-            await this.generateObject(objectInput);
+            await this._generateObject(objectInput);
         }
         console.log('-----  generating enum models -----'.cyan());
         for (const enumInput of this.allEnumsEditorInput) {
-            const enumVals = {};
-            if (enumInput.enumNames.length === enumInput.enumValues.length) {
-                for (let i = 0; i < enumInput.enumNames.length; i++) {
-                    enumVals[enumInput.enumNames[i]] = enumInput.enumValues[i];
-                }
-            } else {
-                enumInput.enumsOptions.forEach(x => (enumVals[x] = x));
+            await this._generateEnum(enumInput);
+        }
+    }
+
+    private async _generateEnum(enumInput: EditorPrimitiveInput) {
+        const enumVals = {};
+        if (enumInput.enumNames.length === enumInput.enumValues.length) {
+            for (let i = 0; i < enumInput.enumNames.length; i++) {
+                enumVals[enumInput.enumNames[i]] = enumInput.enumValues[i];
             }
-            await this.generateEnum(enumInput, enumVals);
+        } else {
+            enumInput.enumsOptions.forEach(x => (enumVals[x] = x));
+        }
+        await this.generateEnum(enumInput, enumVals);
+    }
+
+    private async _generateObject(objectInput: EditorObjectInput) {
+        if (objectInput.isDictionary) {
+            return;
+        }
+        await this.generateObject(objectInput);
+        for (const editorInput of objectInput.properties) {
+            await this.generateByInput(editorInput);
+        }
+    }
+
+    private async generateByInput(editorInput: EditorInput) {
+        if (!this.shouldGenerateModel(editorInput)) {
+            return;
+        }
+        if (editorInput.editorType === 'EditorPrimitiveInput') {
+            await this._generateEnum(editorInput as EditorPrimitiveInput);
+        }
+        if (editorInput.editorType === 'EditorObjectInput') {
+            await this._generateObject(editorInput as EditorObjectInput);
         }
     }
 
     shouldGenerateModel(editorInput: EditorInput) {
         makeDirIfNotExist(this.modelsFolder);
+        if ((editorInput as EditorObjectInput)?.isDictionary === true) {
+            return false;
+        }
         const fileName = this.getFileName(editorInput);
         if (!fileName) {
             return false;
@@ -131,10 +154,9 @@ export abstract class GeneratorAbstract {
     }
 
     shouldGenerateFile(path: string) {
-        if (this.generatedFiles.filter(x => x.toLowerCase() === path.toLowerCase()).length > 0) {
+        if (isExists(path)) {
             return false;
         }
-        this.generatedFiles.push(path);
         return true;
     }
 
@@ -146,6 +168,7 @@ export abstract class GeneratorAbstract {
             }
             if (!name && editorInput.editorType === 'EditorPrimitiveInput' && (editorInput as EditorPrimitiveInput).enumsOptions.length > 0) {
                 name = editorInput.name;
+                name = name ? name + 'Enum' : name;
             }
             if (!name || name === 'undefined' || name === '') {
                 return undefined;
@@ -157,6 +180,7 @@ export abstract class GeneratorAbstract {
         if (!fileName) {
             return undefined;
         }
+        fileName = capitalize(fileName);
         const modelFile = join(this.modelsFolder, fileName + this.getFileExtension(true));
         const path = this.filesNames.find(x => x.toLowerCase() === modelFile.toLowerCase());
         if (path) {

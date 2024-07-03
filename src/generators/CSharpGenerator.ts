@@ -52,11 +52,13 @@ ${objectInput.properties
         }
         cleanNameCounter[propName]++;
         const propType = this.getPropDesc(x);
-        if (objectInput.editorType === 'EditorPrimitiveInput' && propType !== 'object') {
+        const isEnum = x.editorType === 'EditorPrimitiveInput' && (x as EditorPrimitiveInput).type === 'enum' && propType !== 'object';
+        const isPrimitiveWithNullableSupp = x.editorType === 'EditorPrimitiveInput' && propType !== 'string';
+        if (isEnum) {
             attributes += `[JsonConverter(typeof(StringEnumConverter))] `
         }
         let shouldMarkNullable = x.nullable || !x.required;
-        if (this.options.disableNullable && shouldMarkNullable && (propType === 'object' || propType === 'string')) {
+        if (this.options.disableNullable && shouldMarkNullable && !isPrimitiveWithNullableSupp && !isEnum) {
             shouldMarkNullable = false;
         }
         return `\t ${attributes}public ${this.getPropDesc(x)}${shouldMarkNullable ? '?' : ''} ${propName}${cleanNameSuffix} { get; set; }`;
