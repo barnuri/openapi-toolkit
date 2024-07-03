@@ -139,7 +139,7 @@ export abstract class GeneratorAbstract {
             await this._generateEnum(editorInput as EditorPrimitiveInput);
         }
         if (editorInput.editorType === 'EditorObjectInput') {
-            await this._generateEnum(editorInput as EditorObjectInput);
+            await this._generateObject(editorInput as EditorObjectInput);
         }
     }
 
