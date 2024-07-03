@@ -25,10 +25,21 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '18.x'
+          
+      - name: Set useComplexSwagger conditions
+        id: useComplexSwagger
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" && "${{ github.event.inputs.useComplexSwagger }}" == "true" ]]; then
+            echo "::set-output name=useComplexSwagger::true"
+          elif [[ "${{ github.event_name }}" == "pull_request" && "${{ github.event.pull_request.title }}" =~ \+ complex ut ]]; then
+            echo "::set-output name=useComplexSwagger::true"
+          else
+            echo "::set-output name=useComplexSwagger::false"
+          fi
         
       - name: download swagger file
         run: curl https://petstore.swagger.io/v2/swagger.json -o $OPENAPI_TOOLKIT_TESTFILE
-        if: ${{ github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && github.event.inputs.useComplexSwagger != 'true') || (github.event_name == 'pull_request' && !contains(github.event.pull_request.title, '+ complex ut')) }}
+        if: ${{ steps.useComplexSwagger.outputs.useComplexSwagger == "false" }} 
 
       - name: install dependencies
         run: rm -rf .npmrc && npm i
@@ -120,7 +131,7 @@ jobs:
           path: ./*
           key: ${{ github.sha }}
       - run: npm run test:go
-        continue-on-error: true
+        continue-on-error: ${{ needs.prepare.outputs.useComplexSwagger == "true" }}
         
   test-go-server:
     name: Test Go Server
@@ -133,4 +144,4 @@ jobs:
           path: ./*
           key: ${{ github.sha }}
       - run: npm run test:go-server
-        continue-on-error: true
+        continue-on-error: ${{ needs.prepare.outputs.useComplexSwagger == "true" }}
