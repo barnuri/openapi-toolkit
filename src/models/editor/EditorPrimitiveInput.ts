@@ -1,6 +1,7 @@
 import { OpenApiDefinitionsDictionary } from './../openapi/OpenApiDefinitionsDictionary';
 import { OpenApiDefinitionObject } from './../openapi/OpenApiDefinitionObject';
 import { EditorInput } from './EditorInput';
+import { OpenApiDocument } from './../openapi';
 
 export class EditorPrimitiveInput extends EditorInput {
     public readonly type: 'number' | 'date' | 'string' | 'enum' | 'boolean';
@@ -14,13 +15,14 @@ export class EditorPrimitiveInput extends EditorInput {
     public readonly pattern: string | undefined;
 
     constructor(
+        openApiDocument: OpenApiDocument,
         type: 'number' | 'date' | 'string' | 'enum' | 'boolean',
         path: string,
         openApiDefinition: OpenApiDefinitionObject,
         openApiParentDefinition: OpenApiDefinitionObject | undefined,
         definitions: OpenApiDefinitionsDictionary | undefined
     ) {
-        super(path, 'EditorPrimitiveInput', openApiDefinition, openApiParentDefinition, definitions);
+        super(openApiDocument, path, 'EditorPrimitiveInput', openApiDefinition, openApiParentDefinition, definitions);
         this.enumNames = openApiDefinition['x-enumNames'] || [];
         this.enumValues = openApiDefinition.enum || [];
         this.pattern = openApiDefinition.pattern;

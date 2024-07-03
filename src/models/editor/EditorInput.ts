@@ -1,6 +1,7 @@
 import { OpenApiDefinitionsDictionary } from './../openapi/OpenApiDefinitionsDictionary';
 import { cloneHelper, editorNameByPath, getOpenApiDefinitionPropGetter } from '../../helpers';
-import { OpenApiDefinitionObject } from './../openapi/OpenApiDefinitionObject';
+import { OpenApiDefinitionObject, OpenApiDocument } from './../openapi';
+
 export class EditorInput {
     public path: string;
     public name: string;
@@ -15,6 +16,7 @@ export class EditorInput {
     public default: any | undefined;
     public className?: string;
     constructor(
+        openApiDocument: OpenApiDocument,
         path: string,
         editorType: 'EditorArrayInput' | 'EditorObjectInput' | 'EditorPrimitiveInput',
         openApiDefinition: OpenApiDefinitionObject,
@@ -37,7 +39,7 @@ export class EditorInput {
             parentClone.properties[this.name]['nullable'] ||
             parentClone.properties[this.name]['x-nullable'];
         this.editorType = editorType;
-        const requiredList = getOpenApiDefinitionPropGetter(parentClone, true, definitions || {}, x => (x as OpenApiDefinitionObject)?.required || [], 'array');
+        const requiredList = getOpenApiDefinitionPropGetter(openApiDocument, parentClone, true, definitions || {}, x => (x as OpenApiDefinitionObject)?.required || [], 'array');
         const propName = path.split('.').splice(-1)[0];
         this.required = requiredList.includes(propName);
         if (path == 'subCategoryCounterSelector' || propName.includes('categoryCounterSelector')) {
