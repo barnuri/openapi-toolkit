@@ -15,7 +15,6 @@ export abstract class GeneratorAbstract {
     allEnumsEditorInput: EditorPrimitiveInput[];
     modelsFolder = join(this.options.output, this.options.modelsFolderName);
     controllersFolder = join(this.options.output, this.options.controllersFolderName);
-    generatedFiles: string[];
     filesNames: string[];
     haveModels: boolean;
     methodsNames: { [name: string]: number } = {};
@@ -41,7 +40,6 @@ export abstract class GeneratorAbstract {
         options.controllerNamePrefix = options.controllerNamePrefix || '';
         options.controllerNameSuffix = options.controllerNameSuffix || '';
         options.namespace = options.namespace || '';
-        this.generatedFiles = [];
         this.filesNames = [];
         this.swagger = swagger;
         this.options.output = fixPath(options.output);
@@ -66,7 +64,6 @@ export abstract class GeneratorAbstract {
 
     async generate(): Promise<void> {
         console.log('-----  start generating -----'.cyan());
-        this.generatedFiles = [];
         this.filesNames = [];
         this.methodsNames = {};
         deleteFilesByPath(this.options.output);
@@ -157,13 +154,9 @@ export abstract class GeneratorAbstract {
     }
 
     shouldGenerateFile(path: string) {
-        // if (this.generatedFiles.filter(x => x.toLowerCase() === path.toLowerCase()).length > 0) {
-        //     return false;
-        // }
         if (isExists(path)) {
-            return;
+            return false;
         }
-        this.generatedFiles.push(path);
         return true;
     }
 
