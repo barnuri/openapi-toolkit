@@ -1,6 +1,7 @@
 import { OpenApiDefinitionsDictionary } from './../openapi/OpenApiDefinitionsDictionary';
 import { OpenApiDefinitionObject } from './../openapi/OpenApiDefinitionObject';
 import { EditorInput } from './EditorInput';
+import { OpenApiDocument } from './../openapi/OpenApiDocument';
 
 export class EditorObjectInput extends EditorInput {
     public properties!: EditorInput[];
@@ -14,6 +15,7 @@ export class EditorObjectInput extends EditorInput {
     public readonly definistionName: string;
     public implements: string[];
     constructor(
+        openApiDocument: OpenApiDocument,
         switchableOptions: string[],
         path: string,
         definistionName: string,
@@ -21,7 +23,7 @@ export class EditorObjectInput extends EditorInput {
         openApiParentDefinition: OpenApiDefinitionObject | undefined,
         definitions: OpenApiDefinitionsDictionary | undefined
     ) {
-        super(path, 'EditorObjectInput', openApiDefinition, openApiParentDefinition, definitions);
+        super(openApiDocument, path, 'EditorObjectInput', openApiDefinition, openApiParentDefinition, definitions);
         this.definistionName = definistionName;
         openApiDefinition.anyOf = openApiDefinition.anyOf || [];
         this.switchable = openApiDefinition.anyOf.length > 0;

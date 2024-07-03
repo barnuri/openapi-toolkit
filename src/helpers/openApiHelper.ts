@@ -1,8 +1,9 @@
 import { OpenApiPathParamInVals } from './../models/openapi/OpenApiDocument';
 import { OpenApiDefinition, OpenApiDocument, OpenApiDefinitionReference, OpenApiDefinitionObject, OpenApiDefinitionsDictionary, ApiPath } from '../models';
-import { cleanString } from '../helpers/utilsHelper';
+import { cleanString, jsonPath } from '../helpers/utilsHelper';
 
 export function getOpenApiDefinitionObject(
+    openApiDocument: OpenApiDocument,
     definition: OpenApiDefinition,
     definitions: OpenApiDefinitionsDictionary,
 ): { def: OpenApiDefinitionObject; refName: string | undefined; ignoreInherit: boolean } {
@@ -10,22 +11,34 @@ export function getOpenApiDefinitionObject(
     definitions = definitions || {};
     const ignoreInherit = definition['x-ignore-inherit'] === true;
     if (Object.keys(definition).includes('$ref')) {
-        const refName = (definition as OpenApiDefinitionReference).$ref.split('/').splice(-1)[0];
-        return { def: definitions[refName], refName, ignoreInherit };
+        const refPath = (definition as OpenApiDefinitionReference).$ref;
+        if (refPath.includes('/anyOf/') || refPath.includes('/oneOf/') || refPath.includes('/allOf/')) {
+            const refJsonPath = refPath.replace(/#/g, '').replace(/\//g, '.');
+            let def = jsonPath(openApiDocument, refJsonPath);
+            if (Object.keys(definition).includes('$ref')) {
+                return getOpenApiDefinitionObject(openApiDocument, def, definitions);
+            }
+            return { def, refName: def.title, ignoreInherit };
+        } else {
+            const refName = refPath.split('/').splice(-1)[0];
+            return { def: definitions[refName], refName, ignoreInherit };
+        }
     }
     if (Object.keys(definition).includes('oneOf')) {
         const openApiDefinitionObject = (definition as OpenApiDefinitionObject).oneOf!.filter((x: any) => x.type != 'null')[0];
-        return getOpenApiDefinitionObject(openApiDefinitionObject, definitions);
+        return getOpenApiDefinitionObject(openApiDocument, openApiDefinitionObject, definitions);
     }
     return { def: definition as OpenApiDefinitionObject, refName: undefined, ignoreInherit };
 }
 
 export function getOpenApiDefinitionObjectProps(
+    openApiDocument: OpenApiDocument,
     definitionObj: OpenApiDefinitionObject,
     includeInheritProps: boolean,
     definitions: OpenApiDefinitionsDictionary,
 ): { [propName: string]: OpenApiDefinition } {
     return getOpenApiDefinitionPropGetter(
+        openApiDocument,
         definitionObj,
         includeInheritProps,
         definitions,
@@ -35,6 +48,7 @@ export function getOpenApiDefinitionObjectProps(
 }
 
 export function getOpenApiDefinitionPropGetter<T>(
+    openApiDocument: OpenApiDocument,
     definitionObj: OpenApiDefinitionObject,
     includeInheritProps: boolean,
     definitions: OpenApiDefinitionsDictionary,
@@ -51,9 +65,9 @@ export function getOpenApiDefinitionPropGetter<T>(
     }
     let inheritVals = defaultVal;
     if (includeInheritProps) {
-        const refsObjs = (definitionObj.allOf || []).filter(x => Object.keys(x).includes('$ref')).map(x => getOpenApiDefinitionObject(x, definitions));
+        const refsObjs = (definitionObj.allOf || []).filter(x => Object.keys(x).includes('$ref')).map(x => getOpenApiDefinitionObject(openApiDocument, x, definitions));
         for (const x of refsObjs) {
-            inheritVals = combineVals(inheritVals, getOpenApiDefinitionPropGetter(x.def, true, definitions, getter, getterType));
+            inheritVals = combineVals(inheritVals, getOpenApiDefinitionPropGetter(openApiDocument, x.def, true, definitions, getter, getterType));
         }
     }
     return combineVals(combineVals(inheritVals, vals2), vals);
