@@ -54,13 +54,13 @@ ${controllerPropsCtor}
         const methodName = capitalize(this.getMethodName(controllerPath));
         let requestType = controllerPath.body.haveBody ? this.getPropDesc(controllerPath.body.schema) : 'object';
         const responseType = this.getPropDesc(controllerPath.response);
-        const bodyParam = controllerPath.body.haveBody ? `${requestType}${!controllerPath.body.required ? `?` : ''} body, ` : '';
+        const bodyParam = controllerPath.body.haveBody ? `${requestType}${!controllerPath.body.required && !this.options.disableNullable ? `?` : ''} body, ` : '';
         const headers = [...controllerPath.cookieParams, ...controllerPath.headerParams];
         const haveHeaderParams = headers.length > 0;
-        const headersParams = haveHeaderParams ? headers.map(x => `string${x.required ? '' : '?'} h${capitalize(x.name)} = default`).join(', ') + `, ` : ``;
+        const headersParams = haveHeaderParams ? headers.map(x => `string${x.required || this.options.disableNullable ? '' : '?'} h${capitalize(x.name)} = default`).join(', ') + `, ` : ``;
         const pathParams =
             controllerPath.pathParams.length > 0
-                ? controllerPath.pathParams.map(x => `${this.getPropDesc(x.schema!)}${x.required ? '' : '?'} p${capitalize(x.name)} = default`).join(', ') +
+                ? controllerPath.pathParams.map(x => `${this.getPropDesc(x.schema!)}${x.required || this.options.disableNullable ? '' : '?'} p${capitalize(x.name)} = default`).join(', ') +
                   ', '
                 : ``;
         let url = controllerPath.path;
@@ -70,15 +70,16 @@ ${controllerPropsCtor}
         const haveQueryParams = controllerPath.queryParams.length > 0;
         url += !haveQueryParams ? '' : '?' + controllerPath.queryParams.map(x => `${x.name}={q${capitalize(x.name)}}`).join('&');
         const queryParams = haveQueryParams
-            ? controllerPath.queryParams.map(x => `${this.getPropDesc(x.schema!)}${x.required ? '' : '?'} q${capitalize(x.name)} = default`).join(', ') + ', '
+            ? controllerPath.queryParams.map(x => `${this.getPropDesc(x.schema!)}${x.required || this.options.disableNullable ? '' : '?'} q${capitalize(x.name)} = default`).join(', ') + ', '
             : ``;
 
         let methodCommonText = `\t\t\t"${capitalize(controllerPath.method.toLowerCase())}",\n`;
         methodCommonText += `\t\t\t\$"${url}\",\n`;
         methodCommonText += `\t\t\t${controllerPath.body.haveBody ? 'body' : 'null'},\n`;
         methodCommonText += `\t\t\t`;
+        const nullableMark = !this.options.disableNullable ? '?' : ''
         if (haveHeaderParams) {
-            methodCommonText += 'new Dictionary<string, string?>()\n';
+            methodCommonText += `new Dictionary<string, string${nullableMark}>()\n`;
             methodCommonText += `\t\t\t{\n`;
             for (const headerParam of headers) {
                 methodCommonText += `\t\t\t\t["${headerParam.name}"] = h${capitalize(headerParam.name)},\n`;
@@ -93,21 +94,23 @@ ${controllerPropsCtor}
 
         let methodContent = '';
         // method one
-        methodContent += `\tpublic Task<${responseType}?> ${methodName}(${methodParams}) \n\t{\n`.replace(', )', ')');
+        methodContent += `\tpublic Task<${responseType}${nullableMark}> ${methodName}(${methodParams}) \n\t{\n`.replace(', )', ')');
         methodContent += `\t\treturn Method<${requestType},${responseType}?>(\n`;
         methodContent += methodCommonText;
 
         // method two
-        methodContent += `\tpublic Task<T?> ${methodName}Async<T>(${methodParams}) \n\t{\n`.replace(', )', ')');
-        methodContent += `\t\treturn Method<${requestType},T?>(\n`;
+        methodContent += `\tpublic Task<T${nullableMark}> ${methodName}Async<T>(${methodParams}) \n\t{\n`.replace(', )', ')');
+        methodContent += `\t\treturn Method<${requestType},T${nullableMark}>(\n`;
         methodContent += methodCommonText;
         // method three
-        methodContent += `\tpublic Task<string?> ${methodName}ContentAsync(${methodParams}) \n\t{\n`.replace(', )', ')');
+        methodContent += `\tpublic Task<string${nullableMark}> ${methodName}ContentAsync(${methodParams}) \n\t{\n`.replace(', )', ')');
         methodContent += `\t\treturn Method<${requestType}>(\n`;
         methodContent += methodCommonText;
         return { methodContent, methodName };
     }
     generateBaseController() {
+        const nullableMark = !this.options.disableNullable ? '?' : ''
+
         const usings = `using System;
 using Newtonsoft.Json;
 using System.Collections.Generic;
@@ -124,11 +127,11 @@ using System.Threading.Tasks;
     {
     }
 
-    public ExceptionWithRequest(string? message) : base(message)
+    public ExceptionWithRequest(string${nullableMark} message) : base(message)
     {
     }
 
-    public ExceptionWithRequest(string? message, Exception? innerException) : base(message, innerException)
+    public ExceptionWithRequest(string${nullableMark} message, Exception${nullableMark} innerException) : base(message, innerException)
     {
     }
 
@@ -146,13 +149,13 @@ using System.Runtime.Serialization;
     public string BaseUrl { get; set; }
     public HttpClient HttpClient { get; set; } = new HttpClient();
     public JsonSerializerSettings JsonSerializerSettings { get; set; }
-    protected async Task<S?> Method<T, S>(string method, string path, T? body, Dictionary<string, string?>? headers)
+    protected async Task<S?> Method<T, S>(string method, string path, T${nullableMark} body, Dictionary<string, string${nullableMark}>${nullableMark} headers)
     {
         var json = await Method(method, path, body, headers) ?? string.Empty;
         var res = JsonConvert.DeserializeObject<S>(json, JsonSerializerSettings);
         return res;
     }
-    protected async Task<string?> Method<T>(string method, string path, T? body, Dictionary<string, string?>? headers)
+    protected async Task<string${nullableMark}> Method<T>(string method, string path, T${nullableMark} body, Dictionary<string, string${nullableMark}>${nullableMark} headers)
     {
         var req = new HttpRequestMessage
         {

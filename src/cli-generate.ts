@@ -49,8 +49,13 @@ yargs(process.argv.slice(2))
                 .nargs('debugLogs', 1)
                 .alias('d', 'debugLogs')
                 .default('debugLogs', true)
+                .nargs('debugLogs', 1)
+                .alias('d', 'debugLogs')
+                .default('debugLogs', true)
                 .nargs('modelsOnly', 1)
-                .default('modelsOnly', false),
+                .default('modelsOnly', false)
+                .nargs('disableNullable', 1)
+                .default('disableNullable', false),
         argv => {
             generate(argv as any)
                 .then(() => console.log('done succssfully'.green()))

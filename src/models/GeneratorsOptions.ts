@@ -16,4 +16,5 @@ export default class GeneratorsOptions {
     longMethodName: boolean = false;
     debugLogs: boolean = true;
     modelsOnly: boolean = false;
+    disableNullable: boolean = false;
 }
