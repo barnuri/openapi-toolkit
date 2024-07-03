@@ -96,7 +96,7 @@ ${controllerPropsCtor}
         let methodContent = '';
         // method one
         methodContent += `\tpublic Task<${responseType}${nullableMark}> ${methodName}(${methodParams}) \n\t{\n`.replace(', )', ')');
-        methodContent += `\t\treturn Method<${requestType},${responseType}?>(\n`;
+        methodContent += `\t\treturn Method<${requestType},${responseType}${nullableMark}>(\n`;
         methodContent += methodCommonText;
 
         // method two
