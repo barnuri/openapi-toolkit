@@ -101,22 +101,42 @@ export abstract class GeneratorAbstract {
     private async generateModels() {
         console.log('-----  generating object models -----'.cyan());
         for (const objectInput of this.allObjectEditorInputs) {
-            if (objectInput.isDictionary) {
-                continue;
-            }
-            await this.generateObject(objectInput);
+            await this._generateObject(objectInput);
         }
         console.log('-----  generating enum models -----'.cyan());
         for (const enumInput of this.allEnumsEditorInput) {
-            const enumVals = {};
-            if (enumInput.enumNames.length === enumInput.enumValues.length) {
-                for (let i = 0; i < enumInput.enumNames.length; i++) {
-                    enumVals[enumInput.enumNames[i]] = enumInput.enumValues[i];
-                }
-            } else {
-                enumInput.enumsOptions.forEach(x => (enumVals[x] = x));
+            await this._generateEnum(enumInput);
+        }
+    }
+
+    private async _generateEnum(enumInput: EditorPrimitiveInput) {
+        const enumVals = {};
+        if (enumInput.enumNames.length === enumInput.enumValues.length) {
+            for (let i = 0; i < enumInput.enumNames.length; i++) {
+                enumVals[enumInput.enumNames[i]] = enumInput.enumValues[i];
             }
-            await this.generateEnum(enumInput, enumVals);
+        } else {
+            enumInput.enumsOptions.forEach(x => (enumVals[x] = x));
+        }
+        await this.generateEnum(enumInput, enumVals);
+    }
+
+    private async _generateObject(objectInput: EditorObjectInput) {
+        if (objectInput.isDictionary) {
+            return;
+        }
+        await this.generateObject(objectInput);
+    }
+
+    private generateByInput(editorInput: EditorInput) {
+        if (!this.shouldGenerateModel(editorInput)) {
+            return;
+        }
+        if (editorInput.type === 'EditorPrimitiveInput') {
+            await this._generateEnum(editorInput as EditorPrimitiveInput);
+        }
+        if (editorInput.type === 'EditorObjectInput') {
+            await this._generateEnum(editorInput as EditorObjectInput);
         }
     }
 
@@ -163,6 +183,7 @@ export abstract class GeneratorAbstract {
             fileName = path.replace(/\\/g, '/').split('/').pop()?.split('.')[0];
         } else {
             this.filesNames.push(modelFile);
+            this.generateByInput(editorInput);
         }
         return fileName;
     }
