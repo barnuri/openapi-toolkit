@@ -28,7 +28,7 @@ jobs:
         
       - name: download swagger file
         run: curl https://petstore.swagger.io/v2/swagger.json -o $OPENAPI_TOOLKIT_TESTFILE
-        if: ${{ github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && github.event.inputs.useComplexSwagger != 'true') || (github.event_name == 'pull_request' && !contains(github.event.pull_request.title, '+ complex ut') }}
+        if: ${{ github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && github.event.inputs.useComplexSwagger != 'true') || (github.event_name == 'pull_request' && !contains(github.event.pull_request.title, '+ complex ut')) }}
 
       - name: install dependencies
         run: rm -rf .npmrc && npm i
