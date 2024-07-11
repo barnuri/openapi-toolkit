@@ -112,7 +112,14 @@ ${controllerPropsCtor}
         methodContent += `\tpublic Task<T${nullableMark}> ${methodName}Async<T>(${methodParams}) \n\t{\n`.replace(', )', ')');
         methodContent += `\t\treturn Method<${requestType},T${nullableMark}>(\n`;
         methodContent += methodCommonText;
+
         // method three
+        const genericBodyParam = controllerPath.body.haveBody ? `S body, ` : '';
+        methodContent += `\tpublic Task<T${nullableMark}> ${methodName}Async<T, S>(${genericBodyParam}${pathParams}${queryParams}${headersParams}) \n\t{\n`.replace(', )', ')');
+        methodContent += `\t\treturn Method<S,T${nullableMark}>(\n`;
+        methodContent += methodCommonText;
+
+        // method four
         methodContent += `\tpublic Task<string${nullableMark}> ${methodName}ContentAsync(${methodParams}) \n\t{\n`.replace(', )', ')');
         methodContent += `\t\treturn Method<${requestType}>(\n`;
         methodContent += methodCommonText;
