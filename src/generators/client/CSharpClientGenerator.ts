@@ -85,7 +85,7 @@ ${controllerPropsCtor}
 
         let methodCommonText = `\t\t\t"${capitalize(controllerPath.method.toLowerCase())}",\n`;
         methodCommonText += `\t\t\t\$"${url}\",\n`;
-        methodCommonText += `\t\t\t${controllerPath.body.haveBody ? 'body' : 'null'},\n`;
+        methodCommonText += `\t\t\t${controllerPath.body.haveBody ? 'body' : 'default'},\n`;
         methodCommonText += `\t\t\t`;
         const nullableMark = !this.options.disableNullable ? '?' : ''
         if (haveHeaderParams) {
