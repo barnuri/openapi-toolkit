@@ -13,21 +13,18 @@ export class CSharpClientGenerator extends CSharpGenerator {
         const controllerProps = controllerPropsNames.map(x => `\tpublic ${x} ${x} { get; private set; }`).join('\n') + '\n';
         const controllerPropsCtor =
             controllerPropsNames
-                .map(x => `\t\t${x} = new ${x} { BaseUrl = BaseUrl, HttpClient = HttpClient, JsonSerializerSettings = JsonSerializerSettings };`)
-                .join('\n') + '\n';
+                .map(x => `\t\t${x} = new ${x} { ClientSettings = ClientSettings };`)
+                .join('\n');
 
-        let mainFileContent = `
-public class Client
+        let mainFileContent = `public class Client
 {
-    public string BaseUrl { get; set; }
-    public HttpClient HttpClient { get; set; }
-    public JsonSerializerSettings JsonSerializerSettings { get; set; }
+    public ClientSettings ClientSettings { get; set; }
 ${controllerProps}
 
-    public Client(string baseUrl, HttpClient${nullableMark} httpClient = null, JsonSerializerSettings${nullableMark} jsonSerializerSettings = null)
+    public Client(ClientSettings${nullableMark} clientSettings = null)
     {
-        BaseUrl = baseUrl;
-        HttpClient = httpClient ?? new HttpClient();
+        ClientSettings = clientSettings ?? new ClientSettings();
+        ClientSettings.HttpClient = ClientSettings.HttpClient ?? new HttpClient();
         var defaultJsonSerializerSettings = new JsonSerializerSettings
         {
             TypeNameHandling = TypeNameHandling.Objects,
@@ -35,11 +32,23 @@ ${controllerProps}
             NullValueHandling = NullValueHandling.Ignore
         };
         defaultJsonSerializerSettings.Converters.Add(new Newtonsoft.Json.Converters.StringEnumConverter());
-        JsonSerializerSettings = jsonSerializerSettings ?? defaultJsonSerializerSettings;
+        ClientSettings.JsonSerializerSettings = ClientSettings.JsonSerializerSettings ?? defaultJsonSerializerSettings;
 ${controllerPropsCtor}
     }
 }`;
-        writeFileSync(this.mainExportFile, 'using System.Net.Http;\n' + this.addNamespace(mainFileContent));
+        writeFileSync(this.mainExportFile, this.addNamespace(mainFileContent));
+
+        const clientSettingsContent = `public class ClientSettings
+{
+    public string BaseUrl { get; set; }
+    public HttpClient HttpClient { get; set; }
+    public bool ValidateStatusCode { get; set; } = true;
+    public JsonSerializerSettings JsonSerializerSettings { get; set; }
+    public Func<HttpRequestMessage, Task> PreRequest { get; set; } = (_) => Task.CompletedTask;
+    public Func<HttpRequestMessage, HttpResponseMessage, Task> PostRequest { get; set; } = (_, __) => Task.CompletedTask;
+}
+`;
+        writeFileSync(join(this.options.output, 'ClientSettings.cs'), this.addNamespace(clientSettingsContent));
     }
     generateController(controller: string, controlerPaths: ApiPath[]): void {
         const controllerName = this.getControllerName(controller);
@@ -147,26 +156,28 @@ using System.Runtime.Serialization;
         writeFileSync(join(this.options.output, 'ExceptionWithRequest.cs'), this.addNamespace(errorClass, exUsing));
         const baseControllerContent = `public class BaseController
 {
-    public string BaseUrl { get; set; }
-    public HttpClient HttpClient { get; set; } = new HttpClient();
-    public JsonSerializerSettings JsonSerializerSettings { get; set; }
+    public ClientSettings ClientSettings { get; set; }
+
     protected async Task<S${nullableMark}> Method<T, S>(string method, string path, T${nullableMark} body, Dictionary<string, string${nullableMark}>${nullableMark} headers)
     {
         var json = await Method(method, path, body, headers) ?? string.Empty;
-        var res = JsonConvert.DeserializeObject<S>(json, JsonSerializerSettings);
+        var res = JsonConvert.DeserializeObject<S>(json, ClientSettings.JsonSerializerSettings);
         return res;
     }
+
     protected async Task<string${nullableMark}> Method<T>(string method, string path, T${nullableMark} body, Dictionary<string, string${nullableMark}>${nullableMark} headers)
     {
         var req = new HttpRequestMessage
         {
             Method = new HttpMethod(method),
-            RequestUri = new Uri($"{BaseUrl.TrimEnd('/')}/{path.TrimStart('/')}"),
+            RequestUri = new Uri($"{ClientSettings.BaseUrl.TrimEnd('/')}/{path.TrimStart('/')}"),
             Content = new StringContent(JsonConvert.SerializeObject(body), null, "application/json"),
         };
         headers?.Keys.ToList().ForEach(x => req.Headers.TryAddWithoutValidation(x, headers[x]));
-        var res = await HttpClient.SendAsync(req);
-        if ((int)res.StatusCode > 299)
+        await ClientSettings.PreRequest?.Invoke(req);
+        var res = await ClientSettings.HttpClient.SendAsync(req);
+        await ClientSettings.PostRequest?.Invoke(req, res);
+        if (ClientSettings.ValidateStatusCode && (int)res.StatusCode > 299)
         {
             throw new ExceptionWithRequest($"http error {res.StatusCode}") { Request = req, Response = res };
         }
