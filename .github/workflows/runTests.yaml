@@ -29,21 +29,16 @@ jobs:
       - name: Set useComplexSwagger conditions
         id: useComplexSwagger
         run: |
-          contains_complex_ut_label=false
+          contains_complex_ut_label="false"
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            for label in "${{ github.event.pull_request.labels[*].name }}"; do
-              if [[ "$label" == "complex-ut" ]]; then
-                contains_complex_ut_label=true
-                break
-              fi
-            done
+            contains_complex_ut_label="${{ contains(toJson(github.event.pull_request.labels.*.name), 'complex-ut') }}"
           fi
           if [[ "${{ github.event_name }}" == "workflow_dispatch" && "${{ github.event.inputs.useComplexSwagger }}" == "true" ]]; then
-            echo "::set-output name=useComplexSwagger::true"
+            echo "useComplexSwagger=true" >> $GITHUB_OUTPUT
           elif [[ "${{ github.event_name }}" == "pull_request" && ( "${{ github.event.pull_request.title }}" == *"+ complex ut"* || "$contains_complex_ut_label" == "true" ) ]]; then
-            echo "::set-output name=useComplexSwagger::true"
+            echo "useComplexSwagger=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=useComplexSwagger::false"
+            echo "useComplexSwagger=false" >> $GITHUB_OUTPUT
           fi
         
       - name: download swagger file
