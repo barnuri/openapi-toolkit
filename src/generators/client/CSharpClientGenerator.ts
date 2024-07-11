@@ -115,7 +115,8 @@ ${controllerPropsCtor}
 
         // method three
         const genericBodyParam = controllerPath.body.haveBody ? `S body, ` : '';
-        methodContent += `\tpublic Task<T${nullableMark}> ${methodName}Async<T, S>(${genericBodyParam}${pathParams}${queryParams}${headersParams}) \n\t{\n`.replace(', )', ')');
+        const genericBodyMethodParams = `${genericBodyParam}${pathParams}${queryParams}${headersParams}`;
+        methodContent += `\tpublic Task<T${nullableMark}> ${methodName}Async<T, S>(${genericBodyMethodParams}) \n\t{\n`.replace(', )', ')');
         methodContent += `\t\treturn Method<S,T${nullableMark}>(\n`;
         methodContent += methodCommonText;
 
@@ -123,6 +124,12 @@ ${controllerPropsCtor}
         methodContent += `\tpublic Task<string${nullableMark}> ${methodName}ContentAsync(${methodParams}) \n\t{\n`.replace(', )', ')');
         methodContent += `\t\treturn Method<${requestType}>(\n`;
         methodContent += methodCommonText;
+
+        // method five
+        methodContent += `\tpublic Task<string${nullableMark}> ${methodName}ContentAsync<S>(${genericBodyMethodParams}) \n\t{\n`.replace(', )', ')');
+        methodContent += `\t\treturn Method<S>(\n`;
+        methodContent += methodCommonText;
+
         return { methodContent, methodName };
     }
     generateBaseController() {
