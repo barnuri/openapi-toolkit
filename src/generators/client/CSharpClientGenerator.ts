@@ -96,7 +96,7 @@ ${controllerPropsCtor}
             }
             methodCommonText += `\t\t\t}\n`;
         } else {
-            methodCommonText += 'null\n';
+            methodCommonText += 'default\n';
         }
         methodCommonText += `\t\t);\n`;
         methodCommonText += `\t}\n`;
