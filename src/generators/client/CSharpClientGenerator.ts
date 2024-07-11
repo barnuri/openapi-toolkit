@@ -85,7 +85,7 @@ ${controllerPropsCtor}
 
         let methodCommonText = `\t\t\t"${capitalize(controllerPath.method.toLowerCase())}",\n`;
         methodCommonText += `\t\t\t\$"${url}\",\n`;
-        methodCommonText += `\t\t\t${controllerPath.body.haveBody ? 'body' : 'null'},\n`;
+        methodCommonText += `\t\t\t${controllerPath.body.haveBody ? 'body' : 'default'},\n`;
         methodCommonText += `\t\t\t`;
         const nullableMark = !this.options.disableNullable ? '?' : ''
         if (haveHeaderParams) {
@@ -96,7 +96,7 @@ ${controllerPropsCtor}
             }
             methodCommonText += `\t\t\t}\n`;
         } else {
-            methodCommonText += 'null\n';
+            methodCommonText += 'default\n';
         }
         methodCommonText += `\t\t);\n`;
         methodCommonText += `\t}\n`;
@@ -112,10 +112,24 @@ ${controllerPropsCtor}
         methodContent += `\tpublic Task<T${nullableMark}> ${methodName}Async<T>(${methodParams}) \n\t{\n`.replace(', )', ')');
         methodContent += `\t\treturn Method<${requestType},T${nullableMark}>(\n`;
         methodContent += methodCommonText;
+
         // method three
+        const genericBodyParam = controllerPath.body.haveBody ? `S body, ` : '';
+        const genericBodyMethodParams = `${genericBodyParam}${pathParams}${queryParams}${headersParams}`;
+        methodContent += `\tpublic Task<T${nullableMark}> ${methodName}Async<T, S>(${genericBodyMethodParams}) \n\t{\n`.replace(', )', ')');
+        methodContent += `\t\treturn Method<S,T${nullableMark}>(\n`;
+        methodContent += methodCommonText;
+
+        // method four
         methodContent += `\tpublic Task<string${nullableMark}> ${methodName}ContentAsync(${methodParams}) \n\t{\n`.replace(', )', ')');
         methodContent += `\t\treturn Method<${requestType}>(\n`;
         methodContent += methodCommonText;
+
+        // method five
+        methodContent += `\tpublic Task<string${nullableMark}> ${methodName}ContentAsync<S>(${genericBodyMethodParams}) \n\t{\n`.replace(', )', ')');
+        methodContent += `\t\treturn Method<S>(\n`;
+        methodContent += methodCommonText;
+
         return { methodContent, methodName };
     }
     generateBaseController() {
