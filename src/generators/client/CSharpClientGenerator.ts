@@ -196,9 +196,9 @@ using System.Runtime.Serialization;
         await ClientSettings.PostRequest?.Invoke(req, res);
         if (ClientSettings.ValidateStatusCode && (int)res.StatusCode > 299)
         {
-            var responseBody = response == null || !ClientSettings.ErrorExtractResponseBody 
+            var responseBody = res == null || !ClientSettings.ErrorExtractResponseBody 
                 ? null
-                : await response.Content.ReadAsStringAsync();
+                : await res.Content.ReadAsStringAsync();
             throw new ExceptionWithRequest($"http error {res.StatusCode}") 
             { 
                 Request = req, 
