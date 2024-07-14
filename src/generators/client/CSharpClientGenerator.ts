@@ -43,6 +43,7 @@ ${controllerPropsCtor}
     public string BaseUrl { get; set; }
     public HttpClient HttpClient { get; set; }
     public bool ValidateStatusCode { get; set; } = true;
+    public bool ErrorExtractResponseBody { get; set; } = true;
     public JsonSerializerSettings JsonSerializerSettings { get; set; }
     public Func<HttpRequestMessage, Task> PreRequest { get; set; } = (_) => Task.CompletedTask;
     public Func<HttpRequestMessage, HttpResponseMessage, Task> PostRequest { get; set; } = (_, __) => Task.CompletedTask;
@@ -145,8 +146,10 @@ using System.Threading.Tasks;
 
         const errorClass = `public class ExceptionWithRequest : Exception
 {
-    public HttpResponseMessage Response { get; set; }
-    public HttpRequestMessage Request { get; set; }
+    public HttpResponseMessage${nullableMark} Response { get; set; }
+    public HttpRequestMessage${nullableMark} Request { get; set; }
+    public string${nullableMark} ResponseBody { get; set; }
+
     public ExceptionWithRequest()
     {
     }
@@ -193,7 +196,15 @@ using System.Runtime.Serialization;
         await ClientSettings.PostRequest?.Invoke(req, res);
         if (ClientSettings.ValidateStatusCode && (int)res.StatusCode > 299)
         {
-            throw new ExceptionWithRequest($"http error {res.StatusCode}") { Request = req, Response = res };
+            var responseBody = res == null || !ClientSettings.ErrorExtractResponseBody 
+                ? null
+                : await res.Content.ReadAsStringAsync();
+            throw new ExceptionWithRequest($"http error {res.StatusCode}") 
+            { 
+                Request = req, 
+                Response = res, 
+                ResponseBody = responseBody,
+            };
         }
         var content = await res.Content.ReadAsStringAsync();
         return content;
