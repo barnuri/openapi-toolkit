@@ -1,0 +1,43 @@
+name: 'Prepare Environment'
+description: 'Prepares the environment by checking out code, installing dependencies, and setting conditions for using Swagger.'
+inputs:
+  useComplexSwagger:
+    description: 'Use complexSwagger.json'
+    required: false
+    default: 'true'
+runs:
+  using: 'composite'
+  steps:
+    - name: Install Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '22.x'
+
+    - name: Set useComplexSwagger conditions
+      shell: bash
+      id: useComplexSwagger
+      run: |
+        contains_complex_ut_label="false"
+        if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+          contains_complex_ut_label="${{ contains(toJson(github.event.pull_request.labels.*.name), 'complex-ut') }}"
+        fi
+        if [[ "${{ github.event_name }}" == "workflow_dispatch" && "${{ github.event.inputs.useComplexSwagger }}" == "true" ]]; then
+          echo "useComplexSwagger=true" >> $GITHUB_ENV
+        elif [[ "${{ github.event_name }}" == "pull_request" && ( "${{ github.event.pull_request.title }}" == *"+ complex ut"* || "$contains_complex_ut_label" == "true" ) ]]; then
+          echo "useComplexSwagger=true" >> $GITHUB_ENV
+        else
+          echo "useComplexSwagger=false" >> $GITHUB_ENV
+        fi
+
+    - name: Download Swagger file
+      shell: bash
+      run: curl https://petstore.swagger.io/v2/swagger.json -o ${{ env.OPENAPI_TOOLKIT_TESTFILE }}
+      if: ${{ env.useComplexSwagger == 'false' }}
+
+    - name: Install dependencies
+      shell: bash
+      run: rm -rf .npmrc && npm i
+
+    - name: Build
+      shell: bash
+      run: npm run build

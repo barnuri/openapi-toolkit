@@ -1,9 +1,10 @@
 name: Run Tests
+
 on:
   workflow_dispatch:
     inputs:
       useComplexSwagger:
-        description: 'use complexSwagger.json'
+        description: 'Use complexSwagger.json'
         required: false
         default: 'true'
   push:
@@ -11,157 +12,127 @@ on:
       - master
   pull_request:
     branches: [ master ]
+
 env:
   OPENAPI_TOOLKIT_TESTFILE: "${{ github.workspace }}/.github/complexSwagger.json"
+  DOTNET_NOLOGO: true
+
 jobs:
-  prepare:
-    runs-on: ubuntu-latest
-    name: Prepare Environment
-    steps:
-      - name: checkout
-        uses: actions/checkout@v3
-
-      - name: install node
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18.x'
-          
-      - name: Set useComplexSwagger conditions
-        id: useComplexSwagger
-        run: |
-          contains_complex_ut_label="false"
-          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            contains_complex_ut_label="${{ contains(toJson(github.event.pull_request.labels.*.name), 'complex-ut') }}"
-          fi
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" && "${{ github.event.inputs.useComplexSwagger }}" == "true" ]]; then
-            echo "useComplexSwagger=true" >> $GITHUB_OUTPUT
-          elif [[ "${{ github.event_name }}" == "pull_request" && ( "${{ github.event.pull_request.title }}" == *"+ complex ut"* || "$contains_complex_ut_label" == "true" ) ]]; then
-            echo "useComplexSwagger=true" >> $GITHUB_OUTPUT
-          else
-            echo "useComplexSwagger=false" >> $GITHUB_OUTPUT
-          fi
-        
-      - name: download swagger file
-        run: curl https://petstore.swagger.io/v2/swagger.json -o $OPENAPI_TOOLKIT_TESTFILE
-        if: steps.useComplexSwagger.outputs.useComplexSwagger == 'false'
-
-      - name: install dependencies
-        run: rm -rf .npmrc && npm i
-
-      - name: build 
-        run: npm run build
-
-      - uses: actions/cache@v3
-        id: restore-build
-        with:
-          path: ./*
-          key: ${{ github.sha }}
-
   test-typescript-axios:
     name: Test Typescript Axios
     runs-on: ubuntu-latest
-    needs: [ prepare ]
     steps:
-      - uses: actions/cache@v3
-        id: restore-build
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Prepare Environment
+        uses: ./.github/actions/prepare-env
         with:
-          path: ./*
-          key: ${{ github.sha }}
+          useComplexSwagger: ${{ github.event.inputs.useComplexSwagger }}
       - run: npm run test:typescript-axios
 
   test-typescript-models:
     name: Test Typescript Models
     runs-on: ubuntu-latest
-    needs: [ prepare ]
     steps:
-      - uses: actions/cache@v3
-        id: restore-build
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Prepare Environment
+        uses: ./.github/actions/prepare-env
         with:
-          path: ./*
-          key: ${{ github.sha }}
+          useComplexSwagger: ${{ github.event.inputs.useComplexSwagger }}
       - run: npm run test:typescript-models
 
   test-typescript-reactquery:
     name: Test Typescript ReactQuery
     runs-on: ubuntu-latest
-    needs: [ prepare ]
     steps:
-      - uses: actions/cache@v3
-        id: restore-build
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Prepare Environment
+        uses: ./.github/actions/prepare-env
         with:
-          path: ./*
-          key: ${{ github.sha }}
+          useComplexSwagger: ${{ github.event.inputs.useComplexSwagger }}
       - run: npm run test:typescript-react-query
         
   test-csharp:
     name: Test C#
     runs-on: ubuntu-latest
-    needs: [ prepare ]
-    env:
-      DOTNET_NOLOGO: true
     steps:
-      - uses: actions/cache@v3
-        id: restore-build
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Prepare Environment
+        uses: ./.github/actions/prepare-env
         with:
-          path: ./*
-          key: ${{ github.sha }}
-      - name: install dotnet
+          useComplexSwagger: ${{ github.event.inputs.useComplexSwagger }}
+
+      - name: Install .NET
         uses: actions/setup-dotnet@v3
+        
       - run: npm run test:csharp
 
   test-csharp-nullable-false:
     name: Test C# nullable false
     runs-on: ubuntu-latest
-    needs: [ prepare ]
-    env:
-      DOTNET_NOLOGO: true
     steps:
-      - uses: actions/cache@v3
-        id: restore-build
-        with:
-          path: ./*
-          key: ${{ github.sha }}
-      - name: install dotnet
-        uses: actions/setup-dotnet@v3
-      - run: npm run test:csharp2
+        - name: Checkout code
+          uses: actions/checkout@v4
+
+        - name: Prepare Environment
+          uses: ./.github/actions/prepare-env
+          with:
+            useComplexSwagger: ${{ github.event.inputs.useComplexSwagger }}
+  
+        - name: Install .NET
+          uses: actions/setup-dotnet@v3
+          
+        - run: npm run test:csharp2
         
   test-python:
     name: Test Python
     runs-on: ubuntu-latest
-    needs: [ prepare ]
     steps:
-      - uses: actions/cache@v3
-        id: restore-build
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Prepare Environment
+        uses: ./.github/actions/prepare-env
         with:
-          path: ./*
-          key: ${{ github.sha }}
-      - name: install python
+          useComplexSwagger: ${{ github.event.inputs.useComplexSwagger }}
+          
+      - name: Install Python
         uses: actions/setup-python@v4
+
       - run: pip install pylint requests
       - run: npm run test:python
 
   test-go:
     name: Test Go
     runs-on: ubuntu-latest
-    needs: [ prepare ]
     steps:
-      - uses: actions/cache@v3
-        id: restore-build
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Prepare Environment
+        uses: ./.github/actions/prepare-env
         with:
-          path: ./*
-          key: ${{ github.sha }}
+          useComplexSwagger: ${{ github.event.inputs.useComplexSwagger }}
       - run: npm run test:go
         continue-on-error: true
         
   test-go-server:
     name: Test Go Server
     runs-on: ubuntu-latest
-    needs: [ prepare ]
     steps:
-      - uses: actions/cache@v3
-        id: restore-build
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Prepare Environment
+        uses: ./.github/actions/prepare-env
         with:
-          path: ./*
-          key: ${{ github.sha }}
+          useComplexSwagger: ${{ github.event.inputs.useComplexSwagger }}
       - run: npm run test:go-server
         continue-on-error: true
