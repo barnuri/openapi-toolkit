@@ -21,7 +21,11 @@ export class PythonClientGenerator extends GeneratorAbstract {
         const propertiesContent = [] as string[];
         for (const prop of objectInput.properties) {
             const type = this.getPropDesc(prop);
-            const name = prop.name.replace(/\[i\]/g, '').replace(/-/g, '_');
+            let name = prop.name.replace(/\[i\]/g, '').replace(/-/g, '_');
+            const systemNames = [`from`, `None`, `True`, `False`, `pass`];
+            if (systemNames.includes(name)) {
+                name = '_' + name;
+            }
             propertiesContent.push(`${tab}${name}: ${prop.nullable || !prop.required ? 'Optional[' + type + ']' : type}`);
         }
         propertiesContent.push(`${tab}extra: Dict[str, Any] = field(default_factory=dict)`);
@@ -31,7 +35,7 @@ ${propertiesContent.join('\n')}
 ${tab}def __post_init__(self):
 ${tab}${tab}attributes = asdict(self)
 ${tab}${tab}attributes.pop('extra')  # Remove 'extra' to avoid self-reference
-${tab}${tab}self.extra.update({k.replace('_', '-'): v for k, v in attributes.items()})
+${tab}${tab}self.extra.update({k.strip('_').replace('_', '-'): v for k, v in attributes.items()})
 
 ${tab}def __getitem__(self, key):
 ${tab}${tab}return self.extra[key]
