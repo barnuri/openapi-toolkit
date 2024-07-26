@@ -1,5 +1,5 @@
 import { EditorArrayInput, EditorInput, ApiPath } from '../../models';
-import { getEditorInput2 } from '../../helpers';
+import { getEditorInput2, snakeCase } from '../../helpers';
 import { GeneratorAbstract } from '../GeneratorAbstract';
 import { EditorObjectInput, EditorPrimitiveInput, OpenApiDefinition } from '../../models';
 import { writeFileSync } from 'fs';
@@ -146,7 +146,7 @@ ${this.parsingResult.controllersNames
             url = url.replace('{' + pathParam.name + '}', `{p_${pathParam.name}}`);
         }
         const haveQueryParams = controllerPath.queryParams.length > 0;
-        url += !haveQueryParams ? '' : '?' + controllerPath.queryParams.map(x => `${x.name}={q_${x.name}}`).join('&');
+        url += !haveQueryParams ? '' : '?' + controllerPath.queryParams.map(x => `${x.name}={q_${snakeCase(x.name)}}`).join('&');
 
         const headersMethodParam = '{' + headers.map(x => `'${x.name}':{h_${x.name}}`).join(',') + '}';
 
