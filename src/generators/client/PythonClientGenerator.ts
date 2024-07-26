@@ -6,7 +6,7 @@ import { writeFileSync } from 'fs';
 import { join } from 'path';
 
 const tab = ' '.repeat(4);
-const systemNames = [`from`, `None`, `True`, `False`, `pass`, `global`, `in`, `except`, `and`];
+const systemNames = [`from`, `None`, `True`, `False`, `pass`, `global`, `in`, `except`, `and`, `field`];
 
 export class PythonClientGenerator extends GeneratorAbstract {
     generateObject(objectInput: EditorObjectInput): void {
