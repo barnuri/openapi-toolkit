@@ -5,3 +5,4 @@ export * from './client/CSharpClientGenerator';
 export * from './client/TypescriptAxiosClientGenerator';
 export * from './TypescriptGenerator';
 export * from './GeneratorAbstract';
+export * from './generate';
