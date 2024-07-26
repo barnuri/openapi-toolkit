@@ -17,6 +17,7 @@ runs:
         node-version: '22.x'
 
     - name: Set useComplexSwagger conditions
+      shell: bash
       id: useComplexSwagger
       run: |
         contains_complex_ut_label="false"
@@ -32,11 +33,14 @@ runs:
         fi
 
     - name: Download Swagger file
+      shell: bash
       run: curl https://petstore.swagger.io/v2/swagger.json -o ${{ env.OPENAPI_TOOLKIT_TESTFILE }}
       if: ${{ env.useComplexSwagger == 'false' }}
 
     - name: Install dependencies
+      shell: bash
       run: rm -rf .npmrc && npm i
 
     - name: Build
+      shell: bash
       run: npm run build
