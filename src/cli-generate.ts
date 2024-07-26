@@ -2,7 +2,7 @@
 import 'colors-ext';
 import { ServerGenerators } from './models/ServerGenerators';
 import { ClientGenerators } from './models/ClientGenerators';
-import { generate } from './generators';
+import { generate } from './generators/generate';
 import yargs = require('yargs/yargs');
 
 process.argv[1] = '';
@@ -66,7 +66,7 @@ yargs(process.argv.slice(2))
         ['generators'],
         'generators list',
         () => {},
-        argv => {
+        _argv => {
             console.log('client generators:' + '\n\t- ' + Object.values(ClientGenerators).join('\n\t- '));
             console.log('server generators:' + '\n\t- ' + Object.values(ServerGenerators).join('\n\t- '));
         },

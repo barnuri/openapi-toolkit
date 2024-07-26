@@ -26,28 +26,40 @@ export class TypescriptNestServerGenerator extends TypescriptGenerator {
         const methodName = this.getMethodName(controllerPath);
         let requestType = controllerPath.body.haveBody ? this.getPropDesc(controllerPath.body.schema) : 'undefined';
         const responseType = this.getPropDesc(controllerPath.response);
-        const bodyParam = controllerPath.body.haveBody ? `@nestCommon.Body() body: ${requestType}${!controllerPath.body.required ? ` | undefined` : ''}, ` : '';
+        const bodyParam = controllerPath.body.haveBody
+            ? `@nestCommon.Body() body: ${requestType}${!controllerPath.body.required ? ` | undefined` : ''}, `
+            : '';
         const headers = [...controllerPath.cookieParams, ...controllerPath.headerParams];
         const headersParams =
             headers.length > 0
-                ? headers.map(x => `@nestCommon.Headers('${x.name}') h_${x.name}: string ${x.required ? '' : ' | undefined'}`).join(', ') + `, `
+                ? headers.map(x => `@nestCommon.Headers('${x.name}') h_${x.name}: string ${x.required ? '' : ' | undefined'}`).join(', ') +
+                  `, `
                 : ``;
         const pathParams =
             controllerPath.pathParams.length > 0
                 ? controllerPath.pathParams
-                      .map(x => `@nestCommon.Param('${x.name}') p_${x.name}: ${this.getPropDesc(x.schema!)} ${x.required ? '' : ' | undefined'}`)
+                      .map(
+                          x =>
+                              `@nestCommon.Param('${x.name}') p_${x.name}: ${this.getPropDesc(x.schema!)} ${x.required ? '' : ' | undefined'}`,
+                      )
                       .join(', ') + `, `
                 : ``;
 
         const queryParams =
             controllerPath.queryParams.length > 0
                 ? controllerPath.queryParams
-                      .map(x => `@nestCommon.Query('${x.name}') q_${x.name}: ${this.getPropDesc(x.schema!)} ${x.required ? '' : ' | undefined'}`)
+                      .map(
+                          x =>
+                              `@nestCommon.Query('${x.name}') q_${x.name}: ${this.getPropDesc(x.schema!)} ${x.required ? '' : ' | undefined'}`,
+                      )
                       .join(', ') + `, `
                 : ``;
         let methodContent = '';
         methodContent += `\t@nestCommon.${capitalize(controllerPath.method)}("${controllerPath.path}")\n`;
-        methodContent += `\tasync ${methodName}(${bodyParam}${pathParams}${queryParams}${headersParams}): ${responseType}> {\n`.replace(', )', ')');
+        methodContent += `\tasync ${methodName}(${bodyParam}${pathParams}${queryParams}${headersParams}): ${responseType}> {\n`.replace(
+            ', )',
+            ')',
+        );
         methodContent += `\t\tthrow Error('NotImplemented');\n`;
         methodContent += `\t}\n`;
         return { methodContent, methodName };

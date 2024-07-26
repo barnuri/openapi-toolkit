@@ -29,18 +29,24 @@ export class CSharpServerGenerator extends CSharpGenerator {
         const bodyParam = controllerPath.body.haveBody ? `[FromBody] ${requestType}${!controllerPath.body.required ? `?` : ''} body, ` : '';
         const headers = [...controllerPath.cookieParams, ...controllerPath.headerParams];
         const headersParams =
-            headers.length > 0 ? headers.map(x => `[FromHeader(Name = "${x.name}")] string${x.required ? '' : '?'} ${x.name} = default`).join(', ') + `, ` : ``;
+            headers.length > 0
+                ? headers.map(x => `[FromHeader(Name = "${x.name}")] string${x.required ? '' : '?'} ${x.name} = default`).join(', ') + `, `
+                : ``;
         const pathParams =
             controllerPath.pathParams.length > 0
                 ? controllerPath.pathParams
-                      .map(x => `[FromRoute(Name = "${x.name}")] ${this.getPropDesc(x.schema!)}${x.required ? '' : '?'} ${x.name} = default`)
+                      .map(
+                          x => `[FromRoute(Name = "${x.name}")] ${this.getPropDesc(x.schema!)}${x.required ? '' : '?'} ${x.name} = default`,
+                      )
                       .join(', ') + ', '
                 : ``;
 
         const queryParams =
             controllerPath.queryParams.length > 0
                 ? controllerPath.queryParams
-                      .map(x => `[FromQuery(Name = "${x.name}")] ${this.getPropDesc(x.schema!)}${x.required ? '' : '?'} ${x.name} = default`)
+                      .map(
+                          x => `[FromQuery(Name = "${x.name}")] ${this.getPropDesc(x.schema!)}${x.required ? '' : '?'} ${x.name} = default`,
+                      )
                       .join(', ') + ', '
                 : ``;
 

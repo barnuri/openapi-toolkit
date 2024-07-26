@@ -2,7 +2,7 @@ import { TypescriptGenerator } from './../TypescriptGenerator';
 import { appendFileSync, writeFileSync } from 'fs';
 import { ApiPath } from '../../models/ApiPath';
 import { join } from 'path';
-import { capitalize, makeDirIfNotExist } from '../../helpers';
+import { makeDirIfNotExist } from '../../helpers';
 
 export class TypescriptAxiosClientGenerator extends TypescriptGenerator {
     modelsExportFile = join(this.modelsFolder, 'index.ts');
@@ -16,7 +16,7 @@ export * from './controllers';
 export * from './ControllerBase';
 
 class ApiClient {
-${this.controllersNames
+${this.parsingResult.controllersNames
     .map(x => this.getControllerName(x))
     .map(x => `\tpublic ${x}: controllers.${x}`)
     .join(';\n')}
@@ -24,7 +24,7 @@ ${this.controllersNames
     constructor(public axiosRequestConfig?: AxiosRequestConfig, public axiosInstance?: AxiosInstance) {
         this.axiosRequestConfig = axiosRequestConfig || {}; 
         this.axiosInstance = axiosInstance || axios.create(this.axiosRequestConfig);   
-${this.controllersNames
+${this.parsingResult.controllersNames
     .map(x => this.getControllerName(x))
     .map(x => `\t\tthis.${x} = new controllers.${x}(this.axiosInstance)`)
     .join(',\n')}
@@ -55,7 +55,9 @@ import { ControllerBase } from '../ControllerBase';`;
         const methodName = this.getMethodName(controllerPath);
         let requestType = controllerPath.body.haveBody ? this.getPropDesc(controllerPath.body.schema) : 'undefined';
         const responseType = this.getPropDesc(controllerPath.response);
-        const bodyParam = controllerPath.body.haveBody ? `body: ${requestType}${!controllerPath.body.required ? ` | undefined` : ''}, ` : '';
+        const bodyParam = controllerPath.body.haveBody
+            ? `body: ${requestType}${!controllerPath.body.required ? ` | undefined` : ''}, `
+            : '';
         const headers = [...controllerPath.cookieParams, ...controllerPath.headerParams];
         const haveHeaderParams = headers.length > 0;
         const headersParams = haveHeaderParams ? `headers: {${headers.map(x => `${x.name}${x.required ? '' : '?'}: string`)}}, ` : ``;
@@ -68,7 +70,12 @@ import { ControllerBase } from '../ControllerBase';`;
             url = url.replace('{' + pathParam.name + '}', "${pathParams['" + pathParam.name + "']}");
         }
         const haveQueryParams = controllerPath.queryParams.length > 0;
-        url += !haveQueryParams ? '' : '?' + controllerPath.queryParams.map(x => `${x.name}=\${queryParams['${x.name}'] !== undefined ? queryParams['${x.name}'] : ''}`).join('&');
+        url += !haveQueryParams
+            ? ''
+            : '?' +
+              controllerPath.queryParams
+                  .map(x => `${x.name}=\${queryParams['${x.name}'] !== undefined ? queryParams['${x.name}'] : ''}`)
+                  .join('&');
         const queryParamFix = (name: string) => (name.includes('.') || name.includes('-') ? `"${name}"` : name);
         const queryParams = haveQueryParams
             ? `queryParams: {${controllerPath.queryParams.map(x => `${queryParamFix(x.name)}${x.required ? '' : '?'}: ${this.getPropDesc(x.schema!)}`)}}, `

@@ -8,7 +8,7 @@ export class GoClientGenerator extends GoGenerator {
     mainExportFile = join(this.options.output, 'main.go');
     generateClient(): void {
         super.generateClient();
-        const controllerPropsNames = this.controllersNames.map(x => this.getControllerName(x));
+        const controllerPropsNames = this.parsingResult.controllersNames.map(x => this.getControllerName(x));
         const mainFileContent = `package main
 ${this.getImportes(`
     "io"
@@ -148,9 +148,9 @@ func main() {
         const controllerName = this.getControllerName(controller);
         makeDirIfNotExist(this.controllersFolder);
         let controllerContent = `package controllers
-${this.getImportes(!this.haveModels ? '' : `\n\tmodels "${this.options.namespace}/models"`)}`;
-        if (this.haveModels) {
-            controllerContent += `var _ = models.${this.getFileName([...this.allEnumsEditorInput, ...this.allObjectEditorInputs][0])}\n\n`;
+${this.getImportes(!this.parsingResult.haveModels ? '' : `\n\tmodels "${this.options.namespace}/models"`)}`;
+        if (this.parsingResult.haveModels) {
+            controllerContent += `var _ = models.${this.getFileName([...this.parsingResult.allEnumsEditorInput, ...this.parsingResult.allObjectEditorInputs][0])}\n\n`;
         }
         controllerContent += `
 type ${controllerName} struct {
@@ -178,7 +178,10 @@ type ${controllerName} struct {
         const pathParamsForUrl =
             controllerPath.pathParams.length > 0
                 ? controllerPath.pathParams.map(x => ({
-                      format: this.getPropDesc(x.schema!, 'models') == 'bool' ? `strconv.FormatBool(p${capitalize(x.name)})` : `string(p${capitalize(x.name)})`,
+                      format:
+                          this.getPropDesc(x.schema!, 'models') == 'bool'
+                              ? `strconv.FormatBool(p${capitalize(x.name)})`
+                              : `string(p${capitalize(x.name)})`,
                       param: `p${capitalize(x.name)}`,
                   }))
                 : [];
@@ -193,17 +196,21 @@ type ${controllerName} struct {
             : ``;
         const queryParamsForUrl = haveQueryParams
             ? controllerPath.queryParams.map(x => ({
-                  format: this.getPropDesc(x.schema!, 'models') == 'bool' ? `strconv.FormatBool(q${capitalize(x.name)})` : `string(q${capitalize(x.name)})`,
+                  format:
+                      this.getPropDesc(x.schema!, 'models') == 'bool'
+                          ? `strconv.FormatBool(q${capitalize(x.name)})`
+                          : `string(q${capitalize(x.name)})`,
                   param: `q${capitalize(x.name)}`,
               }))
             : [];
         const methodParams = `${bodyParam}${pathParams}${queryParams}${headersParams}`;
 
         let methodContent = '';
-        methodContent += `func (c ${controllerName}) ${methodName}(${methodParams}) (result ${responseType}, httpRes *http.Response, err error) {\n`.replace(
-            ', )',
-            ')',
-        );
+        methodContent +=
+            `func (c ${controllerName}) ${methodName}(${methodParams}) (result ${responseType}, httpRes *http.Response, err error) {\n`.replace(
+                ', )',
+                ')',
+            );
         methodContent += '\theaders := make(map[string]string)\n';
         methodContent += `\tvar res ${responseType}\n`;
 

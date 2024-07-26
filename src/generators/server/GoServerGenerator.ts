@@ -260,7 +260,7 @@ func main() {
 	}))
 
     // Controllers
-${this.controllersNames.map(x => `\tcontrollers.${this.getControllerName(x)}(e)`).join('\n')}
+${this.parsingResult.controllersNames.map(x => `\tcontrollers.${this.getControllerName(x)}(e)`).join('\n')}
 
 	// Start server
     e.GET("/swagger/*", echoSwagger.WrapHandler)
@@ -281,9 +281,9 @@ ${this.controllersNames.map(x => `\tcontrollers.${this.getControllerName(x)}(e)`
         const controllerContent = `package controllers
 import (
     "github.com/labstack/echo/v4"
-	"errors"${this.haveModels ? `\n\tmodels "${this.options.namespace}/models"` : ''}
+	"errors"${this.parsingResult.haveModels ? `\n\tmodels "${this.options.namespace}/models"` : ''}
 )
-${this.haveModels ? `\nvar _ = models.${this.getFileName([...this.allEnumsEditorInput, ...this.allObjectEditorInputs][0])}` : ''}
+${this.parsingResult.haveModels ? `\nvar _ = models.${this.getFileName([...this.parsingResult.allEnumsEditorInput, ...this.parsingResult.allObjectEditorInputs][0])}` : ''}
 
 ${definisions.map(x => x.func).join('\n')}
 
@@ -300,7 +300,9 @@ ${definisions.map(x => '\t' + x.route).join('\n')}
         const headers = [...controllerPath.cookieParams, ...controllerPath.headerParams];
         const headerVarbs = (headers || []).map(x => `\t// h${capitalize(x.name)} := c.request.Header.Get("${x.name}")`).join('\n');
         const pathVarbs = (controllerPath.pathParams || []).map(x => `\t// p${capitalize(x.name)} := c.Param("${x.name}")`).join('\n');
-        const queryVarbs = (controllerPath.queryParams || []).map(x => `\t// q${capitalize(x.name)} := c.QueryParam("${x.name}")`).join('\n');
+        const queryVarbs = (controllerPath.queryParams || [])
+            .map(x => `\t// q${capitalize(x.name)} := c.QueryParam("${x.name}")`)
+            .join('\n');
         const bodyVarb = controllerPath.body.haveBody
             ? `\treqBody := new(${requestType})
     if err := c.Bind(reqBody); err != nil {

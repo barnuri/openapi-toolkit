@@ -40,7 +40,14 @@ export class EditorInput {
             parentClone.properties[this.name]['nullable'] ||
             parentClone.properties[this.name]['x-nullable'];
         this.editorType = editorType;
-        const requiredList = getOpenApiDefinitionPropGetter(openApiDocument, parentClone, true, definitions || {}, x => (x as OpenApiDefinitionObject)?.required || [], 'array');
+        const requiredList = getOpenApiDefinitionPropGetter(
+            openApiDocument,
+            parentClone,
+            true,
+            definitions || {},
+            x => (x as OpenApiDefinitionObject)?.required || [],
+            'array',
+        );
         const propName = path.split('.').splice(-1)[0];
         this.required = requiredList.includes(propName);
         if (path == 'subCategoryCounterSelector' || propName.includes('categoryCounterSelector')) {

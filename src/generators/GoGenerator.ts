@@ -49,7 +49,7 @@ ${this.getObjectProps(objectInput)}
         if (objectInput.implements.length > 0) {
             props +=
                 '\n' +
-                this.allEditorInputs
+                this.parsingResult.allEditorInputs
                     .filter(x => objectInput.implements.includes(x.name) && x.editorType === 'EditorObjectInput')
                     .map(x => this.getObjectProps(x as EditorObjectInput));
         }
@@ -57,7 +57,9 @@ ${this.getObjectProps(objectInput)}
     }
     getPropDesc(obj: EditorInput | OpenApiDefinition, modelModule?: string) {
         modelModule = modelModule ? `${modelModule}.`.replace('..', '.') : ``;
-        const editorInput = (obj as EditorInput)?.editorType ? (obj as EditorInput) : getEditorInput2(this.swagger, obj as OpenApiDefinition);
+        const editorInput = (obj as EditorInput)?.editorType
+            ? (obj as EditorInput)
+            : getEditorInput2(this.swagger, obj as OpenApiDefinition);
         const fileName = this.getFileName(editorInput);
 
         if (editorInput.editorType === 'EditorPrimitiveInput') {

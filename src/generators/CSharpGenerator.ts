@@ -24,7 +24,7 @@ using Newtonsoft.Json.Converters;
         if (!this.options.disableNullable) {
             combineContent += '\n#nullable enable';
         }
-        combineContent += '\nnamespace ' + this.options.namespace + '\n{\n\t' + content.replace(/\n/g, '\n\t') + '\n}'
+        combineContent += '\nnamespace ' + this.options.namespace + '\n{\n\t' + content.replace(/\n/g, '\n\t') + '\n}';
         return combineContent;
     }
     generateObject(objectInput: EditorObjectInput): void {
@@ -55,7 +55,7 @@ ${objectInput.properties
         const isEnum = x.editorType === 'EditorPrimitiveInput' && (x as EditorPrimitiveInput).type === 'enum' && propType !== 'object';
         const isPrimitiveWithNullableSupp = x.editorType === 'EditorPrimitiveInput' && propType !== 'string';
         if (isEnum) {
-            attributes += `[JsonConverter(typeof(StringEnumConverter))] `
+            attributes += `[JsonConverter(typeof(StringEnumConverter))] `;
         }
         let shouldMarkNullable = x.nullable || !x.required;
         if (this.options.disableNullable && shouldMarkNullable && !isPrimitiveWithNullableSupp && !isEnum) {
@@ -68,7 +68,9 @@ ${objectInput.properties
         writeFileSync(modelFile, this.addNamespace(modelFileContent));
     }
     getPropDesc(obj: EditorInput | OpenApiDefinition) {
-        const editorInput = (obj as EditorInput)?.editorType ? (obj as EditorInput) : getEditorInput2(this.swagger, obj as OpenApiDefinition);
+        const editorInput = (obj as EditorInput)?.editorType
+            ? (obj as EditorInput)
+            : getEditorInput2(this.swagger, obj as OpenApiDefinition);
         const fileName = this.getFileName(editorInput);
 
         if (editorInput.editorType === 'EditorPrimitiveInput') {
@@ -118,7 +120,7 @@ ${objectInput.properties
         const cleanNameCounter = {} as any;
         for (let index = 0; index < enumKeys.length; index++) {
             const enumKey = enumKeys[index];
-            let enumCleanName = cleanString(this.getEnumValueName(capitalize(enumKey))).replace(/"/g, "");
+            let enumCleanName = cleanString(this.getEnumValueName(capitalize(enumKey))).replace(/"/g, '');
             const enumAssignment = typeof enumVals[enumKey] === 'number' ? ` = ${enumVals[enumVals[enumKey]]}` : ``;
             if (cleanNameCounter[enumCleanName] === undefined) {
                 cleanNameCounter[enumCleanName] = 0;
@@ -128,11 +130,11 @@ ${objectInput.properties
                 cleanNameSuffix = cleanNameCounter[enumCleanName];
             }
             cleanNameCounter[enumCleanName]++;
-            enumValsAgg.push({ 
-                index, 
+            enumValsAgg.push({
+                index,
                 enumCleanName: `${enumCleanName}${cleanNameSuffix}`,
-                enumAssignment, 
-                realValue: enumVals[enumKey]
+                enumAssignment,
+                realValue: enumVals[enumKey],
             });
         }
         const modelFile = join(this.modelsFolder, this.getFileName(enumInput) + this.getFileExtension(true));

@@ -9,4 +9,11 @@ export class ChangesModel {
     dictNewKeys!: { [key: string]: string[] };
 }
 
-export const ChangesModelDefaultValue: ChangesModel = { $set: {}, $unset: {}, $pull: {}, $push: {}, newArrayItemsCount: {}, dictNewKeys: {} };
+export const ChangesModelDefaultValue: ChangesModel = {
+    $set: {},
+    $unset: {},
+    $pull: {},
+    $push: {},
+    newArrayItemsCount: {},
+    dictNewKeys: {},
+};

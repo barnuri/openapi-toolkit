@@ -4,65 +4,26 @@ import { getAllEditors, getApiPaths, getAllEditorInputsByEditors, capitalize, di
 import { OpenApiDocument, Editor, ApiPath, EditorPrimitiveInput, EditorObjectInput } from '../models/index';
 import GeneratorsOptions from '../models/GeneratorsOptions';
 import { join } from 'path';
+import ParsingResult from '../models/ParsingResult';
 
 export abstract class GeneratorAbstract {
-    editors: Editor[];
-    apiPaths: ApiPath[];
-    controllersNames: string[];
-    allEditorInputs: EditorInput[];
-    allObjectEditorInputs: EditorObjectInput[];
-    allPrimitiveEditorInput: EditorPrimitiveInput[];
-    allEnumsEditorInput: EditorPrimitiveInput[];
     modelsFolder = join(this.options.output, this.options.modelsFolderName);
     controllersFolder = join(this.options.output, this.options.controllersFolderName);
     filesNames: string[];
-    haveModels: boolean;
     methodsNames: { [name: string]: number } = {};
 
-    constructor(public swagger: OpenApiDocument, public options: GeneratorsOptions) {
-        if (!options.pathOrUrl) {
-            throw new Error('pathOrUrl is required');
-        }
-        if (!options.output) {
-            throw new Error('output is required');
-        }
-        if (!options.generator) {
-            throw new Error('generator is required');
-        }
-        if (!options.type) {
-            throw new Error('type is required');
-        }
-
-        options.modelsFolderName = options.modelsFolderName || '';
-        options.modelNamePrefix = options.modelNamePrefix || '';
-        options.modelNameSuffix = options.modelNameSuffix || '';
-        options.controllersFolderName = options.controllersFolderName || '';
-        options.controllerNamePrefix = options.controllerNamePrefix || '';
-        options.controllerNameSuffix = options.controllerNameSuffix || '';
-        options.namespace = options.namespace || '';
+    constructor(
+        public swagger: OpenApiDocument,
+        public options: GeneratorsOptions,
+        public parsingResult: ParsingResult,
+    ) {
         this.filesNames = [];
         this.swagger = swagger;
-        this.options.output = fixPath(options.output);
-        console.log('-----  start parsing -----'.cyan());
-        console.log('parsing models');
-        this.editors = getAllEditors(swagger, options.debugLogs);
-        console.log('parse all api pathes');
-        this.apiPaths = getApiPaths(swagger);
-        this.controllersNames = distinctByProp([...new Set(this.apiPaths.map(x => x.controller))], x => x.toLowerCase());
-        this.allEditorInputs = getAllEditorInputsByEditors(this.editors);
-        this.allObjectEditorInputs = this.allEditorInputs.filter(x => x.editorType === 'EditorObjectInput').map(x => x as EditorObjectInput);
-        for (const objectInput of this.allObjectEditorInputs) {
-            if (objectInput.implements) {
-                objectInput.implements = objectInput.implements.map(x => capitalize(x));
-            }
-        }
-        this.allPrimitiveEditorInput = this.allEditorInputs.filter(x => x.editorType === 'EditorPrimitiveInput').map(x => x as EditorPrimitiveInput);
-        this.allEnumsEditorInput = this.allPrimitiveEditorInput.filter(x => x.enumNames.length + x.enumsOptions.length + x.enumValues.length > 0);
-        this.haveModels = this.allObjectEditorInputs.length + this.allEnumsEditorInput.length > 0;
-        console.log('-----  done parsing -----'.green());
+        this.options = options;
+        this.parsingResult = parsingResult;
     }
 
-    async generate(): Promise<void> {
+    async generate() {
         console.log('-----  start generating -----'.cyan());
         this.filesNames = [];
         this.methodsNames = {};
@@ -83,8 +44,8 @@ export abstract class GeneratorAbstract {
 
     private async generateControllers() {
         console.log('----- generating controllers -----'.cyan());
-        for (const controllerName of this.controllersNames) {
-            const controllerPaths = this.apiPaths.filter(x => x.controller.toLowerCase() === controllerName.toLowerCase());
+        for (const controllerName of this.parsingResult.controllersNames) {
+            const controllerPaths = this.parsingResult.apiPaths.filter(x => x.controller.toLowerCase() === controllerName.toLowerCase());
             const controllerDisplay = `${this.getControllerName(controllerName)} - methods: ${controllerPaths.length}`;
             console.log(' ');
             console.log('-'.repeat(controllerDisplay.length).cyan());
@@ -97,11 +58,11 @@ export abstract class GeneratorAbstract {
 
     private async generateModels() {
         console.log('-----  generating object models -----'.cyan());
-        for (const objectInput of this.allObjectEditorInputs) {
+        for (const objectInput of this.parsingResult.allObjectEditorInputs) {
             await this._generateObject(objectInput);
         }
         console.log('-----  generating enum models -----'.cyan());
-        for (const enumInput of this.allEnumsEditorInput) {
+        for (const enumInput of this.parsingResult.allEnumsEditorInput) {
             await this._generateEnum(enumInput);
         }
     }
@@ -166,7 +127,11 @@ export abstract class GeneratorAbstract {
             if (!name || name === 'undefined' || name === '') {
                 name = undefined;
             }
-            if (!name && editorInput.editorType === 'EditorPrimitiveInput' && (editorInput as EditorPrimitiveInput).enumsOptions.length > 0) {
+            if (
+                !name &&
+                editorInput.editorType === 'EditorPrimitiveInput' &&
+                (editorInput as EditorPrimitiveInput).enumsOptions.length > 0
+            ) {
                 name = editorInput.name;
                 name = name ? name + 'Enum' : name;
             }
@@ -269,10 +234,16 @@ export abstract class GeneratorAbstract {
     getEnumValueName(name: string) {
         const specialChars = ['-', ' ', '!'];
         const specialKeywords = ['in', 'public', 'private', 'readonly'];
-        if (specialChars.filter(x => name.includes(x)).length > 0) { return `"${name}"`; }
-        if (specialKeywords.filter(x => name === x).length > 0) { return `"${name}"`; }
-        if (!isNaN(parseFloat(name))) { return `Num${name}`; }
-        return name;        
+        if (specialChars.filter(x => name.includes(x)).length > 0) {
+            return `"${name}"`;
+        }
+        if (specialKeywords.filter(x => name === x).length > 0) {
+            return `"${name}"`;
+        }
+        if (!isNaN(parseFloat(name))) {
+            return `Num${name}`;
+        }
+        return name;
     }
 
     abstract getFileExtension(isModel: boolean);

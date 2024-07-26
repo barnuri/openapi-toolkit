@@ -21,13 +21,14 @@ export class EditorObjectInput extends EditorInput {
         definistionName: string,
         openApiDefinition: OpenApiDefinitionObject,
         openApiParentDefinition: OpenApiDefinitionObject | undefined,
-        definitions: OpenApiDefinitionsDictionary | undefined
+        definitions: OpenApiDefinitionsDictionary | undefined,
     ) {
         super(openApiDocument, path, 'EditorObjectInput', openApiDefinition, openApiParentDefinition, definitions);
         this.definistionName = definistionName;
         openApiDefinition.anyOf = openApiDefinition.anyOf || [];
         this.switchable = openApiDefinition.anyOf.length > 0;
-        this.isAbstract = openApiDefinition['x-abstract'] == true || (openApiDefinition.allOf || []).filter(x => x['x-abstract'] == true).length > 0;
+        this.isAbstract =
+            openApiDefinition['x-abstract'] == true || (openApiDefinition.allOf || []).filter(x => x['x-abstract'] == true).length > 0;
         this.switchableOptions = !this.switchable ? [] : switchableOptions || [];
         this.isDictionary = !!openApiDefinition.additionalProperties || !!openApiDefinition['x-dictionaryKey'];
         this.default = {};
