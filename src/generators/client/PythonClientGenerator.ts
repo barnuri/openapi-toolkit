@@ -6,6 +6,7 @@ import { writeFileSync } from 'fs';
 import { join } from 'path';
 
 const tab = ' '.repeat(4);
+const systemNames = [`from`, `None`, `True`, `False`, `pass`, `global`, `in`, `except`, `and`];
 
 export class PythonClientGenerator extends GeneratorAbstract {
     generateObject(objectInput: EditorObjectInput): void {
@@ -22,7 +23,6 @@ export class PythonClientGenerator extends GeneratorAbstract {
         for (const prop of objectInput.properties) {
             const type = this.getPropDesc(prop);
             let name = prop.name.replace(/\[i\]/g, '').replace(/-/g, '_');
-            const systemNames = [`from`, `None`, `True`, `False`, `pass`];
             if (systemNames.includes(name)) {
                 name = '_' + name;
             }
@@ -53,13 +53,17 @@ ${tab}${tab}return self.extra.get(item.replace('_', '-'))`;
         }
         const modelFile = join(this.modelsFolder, this.getFileName(enumInput) + this.getFileExtension(false));
         const classDeclare = `class ${this.getFileName(enumInput)}(Enum):`;
+        const getName = (e: string) => {
+            if (systemNames.includes(e)) {
+                e = '_' + e;
+            }
+            e = e.replace(/ /g, '').replace(/-/g, '').replace(/!/g, 'not_');
+            return this.getEnumValueName(e);
+        };
         let modelFileContent = `   
 ${classDeclare}
 ${Object.keys(enumVals)
-    .map(
-        x =>
-            `${tab}${x == 'None' ? '_None' : x.replace(/ /, '').replace(/-/, '')} = ${typeof enumVals[x] === 'number' ? enumVals[x] : `'${enumVals[x]}'`}`,
-    )
+    .map(x => `${tab}${getName(x)} = ${typeof enumVals[x] === 'number' ? enumVals[x] : `'${enumVals[x]}'`}`)
     .join('\n')}`;
         if (Object.keys(enumVals).length <= 0) {
             modelFileContent += `${tab}pass`;
