@@ -5,27 +5,42 @@ import { EditorObjectInput, EditorPrimitiveInput, OpenApiDefinition } from '../.
 import { writeFileSync } from 'fs';
 import { join } from 'path';
 
+const tab = ' '.repeat(4);
+
 export class PythonClientGenerator extends GeneratorAbstract {
     generateObject(objectInput: EditorObjectInput): void {
         const extendStr =
             objectInput.implements.length > 0
-                ? `models.${this.options.modelNamePrefix}${objectInput.implements[0]}${this.options.modelNameSuffix.split('.')[0]}`
-                : `object`;
-        const classDeclare = `class ${this.getFileName(objectInput)}(${extendStr}):`;
+                ? `(models.${this.options.modelNamePrefix}${objectInput.implements[0]}${this.options.modelNameSuffix.split('.')[0]})`
+                : ``;
+        const classDeclare = `@dataclass\nclass ${this.getFileName(objectInput)}${extendStr}:`;
         if (!this.shouldGenerateModel(objectInput)) {
             return;
         }
         const modelFile = join(this.modelsFolder, this.getFileName(objectInput) + this.getFileExtension(true));
-        let modelFileContent = `${classDeclare}
-${objectInput.properties
-    .map(
-        x =>
-            `\t${x.name.replace(/\[i\]/g, '')}: ${x.nullable || !x.required ? 'Optional[' + this.getPropDesc(x) + ']' : this.getPropDesc(x)}`,
-    )
-    .join('\n')}`;
-        if (objectInput.properties.length <= 0) {
-            modelFileContent += '\tpass';
+        const propertiesContent = [] as string[];
+        for (const prop of objectInput.properties) {
+            const type = this.getPropDesc(prop);
+            const name = prop.name.replace(/\[i\]/g, '').replace(/-/g, '_');
+            propertiesContent.push(`${tab}${name}: ${prop.nullable || !prop.required ? 'Optional[' + type + ']' : type}`);
         }
+        propertiesContent.push(`${tab}extra: Dict[str, Any] = field(default_factory=dict)`);
+        let modelFileContent = `${classDeclare}
+${propertiesContent.join('\n')}
+
+${tab}def __post_init__(self):
+${tab}${tab}attributes = asdict(self)
+${tab}${tab}attributes.pop('extra')  # Remove 'extra' to avoid self-reference
+${tab}${tab}self.extra.update({k.replace('_', '-'): v for k, v in attributes.items()})
+
+${tab}def __getitem__(self, key):
+${tab}${tab}return self.extra[key]
+
+${tab}def __setitem__(self, key, value):
+${tab}${tab}self.extra[key] = value
+
+${tab}def __getattr__(self, item):
+${tab}${tab}return self.extra.get(item.replace('_', '-'))`;
         writeFileSync(modelFile, this.appendModelsImports(modelFileContent));
     }
     generateEnum(enumInput: EditorPrimitiveInput, enumVals: { [name: string]: string | number }): void {
@@ -37,10 +52,13 @@ ${objectInput.properties
         let modelFileContent = `   
 ${classDeclare}
 ${Object.keys(enumVals)
-    .map(x => `\t${x == 'None' ? '_None' : x} = ${typeof enumVals[x] === 'number' ? enumVals[x] : `'${enumVals[x]}'`}`)
+    .map(
+        x =>
+            `${tab}${x == 'None' ? '_None' : x.replace(/ /, '').replace(/-/, '')} = ${typeof enumVals[x] === 'number' ? enumVals[x] : `'${enumVals[x]}'`}`,
+    )
     .join('\n')}`;
         if (Object.keys(enumVals).length <= 0) {
-            modelFileContent += '\tpass';
+            modelFileContent += `${tab}pass`;
         }
         writeFileSync(modelFile, this.appendModelsImports(modelFileContent));
     }
@@ -51,15 +69,15 @@ ${Object.keys(enumVals)
             const modelName = match[1];
             imports += `from ..models.${modelName} import ${modelName}\n`;
         }
-
-        const haveAnyType = fileContent.includes(': Any') || fileContent.includes('[Any]');
+        const haveDataClass = fileContent.includes('@dataclass');
+        if (haveDataClass) {
+            imports += `from dataclasses import dataclass, field, asdict\n`;
+        }
         const haveOptionalType = fileContent.includes(': Optional') || fileContent.includes('[Optional]');
-        if (haveAnyType && haveOptionalType) {
-            imports += `from typing import Optional, Any\n`;
-        } else if (haveOptionalType) {
-            imports += `from typing import Optional\n`;
-        } else if (haveAnyType) {
-            imports += `from typing import Any\n`;
+        if (haveOptionalType) {
+            imports += `from typing import Dict, Optional, Any\n`;
+        } else {
+            imports += `from typing import Dict, Any\n`;
         }
 
         if (fileContent.includes(': datetime') || fileContent.includes('[datetime]')) {
@@ -82,15 +100,15 @@ ${Object.keys(enumVals)
 from typing import Optional, Any
 
 class BaseController(object):
-    def method(self, method: str, path: str, body: Optional[Any], headers: Optional[dict], **kwargs):
-        res = request(
-            **kwargs,
-            url=path,
-            method=method,
-            headers=headers,
-            data=body,
-        )
-        return res.json()`;
+${tab}def method(self, method: str, path: str, body: Optional[Any], headers: Optional[dict], **kwargs):
+${tab}${tab}res = request(
+${tab}${tab}${tab}**kwargs,
+${tab}${tab}${tab}url=path,
+${tab}${tab}${tab}method=method,
+${tab}${tab}${tab}headers=headers,
+${tab}${tab}${tab}data=body,
+${tab}${tab})
+${tab}${tab}return res.json()`;
         const baseControllerFile = join(this.controllersFolder, 'BaseController' + this.getFileExtension(false));
         writeFileSync(baseControllerFile, baseController);
 
@@ -100,7 +118,7 @@ class BaseController(object):
             .join('\n')}
 
 class Client(object):
-    def __init__(self):
+${tab}def __init__(self):
 ${this.parsingResult.controllersNames
     .map(x => this.getControllerName(x))
     .map(x => `        self.${x} = ${x}()`)
@@ -125,40 +143,46 @@ ${this.parsingResult.controllersNames
         const headers = [...controllerPath.cookieParams, ...controllerPath.headerParams];
         const haveHeaders = headers.length > 0;
         const headersParams = haveHeaders
-            ? headers.map(x => `h_${x.name}: ${x.required ? 'str' : 'Optional[str]'} `).join(', ') + `, `
+            ? headers.map(x => `h_${snakeCase(x.name)}: ${x.required ? 'str' : 'Optional[str]'} `).join(', ') + `, `
             : ``;
         const pathParams =
             controllerPath.pathParams.length > 0
                 ? controllerPath.pathParams
-                      .map(x => `p_${x.name}: ${x.required ? this.getPropDesc(x.schema!) : `Optional[${this.getPropDesc(x.schema!)}]`}`)
+                      .map(
+                          x =>
+                              `p_${snakeCase(x.name)}: ${x.required ? this.getPropDesc(x.schema!) : `Optional[${this.getPropDesc(x.schema!)}]`}`,
+                      )
                       .join(', ') + `, `
                 : ``;
 
         const queryParams =
             controllerPath.queryParams.length > 0
                 ? controllerPath.queryParams
-                      .map(x => `q_${x.name}: ${x.required ? this.getPropDesc(x.schema!) : `Optional[${this.getPropDesc(x.schema!)}]`}`)
+                      .map(
+                          x =>
+                              `q_${snakeCase(x.name)}: ${x.required ? this.getPropDesc(x.schema!) : `Optional[${this.getPropDesc(x.schema!)}]`}`,
+                      )
                       .join(', ') + `, `
                 : ``;
 
         let url = controllerPath.path;
         for (const pathParam of controllerPath.pathParams) {
-            url = url.replace('{' + pathParam.name + '}', `{p_${pathParam.name}}`);
+            url = url.replace('{' + pathParam.name + '}', `{p_${snakeCase(pathParam.name)}}`);
         }
         const haveQueryParams = controllerPath.queryParams.length > 0;
         url += !haveQueryParams ? '' : '?' + controllerPath.queryParams.map(x => `${x.name}={q_${snakeCase(x.name)}}`).join('&');
 
-        const headersMethodParam = '{' + headers.map(x => `'${x.name}':{h_${x.name}}`).join(',') + '}';
+        const headersMethodParam = '{' + headers.map(x => `'${x.name}':{h_${snakeCase(x.name)}}`).join(',') + '}';
 
         let methodContent = '';
-        methodContent += `\tdef ${methodName}(self, ${bodyParam}${pathParams}${queryParams}${headersParams}**kwargs) -> ${responseType}:\n`;
-        methodContent += `\t\treturn self.method(\n`;
-        methodContent += `\t\t\t'${controllerPath.method.toLowerCase()}',\n`;
-        methodContent += `\t\t\tf"${url}",\n`;
-        methodContent += `\t\t\t${controllerPath.body.haveBody ? 'body' : 'None'},\n`;
-        methodContent += `\t\t\t${haveHeaders ? headersMethodParam : 'None'},\n`;
-        methodContent += `\t\t\t**kwargs\n`;
-        methodContent += `\t\t)\n`;
+        methodContent += `${tab}def ${methodName}(self, ${bodyParam}${pathParams}${queryParams}${headersParams}**kwargs) -> ${responseType}:\n`;
+        methodContent += `${tab}${tab}return self.method(\n`;
+        methodContent += `${tab}${tab}${tab}'${controllerPath.method.toLowerCase()}',\n`;
+        methodContent += `${tab}${tab}${tab}f"${url}",\n`;
+        methodContent += `${tab}${tab}${tab}${controllerPath.body.haveBody ? 'body' : 'None'},\n`;
+        methodContent += `${tab}${tab}${tab}${haveHeaders ? headersMethodParam : 'None'},\n`;
+        methodContent += `${tab}${tab}${tab}**kwargs\n`;
+        methodContent += `${tab}${tab})\n`;
         return { methodContent, methodName };
     }
     getPropDesc(obj: EditorInput | OpenApiDefinition) {
