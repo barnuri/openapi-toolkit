@@ -23,7 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Prepare Environment
-        uses: ./.github/actions/prepare
+        uses: ./.github/actions/prepare-env
         with:
           useComplexSwagger: ${{ github.event.inputs.useComplexSwagger }}
       - run: npm run test:typescript-axios
@@ -33,7 +33,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Prepare Environment
-        uses: ./.github/actions/prepare
+        uses: ./.github/actions/prepare-env
         with:
           useComplexSwagger: ${{ github.event.inputs.useComplexSwagger }}
       - run: npm run test:typescript-models
@@ -43,7 +43,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Prepare Environment
-        uses: ./.github/actions/prepare
+        uses: ./.github/actions/prepare-env
         with:
           useComplexSwagger: ${{ github.event.inputs.useComplexSwagger }}
       - run: npm run test:typescript-react-query
@@ -53,7 +53,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Prepare Environment
-        uses: ./.github/actions/prepare
+        uses: ./.github/actions/prepare-env
         with:
           useComplexSwagger: ${{ github.event.inputs.useComplexSwagger }}
 
@@ -67,7 +67,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
         - name: Prepare Environment
-          uses: ./.github/actions/prepare
+          uses: ./.github/actions/prepare-env
           with:
             useComplexSwagger: ${{ github.event.inputs.useComplexSwagger }}
   
@@ -81,7 +81,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Prepare Environment
-        uses: ./.github/actions/prepare
+        uses: ./.github/actions/prepare-env
         with:
           useComplexSwagger: ${{ github.event.inputs.useComplexSwagger }}
       - name: Install Python
@@ -95,7 +95,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Prepare Environment
-        uses: ./.github/actions/prepare
+        uses: ./.github/actions/prepare-env
         with:
           useComplexSwagger: ${{ github.event.inputs.useComplexSwagger }}
       - run: npm run test:go
@@ -106,7 +106,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Prepare Environment
-        uses: ./.github/actions/prepare
+        uses: ./.github/actions/prepare-env
         with:
           useComplexSwagger: ${{ github.event.inputs.useComplexSwagger }}
       - run: npm run test:go-server
