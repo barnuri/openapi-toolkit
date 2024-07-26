@@ -14,7 +14,10 @@ export abstract class TypescriptGenerator extends GeneratorAbstract {
     shouldGenerateModel(editorInput: EditorInput) {
         const res = super.shouldGenerateModel(editorInput);
         if (res) {
-            appendFileSync(this.modelsExportFile, `export * from './${this.getFileName(editorInput) + this.getFileAdditionalExtension()}'\n`);
+            appendFileSync(
+                this.modelsExportFile,
+                `export * from './${this.getFileName(editorInput) + this.getFileAdditionalExtension()}'\n`,
+            );
         }
         return res;
     }
@@ -43,7 +46,9 @@ ${objectInput.properties
         writeFileSync(modelFile, this.disableLinting + modelFileContent);
     }
     getPropDesc(obj: EditorInput | OpenApiDefinition) {
-        const editorInput = (obj as EditorInput)?.editorType ? (obj as EditorInput) : getEditorInput2(this.swagger, obj as OpenApiDefinition);
+        const editorInput = (obj as EditorInput)?.editorType
+            ? (obj as EditorInput)
+            : getEditorInput2(this.swagger, obj as OpenApiDefinition);
         const fileName = this.getFileName(editorInput);
 
         if (editorInput.editorType === 'EditorPrimitiveInput') {

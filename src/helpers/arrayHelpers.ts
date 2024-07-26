@@ -130,7 +130,13 @@ export function arrayItemOrderInArray(arrayInput: EditorArrayInput, _changes: Ch
     return changes.$set[jpath] ?? jsonPath(value, jpath) ?? index;
 }
 
-export function setArrayOrder(arrayInput: EditorArrayInput, _changes: ChangesModel, _value: any, index: number, order: number): ChangesModel {
+export function setArrayOrder(
+    arrayInput: EditorArrayInput,
+    _changes: ChangesModel,
+    _value: any,
+    index: number,
+    order: number,
+): ChangesModel {
     let changes = cloneHelper(_changes || ChangesModelDefaultValue);
     let value = cloneHelper(_value || {});
     value = value || {};

@@ -3,7 +3,9 @@ import { ApiPath } from '../../models/ApiPath';
 
 export class TypescriptReactQueryClientGenerator extends TypescriptAxiosClientGenerator {
     getControllersImports() {
-        return super.getControllersImports() + `\nimport { useQuery, useMutation, UseQueryOptions, UseMutationOptions } from 'react-query';`;
+        return (
+            super.getControllersImports() + `\nimport { useQuery, useMutation, UseQueryOptions, UseMutationOptions } from 'react-query';`
+        );
     }
     generateControllerMethodContent(controller: string, controllerPath: ApiPath) {
         const isGetMethod = controllerPath.method.toLowerCase() === 'get';
@@ -11,7 +13,9 @@ export class TypescriptReactQueryClientGenerator extends TypescriptAxiosClientGe
         const queryKey = `${controller}_${methodName}`;
         let requestType = controllerPath.body.haveBody ? this.getPropDesc(controllerPath.body.schema) : 'undefined';
         const responseType = this.getPropDesc(controllerPath.response);
-        const bodyParam = controllerPath.body.haveBody ? `body: ${requestType}${!controllerPath.body.required ? ` | undefined` : ''}, ` : '';
+        const bodyParam = controllerPath.body.haveBody
+            ? `body: ${requestType}${!controllerPath.body.required ? ` | undefined` : ''}, `
+            : '';
         const headers = [...controllerPath.cookieParams, ...controllerPath.headerParams];
         const haveHeaderParams = headers.length > 0;
         const headersParams = haveHeaderParams ? `headers: {${headers.map(x => `${x.name}${x.required ? '' : '?'}: string`)}}, ` : ``;

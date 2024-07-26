@@ -20,7 +20,7 @@ export class EditorPrimitiveInput extends EditorInput {
         path: string,
         openApiDefinition: OpenApiDefinitionObject,
         openApiParentDefinition: OpenApiDefinitionObject | undefined,
-        definitions: OpenApiDefinitionsDictionary | undefined
+        definitions: OpenApiDefinitionsDictionary | undefined,
     ) {
         super(openApiDocument, path, 'EditorPrimitiveInput', openApiDefinition, openApiParentDefinition, definitions);
         this.enumNames = openApiDefinition['x-enumNames'] || [];

@@ -116,7 +116,11 @@ export const getEditorChangesHash = (changes: ChangesModel, editorInput: EditorI
     for (const changeType of Object.keys(changes || {})) {
         for (const fieldKey of Object.keys(changes[changeType] || {})) {
             const fixedFieldKey = fixPathForArraies(fieldKey) || '';
-            if (fieldKey.startsWith(arrayPath) || fixedFieldKey.startsWith(fixPathForArraies(arrayPath)) || fixPathForArraies(fieldKey).startsWith(arrayPath)) {
+            if (
+                fieldKey.startsWith(arrayPath) ||
+                fixedFieldKey.startsWith(fixPathForArraies(arrayPath)) ||
+                fixPathForArraies(fieldKey).startsWith(arrayPath)
+            ) {
                 res += fieldKey + '=' + changes[changeType][fieldKey];
             }
         }

@@ -6,12 +6,14 @@ import * as https from 'https';
 import { rimrafSync } from 'rimraf';
 
 export async function getSwaggerJson(pathOrUrl: string): Promise<OpenApiDocument> {
+    console.log(`get swagger`.cyan());
     let swaggerJson = {};
     if (pathOrUrl.toLowerCase().startsWith('http')) {
         swaggerJson = await axios.get(pathOrUrl, { httpsAgent: new https.Agent({ rejectUnauthorized: false }) }).then(res => res.data);
     } else {
         swaggerJson = JSON.parse(readFileSync(pathOrUrl, 'utf8'));
     }
+    console.log(`get swagger successfull`.green());
     return swaggerJson as OpenApiDocument;
 }
 
@@ -49,4 +51,4 @@ export function setFullPermission(path: string): void {
 
 export const isExists = (path: string) => {
     return existsSync(path);
-}; 
+};

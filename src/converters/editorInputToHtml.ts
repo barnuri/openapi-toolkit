@@ -46,7 +46,10 @@ export function editorInputToHtml(input: EditorInput | Editor | Editor[]) {
                 `<b><u>switchable:</u></b> ${objectInput.switchableOptions.join(',')}` +
                 commonProps +
                 objectInput.switchableObjects
-                    .map((x, i) => `<div style='padding-left:20px'><b><u>${objectInput.switchableOptions![i]}</u></b> props: ${editorInputToHtml(x)} </div>`)
+                    .map(
+                        (x, i) =>
+                            `<div style='padding-left:20px'><b><u>${objectInput.switchableOptions![i]}</u></b> props: ${editorInputToHtml(x)} </div>`,
+                    )
                     .join('')
             );
         }

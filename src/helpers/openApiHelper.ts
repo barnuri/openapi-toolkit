@@ -1,5 +1,12 @@
 import { OpenApiPathParamInVals } from './../models/openapi/OpenApiDocument';
-import { OpenApiDefinition, OpenApiDocument, OpenApiDefinitionReference, OpenApiDefinitionObject, OpenApiDefinitionsDictionary, ApiPath } from '../models';
+import {
+    OpenApiDefinition,
+    OpenApiDocument,
+    OpenApiDefinitionReference,
+    OpenApiDefinitionObject,
+    OpenApiDefinitionsDictionary,
+    ApiPath,
+} from '../models';
 import { cleanString, jsonPath } from '../helpers/utilsHelper';
 
 export function getOpenApiDefinitionObject(
@@ -58,16 +65,22 @@ export function getOpenApiDefinitionPropGetter<T>(
     definitionObj = definitionObj || {};
     const defaultVal: any = getterType === 'object' ? {} : [];
     const vals = getter(definitionObj);
-    const combineVals: any = (a: T, b: T) => (getterType === 'object' ? { ...a, ...b } : getterType === 'array' ? [...(a as any), ...(b as any)] : [a, b]);
+    const combineVals: any = (a: T, b: T) =>
+        getterType === 'object' ? { ...a, ...b } : getterType === 'array' ? [...(a as any), ...(b as any)] : [a, b];
     let vals2 = defaultVal;
     for (const def of definitionObj.allOf || []) {
         vals2 = combineVals(vals2, getter(def));
     }
     let inheritVals = defaultVal;
     if (includeInheritProps) {
-        const refsObjs = (definitionObj.allOf || []).filter(x => Object.keys(x).includes('$ref')).map(x => getOpenApiDefinitionObject(openApiDocument, x, definitions));
+        const refsObjs = (definitionObj.allOf || [])
+            .filter(x => Object.keys(x).includes('$ref'))
+            .map(x => getOpenApiDefinitionObject(openApiDocument, x, definitions));
         for (const x of refsObjs) {
-            inheritVals = combineVals(inheritVals, getOpenApiDefinitionPropGetter(openApiDocument, x.def, true, definitions, getter, getterType));
+            inheritVals = combineVals(
+                inheritVals,
+                getOpenApiDefinitionPropGetter(openApiDocument, x.def, true, definitions, getter, getterType),
+            );
         }
     }
     return combineVals(combineVals(inheritVals, vals2), vals);

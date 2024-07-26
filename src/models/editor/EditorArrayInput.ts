@@ -15,7 +15,7 @@ export class EditorArrayInput extends EditorInput {
         path: string,
         openApiDefinition: OpenApiDefinitionObject,
         openApiParentDefinition: OpenApiDefinitionObject | undefined,
-        definitions: OpenApiDefinitionsDictionary | undefined
+        definitions: OpenApiDefinitionsDictionary | undefined,
     ) {
         super(openApiDocument, path, 'EditorArrayInput', openApiDefinition, openApiParentDefinition, definitions);
         this.itemInput = itemInput;

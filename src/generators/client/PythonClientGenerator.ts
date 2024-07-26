@@ -18,7 +18,10 @@ export class PythonClientGenerator extends GeneratorAbstract {
         const modelFile = join(this.modelsFolder, this.getFileName(objectInput) + this.getFileExtension(true));
         let modelFileContent = `${classDeclare}
 ${objectInput.properties
-    .map(x => `\t${x.name.replace(/\[i\]/g, '')}: ${x.nullable || !x.required ? 'Optional[' + this.getPropDesc(x) + ']' : this.getPropDesc(x)}`)
+    .map(
+        x =>
+            `\t${x.name.replace(/\[i\]/g, '')}: ${x.nullable || !x.required ? 'Optional[' + this.getPropDesc(x) + ']' : this.getPropDesc(x)}`,
+    )
     .join('\n')}`;
         if (objectInput.properties.length <= 0) {
             modelFileContent += '\tpass';
@@ -91,14 +94,14 @@ class BaseController(object):
         const baseControllerFile = join(this.controllersFolder, 'BaseController' + this.getFileExtension(false));
         writeFileSync(baseControllerFile, baseController);
 
-        let mainFileContent = `${this.controllersNames
+        let mainFileContent = `${this.parsingResult.controllersNames
             .map(x => this.getControllerName(x))
             .map(x => `from .controllers.${x} import ${x}`)
             .join('\n')}
 
 class Client(object):
     def __init__(self):
-${this.controllersNames
+${this.parsingResult.controllersNames
     .map(x => this.getControllerName(x))
     .map(x => `        self.${x} = ${x}()`)
     .join('\n')}`;
@@ -116,10 +119,14 @@ ${this.controllersNames
         const methodName = this.getMethodName(controllerPath);
         let requestType = controllerPath.body.haveBody ? this.getPropDesc(controllerPath.body.schema) : 'None';
         const responseType = this.getPropDesc(controllerPath.response);
-        const bodyParam = controllerPath.body.haveBody ? `body: ${!controllerPath.body.required ? `Optional[${requestType}]` : requestType}, ` : '';
+        const bodyParam = controllerPath.body.haveBody
+            ? `body: ${!controllerPath.body.required ? `Optional[${requestType}]` : requestType}, `
+            : '';
         const headers = [...controllerPath.cookieParams, ...controllerPath.headerParams];
         const haveHeaders = headers.length > 0;
-        const headersParams = haveHeaders ? headers.map(x => `h_${x.name}: ${x.required ? 'str' : 'Optional[str]'} `).join(', ') + `, ` : ``;
+        const headersParams = haveHeaders
+            ? headers.map(x => `h_${x.name}: ${x.required ? 'str' : 'Optional[str]'} `).join(', ') + `, `
+            : ``;
         const pathParams =
             controllerPath.pathParams.length > 0
                 ? controllerPath.pathParams
@@ -155,7 +162,9 @@ ${this.controllersNames
         return { methodContent, methodName };
     }
     getPropDesc(obj: EditorInput | OpenApiDefinition) {
-        const editorInput = (obj as EditorInput)?.editorType ? (obj as EditorInput) : getEditorInput2(this.swagger, obj as OpenApiDefinition);
+        const editorInput = (obj as EditorInput)?.editorType
+            ? (obj as EditorInput)
+            : getEditorInput2(this.swagger, obj as OpenApiDefinition);
         const fileName = this.getFileName(editorInput);
         if (editorInput.editorType === 'EditorPrimitiveInput') {
             const primitiveInput = editorInput as EditorPrimitiveInput;

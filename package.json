@@ -7,6 +7,9 @@
     "author": "Bar Nuri",
     "license": "ISC",
     "homepage": "https://github.com/barnuri/openapi-toolkit",
+    "publishConfig": {
+        "registry": "https://registry.npmjs.org"
+    },
     "repository": {
         "type": "git",
         "url": "https://github.com/barnuri/openapi-toolkit"
@@ -35,27 +38,24 @@
         "upgradeDep": "npm-check-updates -u"
     },
     "dependencies": {
-        "axios": "^1.6.8",
+        "axios": "^1.7.2",
         "colors-ext": "^1.0.3",
-        "jsonpath-plus": "^8.1.0",
-        "rimraf": "^5.0.5",
+        "jsonpath-plus": "^9.0.0",
+        "rimraf": "^6.0.1",
         "swagger2openapi": "^7.0.8",
-        "tslib": "^2.6.2",
+        "tslib": "^2.6.3",
         "yargs": "^17.7.2"
     },
     "devDependencies": {
         "@types/jsonpath": "^0.2.4",
-        "@types/node": "^20.12.7",
+        "@types/node": "^20.14.12",
         "@types/yargs": "^17.0.32",
         "cpy-cli": "^5.0.0",
         "cross-env": "^7.0.3",
-        "nodemon": "^3.1.0",
+        "nodemon": "^3.1.4",
         "npm-check-updates": "^16.14.20",
-        "prettier": "^3.2.5",
+        "prettier": "^3.3.3",
         "react-query": "^3.39.3",
-        "typescript": "^5.4.5"
-    },
-    "publishConfig": {
-        "registry": "https://registry.npmjs.org"
+        "typescript": "^5.5.4"
     }
 }

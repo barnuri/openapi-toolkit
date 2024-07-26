@@ -7,7 +7,11 @@ export function primitiveGetValue(_changes: ChangesModel, _value: any, _primitiv
     return changesGetPathValue(_changes, _value, _primitiveInput).pathValue;
 }
 
-export function primitiveSetValue(newVal: string | number | boolean | Date, _changes: ChangesModel, _primitiveInput: EditorPrimitiveInput): ChangesModel {
+export function primitiveSetValue(
+    newVal: string | number | boolean | Date,
+    _changes: ChangesModel,
+    _primitiveInput: EditorPrimitiveInput,
+): ChangesModel {
     const primitiveInput = cloneHelper(_primitiveInput || {});
     let changes: ChangesModel = cloneHelper(_changes || ChangesModelDefaultValue);
     changes = changes || ChangesModelDefaultValue;

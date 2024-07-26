@@ -4,7 +4,11 @@ import { cloneHelper } from './utilsHelper';
 import { jsonPath } from './utilsHelper';
 import { modifyInputPath } from './editorHelpers';
 
-export function objectSetSelectedSwitchable(objectInput: EditorObjectInput, _changes: ChangesModel, newSwitchableType: string): ChangesModel {
+export function objectSetSelectedSwitchable(
+    objectInput: EditorObjectInput,
+    _changes: ChangesModel,
+    newSwitchableType: string,
+): ChangesModel {
     let changes = cloneHelper(_changes || ChangesModelDefaultValue);
     changes = changes || ChangesModelDefaultValue;
     const jpath = objectInput.path + '._t';

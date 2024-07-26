@@ -8,13 +8,10 @@ export class CSharpClientGenerator extends CSharpGenerator {
     mainExportFile = join(this.options.output, 'Client.cs');
     generateClient(): void {
         this.generateBaseController();
-        const nullableMark = !this.options.disableNullable ? '?' : ''
-        const controllerPropsNames = this.controllersNames.map(x => this.getControllerName(x));
+        const nullableMark = !this.options.disableNullable ? '?' : '';
+        const controllerPropsNames = this.parsingResult.controllersNames.map(x => this.getControllerName(x));
         const controllerProps = controllerPropsNames.map(x => `\tpublic ${x} ${x} { get; private set; }`).join('\n') + '\n';
-        const controllerPropsCtor =
-            controllerPropsNames
-                .map(x => `\t\t${x} = new ${x} { ClientSettings = ClientSettings };`)
-                .join('\n');
+        const controllerPropsCtor = controllerPropsNames.map(x => `\t\t${x} = new ${x} { ClientSettings = ClientSettings };`).join('\n');
 
         let mainFileContent = `public class Client
 {
@@ -65,14 +62,24 @@ ${controllerPropsCtor}
         const methodName = capitalize(this.getMethodName(controllerPath));
         let requestType = controllerPath.body.haveBody ? this.getPropDesc(controllerPath.body.schema) : 'object';
         const responseType = this.getPropDesc(controllerPath.response);
-        const bodyParam = controllerPath.body.haveBody ? `${requestType}${!controllerPath.body.required && !this.options.disableNullable ? `?` : ''} body, ` : '';
+        const bodyParam = controllerPath.body.haveBody
+            ? `${requestType}${!controllerPath.body.required && !this.options.disableNullable ? `?` : ''} body, `
+            : '';
         const headers = [...controllerPath.cookieParams, ...controllerPath.headerParams];
         const haveHeaderParams = headers.length > 0;
-        const headersParams = haveHeaderParams ? headers.map(x => `string${x.required || this.options.disableNullable ? '' : '?'} h${capitalize(x.name)} = default`).join(', ') + `, ` : ``;
+        const headersParams = haveHeaderParams
+            ? headers
+                  .map(x => `string${x.required || this.options.disableNullable ? '' : '?'} h${capitalize(x.name)} = default`)
+                  .join(', ') + `, `
+            : ``;
         const pathParams =
             controllerPath.pathParams.length > 0
-                ? controllerPath.pathParams.map(x => `${this.getPropDesc(x.schema!)}${x.required || this.options.disableNullable ? '' : '?'} p${capitalize(x.name)} = default`).join(', ') +
-                  ', '
+                ? controllerPath.pathParams
+                      .map(
+                          x =>
+                              `${this.getPropDesc(x.schema!)}${x.required || this.options.disableNullable ? '' : '?'} p${capitalize(x.name)} = default`,
+                      )
+                      .join(', ') + ', '
                 : ``;
         let url = controllerPath.path;
         for (const pathParam of controllerPath.pathParams) {
@@ -81,14 +88,19 @@ ${controllerPropsCtor}
         const haveQueryParams = controllerPath.queryParams.length > 0;
         url += !haveQueryParams ? '' : '?' + controllerPath.queryParams.map(x => `${x.name}={q${capitalize(x.name)}}`).join('&');
         const queryParams = haveQueryParams
-            ? controllerPath.queryParams.map(x => `${this.getPropDesc(x.schema!)}${x.required || this.options.disableNullable ? '' : '?'} q${capitalize(x.name)} = default`).join(', ') + ', '
+            ? controllerPath.queryParams
+                  .map(
+                      x =>
+                          `${this.getPropDesc(x.schema!)}${x.required || this.options.disableNullable ? '' : '?'} q${capitalize(x.name)} = default`,
+                  )
+                  .join(', ') + ', '
             : ``;
 
         let methodCommonText = `\t\t\t"${capitalize(controllerPath.method.toLowerCase())}",\n`;
         methodCommonText += `\t\t\t\$"${url}\",\n`;
         methodCommonText += `\t\t\t${controllerPath.body.haveBody ? 'body' : 'default'},\n`;
         methodCommonText += `\t\t\t`;
-        const nullableMark = !this.options.disableNullable ? '?' : ''
+        const nullableMark = !this.options.disableNullable ? '?' : '';
         if (haveHeaderParams) {
             methodCommonText += `new Dictionary<string, string${nullableMark}>()\n`;
             methodCommonText += `\t\t\t{\n`;
@@ -127,14 +139,17 @@ ${controllerPropsCtor}
         methodContent += methodCommonText;
 
         // method five
-        methodContent += `\tpublic Task<string${nullableMark}> ${methodName}ContentAsync<S>(${genericBodyMethodParams}) \n\t{\n`.replace(', )', ')');
+        methodContent += `\tpublic Task<string${nullableMark}> ${methodName}ContentAsync<S>(${genericBodyMethodParams}) \n\t{\n`.replace(
+            ', )',
+            ')',
+        );
         methodContent += `\t\treturn Method<S>(\n`;
         methodContent += methodCommonText;
 
         return { methodContent, methodName };
     }
     generateBaseController() {
-        const nullableMark = !this.options.disableNullable ? '?' : ''
+        const nullableMark = !this.options.disableNullable ? '?' : '';
 
         const usings = `using System;
 using Newtonsoft.Json;
@@ -169,7 +184,7 @@ using System.Threading.Tasks;
         const exUsing = `using System;
 using System.Net.Http;
 using System.Runtime.Serialization;
-`
+`;
         writeFileSync(join(this.options.output, 'ExceptionWithRequest.cs'), this.addNamespace(errorClass, exUsing));
         const baseControllerContent = `public class BaseController
 {
