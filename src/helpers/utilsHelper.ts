@@ -106,6 +106,11 @@ export function capitalize(s: string): string {
     return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
+export function snakeCase(str: string): string {
+    str = camelCase(str);
+    return str.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`);
+}
+
 export function camelCase(str: string) {
     str = str
         .replace(/(?:^\w|[A-Z]|\b\w)/g, function (word, index) {
