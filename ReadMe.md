@@ -1,3 +1,6 @@
+# openapi-toolkit
+openapi-toolkit is an open-source tool designed to streamline the integration of OpenAPI (formerly known as Swagger) specifications into your development workflow. By taking an OpenAPI/Swagger file as input, the OpenAPI Toolkit automatically generates server and client code, enabling seamless integration of APIs. This automation accelerates development processes, ensures consistency across different platforms, and reduces the risk of manual errors. Whether you're building a new service or integrating with existing APIs, OpenAPI Toolkit simplifies the process by providing ready-to-use code tailored to your OpenAPI specifications.
+
 # Install
 
 [![Run Tests](https://github.com/barnuri/openapi-toolkit/actions/workflows/runTests.yaml/badge.svg)](https://github.com/barnuri/openapi-toolkit/actions/workflows/runTests.yaml) [![Create Tag And Release And Publish To NPM](https://github.com/barnuri/openapi-toolkit/actions/workflows/createTagAndReleaseAndPublish.yaml/badge.svg)](https://github.com/barnuri/openapi-toolkit/actions/workflows/createTagAndReleaseAndPublish.yaml)
@@ -21,6 +24,30 @@ openapi-toolkit -h
 
 # with docker
 docker run --rm --name openapi-toolkit -v "$(pwd)/output:/output" -e CLI_PARAMS="-i https://petstore3.swagger.io/api/v3/openapi.json -g typescript-axios --modelNamePrefix My --modelNameSuffix .dto" barnuri/openapi-toolkit
+```
+
+# Auto Generate Client/Server (JS\TS)
+
+```js
+const { multipleGenerate, generate } = require('openapi-toolkit');
+
+// use multipleGenerate when you want multiple outputs
+(async () => {
+    const sharedConfig = { debugLogs: false };
+    await multipleGenerate(`https://petstore3.swagger.io/api/v3/openapi.json`, [
+        { ...sharedConfig, generator: 'typescript-react-query', output: `./typescript-react-query/src` },
+        { ...sharedConfig, generator: 'typescript-axios', output: `./typescript-axios/src` },
+        { ...sharedConfig, generator: 'typescript-axios', output: `./typescript-models/src`, modelsOnly: true },
+        { ...sharedConfig, generator: 'c#', output: `./c#/src`, },
+        { ...sharedConfig, generator: 'go', output: `./go/src` },
+        { ...sharedConfig, generator: 'python', output: `./python/src` },
+    ]);
+})();
+
+// use generate when you want only one output
+(async () => {
+    await generate({ pathOrUrl: `https://petstore3.swagger.io/api/v3/openapi.json`, generator: 'typescript-react-query', output: `./typescript-react-query/src` });
+})();
 ```
 
 ### Help output
