@@ -90,7 +90,7 @@ ${controllerPropsCtor}
         url += !haveQueryParams 
             ? '' 
             : '?' + controllerPath.queryParams.map(x => {
-                if ((x.schema as EditorInput)?.editorType === 'EditorArrayInput') {
+                if (this.getPropDesc(x.schema!).includes('[]')) {
                     return `{string.Join("&", {q${capitalize(x.name)}}.Select(x => $"${x.name}={x}"))}`;
                 }
                 return `${x.name}={q${capitalize(x.name)}}`;
