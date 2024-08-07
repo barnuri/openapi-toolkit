@@ -31,6 +31,11 @@ jobs:
           useComplexSwagger: ${{ github.event.inputs.useComplexSwagger }}
       - run: npm run test:typescript-axios
 
+      - uses: actions/upload-artifact@v4
+        with:
+          name: test-typescript-axios
+          path: test*
+
   test-typescript-models:
     name: Test Typescript Models
     runs-on: ubuntu-latest
@@ -44,6 +49,11 @@ jobs:
           useComplexSwagger: ${{ github.event.inputs.useComplexSwagger }}
       - run: npm run test:typescript-models
 
+      - uses: actions/upload-artifact@v4
+        with:
+          name: test-typescript-models
+          path: test*
+
   test-typescript-reactquery:
     name: Test Typescript ReactQuery
     runs-on: ubuntu-latest
@@ -56,7 +66,12 @@ jobs:
         with:
           useComplexSwagger: ${{ github.event.inputs.useComplexSwagger }}
       - run: npm run test:typescript-react-query
-        
+      
+      - uses: actions/upload-artifact@v4
+        with:
+          name: test-typescript-reactquery
+          path: test*
+
   test-csharp:
     name: Test C#
     runs-on: ubuntu-latest
@@ -74,23 +89,31 @@ jobs:
         
       - run: npm run test:csharp
 
+      - uses: actions/upload-artifact@v4
+        with:
+          name: test-csharp
+          path: test*
+
   test-csharp-nullable-false:
     name: Test C# nullable false
     runs-on: ubuntu-latest
     steps:
-        - name: Checkout code
-          uses: actions/checkout@v4
-
-        - name: Prepare Environment
-          uses: ./.github/actions/prepare-env
-          with:
-            useComplexSwagger: ${{ github.event.inputs.useComplexSwagger }}
-  
-        - name: Install .NET
-          uses: actions/setup-dotnet@v3
-          
-        - run: npm run test:csharp2
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Prepare Environment
+        uses: ./.github/actions/prepare-env
+        with:
+          useComplexSwagger: ${{ github.event.inputs.useComplexSwagger }}
+      - name: Install .NET
+        uses: actions/setup-dotnet@v3
         
+      - run: npm run test:csharp2
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: test-csharp-nullable-false
+          path: test*
+
   test-python:
     name: Test Python
     runs-on: ubuntu-latest
@@ -108,6 +131,11 @@ jobs:
 
       - run: pip install pylint requests
       - run: npm run test:python
+      
+      - uses: actions/upload-artifact@v4
+        with:
+          name: test-python
+          path: test*
 
   test-go:
     name: Test Go
@@ -121,6 +149,11 @@ jobs:
         with:
           useComplexSwagger: ${{ github.event.inputs.useComplexSwagger }}
       - run: npm run test:go
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: test-go
+          path: test*
         
   test-go-server:
     name: Test Go Server
@@ -134,3 +167,8 @@ jobs:
         with:
           useComplexSwagger: ${{ github.event.inputs.useComplexSwagger }}
       - run: npm run test:go-server
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: test-go-server
+          path: test*
