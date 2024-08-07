@@ -86,7 +86,14 @@ ${controllerPropsCtor}
             url = url.replace('{' + pathParam.name + '}', `{p${capitalize(pathParam.name)}}`);
         }
         const haveQueryParams = controllerPath.queryParams.length > 0;
-        url += !haveQueryParams ? '' : '?' + controllerPath.queryParams.map(x => `${x.name}={q${capitalize(x.name)}}`).join('&');
+        url += !haveQueryParams 
+            ? '' 
+            : '?' + controllerPath.queryParams.map(x => {
+                if (this.getPropDesc(x.schema!).includes('[]')) {
+                    return `{string.Join("&", q${capitalize(x.name)}.Select(x => $"${x.name}={x}"))}`;
+                }
+                return `${x.name}={q${capitalize(x.name)}}`;
+               }).join('&');
         const queryParams = haveQueryParams
             ? controllerPath.queryParams
                   .map(
