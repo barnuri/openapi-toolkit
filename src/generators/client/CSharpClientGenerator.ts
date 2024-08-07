@@ -3,7 +3,6 @@ import { ApiPath } from '../../models/ApiPath';
 import { join } from 'path';
 import { capitalize, makeDirIfNotExist } from '../../helpers';
 import { CSharpGenerator } from '../CSharpGenerator';
-import { EditorInput } from '../../models/editor/EditorInput';
 
 export class CSharpClientGenerator extends CSharpGenerator {
     mainExportFile = join(this.options.output, 'Client.cs');
