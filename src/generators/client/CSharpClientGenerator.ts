@@ -90,7 +90,7 @@ ${controllerPropsCtor}
             ? '' 
             : '?' + controllerPath.queryParams.map(x => {
                 if (this.getPropDesc(x.schema!).includes('[]')) {
-                    return `{string.Join("&", q${capitalize(x.name)}.Select(x => $"${x.name}={x}"))}`;
+                    return `{string.Join("&", q${capitalize(x.name)}?.Select(x => $"${x.name}={x}"))}`;
                 }
                 return `${x.name}={q${capitalize(x.name)}}`;
                }).join('&');
