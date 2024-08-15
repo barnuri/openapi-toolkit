@@ -88,13 +88,7 @@ ${controllerPropsCtor}
         const haveQueryParams = controllerPath.queryParams.length > 0;
         url += !haveQueryParams 
             ? '' 
-            : '?' + controllerPath.queryParams.map(x => {
-                const csharpParam = `q${capitalize(x.name)}`;
-                if (this.getPropDesc(x.schema!).includes('[]')) {
-                    return `{${csharpParam} == null ? "" : string.Join("&", ${csharpParam}.Select(x => $"${x.name}={x}"))}`;
-                }
-                return `${x.name}={${csharpParam}}`;
-               }).join('&');
+            : `?{string.Join("&", query)}`;
         const queryParams = haveQueryParams
             ? controllerPath.queryParams
                   .map(
@@ -103,7 +97,19 @@ ${controllerPropsCtor}
                   )
                   .join(', ') + ', '
             : ``;
-
+        let queryContent = ``;
+        if (haveQueryParams) {
+            queryContent += `\t\tvar query = new List<string>();`;
+            for (const queryParam of controllerPath.queryParams) {
+                const csharpParam = `q${capitalize(queryParam.name)}`;
+                const isList = this.getPropDesc(queryParam.schema!).includes('[]');
+                if (isList) {
+                    queryContent = `\t\tif (${csharpParam} != null) { query.AddRange(${csharpParam}.Select(x => $"${queryParam.name}={x}")); }`
+                } else {
+                    queryContent = `\t\tquery.Add($"${queryParam.name}={${csharpParam}}");`
+                }
+            }
+        }
         let methodCommonText = `\t\t\t"${capitalize(controllerPath.method.toLowerCase())}",\n`;
         methodCommonText += `\t\t\t\$"${url}\",\n`;
         methodCommonText += `\t\t\t${controllerPath.body.haveBody ? 'body' : 'default'},\n`;
@@ -126,11 +132,13 @@ ${controllerPropsCtor}
         let methodContent = '';
         // method one
         methodContent += `\tpublic Task<${responseType}${nullableMark}> ${methodName}Async(${methodParams}) \n\t{\n`.replace(', )', ')');
+        methodContent += queryContent;
         methodContent += `\t\treturn Method<${requestType},${responseType}${nullableMark}>(\n`;
         methodContent += methodCommonText;
 
         // method two
         methodContent += `\tpublic Task<T${nullableMark}> ${methodName}Async<T>(${methodParams}) \n\t{\n`.replace(', )', ')');
+        methodContent += queryContent;
         methodContent += `\t\treturn Method<${requestType},T${nullableMark}>(\n`;
         methodContent += methodCommonText;
 
@@ -138,19 +146,19 @@ ${controllerPropsCtor}
         const genericBodyParam = controllerPath.body.haveBody ? `S body, ` : '';
         const genericBodyMethodParams = `${genericBodyParam}${pathParams}${queryParams}${headersParams}`;
         methodContent += `\tpublic Task<T${nullableMark}> ${methodName}Async<T, S>(${genericBodyMethodParams}) \n\t{\n`.replace(', )', ')');
+        methodContent += queryContent;
         methodContent += `\t\treturn Method<S,T${nullableMark}>(\n`;
         methodContent += methodCommonText;
 
         // method four
         methodContent += `\tpublic Task<string${nullableMark}> ${methodName}ContentAsync(${methodParams}) \n\t{\n`.replace(', )', ')');
+        methodContent += queryContent;
         methodContent += `\t\treturn Method<${requestType}>(\n`;
         methodContent += methodCommonText;
 
         // method five
-        methodContent += `\tpublic Task<string${nullableMark}> ${methodName}ContentAsync<S>(${genericBodyMethodParams}) \n\t{\n`.replace(
-            ', )',
-            ')',
-        );
+        methodContent += `\tpublic Task<string${nullableMark}> ${methodName}ContentAsync<S>(${genericBodyMethodParams}) \n\t{\n`.replace(', )', ')',);
+        methodContent += queryContent;
         methodContent += `\t\treturn Method<S>(\n`;
         methodContent += methodCommonText;
 
