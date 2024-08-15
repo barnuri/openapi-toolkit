@@ -89,10 +89,11 @@ ${controllerPropsCtor}
         url += !haveQueryParams 
             ? '' 
             : '?' + controllerPath.queryParams.map(x => {
+                const csharpParam = `q${capitalize(x.name)}`;
                 if (this.getPropDesc(x.schema!).includes('[]')) {
-                    return `{string.Join("&", q${capitalize(x.name)}?.Select(x => $"${x.name}={x}"))}`;
+                    return `{${csharpParam} == null ? "" : string.Join("&", ${csharpParam}.Select(x => $"${x.name}={x}"))}`;
                 }
-                return `${x.name}={q${capitalize(x.name)}}`;
+                return `${x.name}={${csharpParam}}`;
                }).join('&');
         const queryParams = haveQueryParams
             ? controllerPath.queryParams
