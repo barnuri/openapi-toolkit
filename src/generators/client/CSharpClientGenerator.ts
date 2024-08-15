@@ -99,14 +99,14 @@ ${controllerPropsCtor}
             : ``;
         let queryContent = ``;
         if (haveQueryParams) {
-            queryContent += `\t\tvar query = new List<string>();`;
+            queryContent += `\t\tvar query = new List<string>();\n`;
             for (const queryParam of controllerPath.queryParams) {
                 const csharpParam = `q${capitalize(queryParam.name)}`;
                 const isList = this.getPropDesc(queryParam.schema!).includes('[]');
                 if (isList) {
-                    queryContent = `\t\tif (${csharpParam} != null) { query.AddRange(${csharpParam}.Select(x => $"${queryParam.name}={x}")); }`
+                    queryContent += `\t\tif (${csharpParam} != null) { query.AddRange(${csharpParam}.Select(x => $"${queryParam.name}={x}")); }\n`
                 } else {
-                    queryContent = `\t\tquery.Add($"${queryParam.name}={${csharpParam}}");`
+                    queryContent += `\t\tquery.Add($"${queryParam.name}={${csharpParam}}");\n`
                 }
             }
         }
