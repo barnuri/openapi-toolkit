@@ -219,7 +219,7 @@ using System.Runtime.Serialization;
         {
             Method = new HttpMethod(method),
             RequestUri = new Uri($"{ClientSettings.BaseUrl.TrimEnd('/')}/{path.TrimStart('/')}"),
-            Content = new StringContent(JsonConvert.SerializeObject(body), null, "application/json"),
+            Content = body != null ? new StringContent(JsonConvert.SerializeObject(body), null, "application/json") : null,
         };
         headers?.Keys.ToList().ForEach(x => req.Headers.TryAddWithoutValidation(x, headers[x]));
         await ClientSettings.PreRequest?.Invoke(req);
