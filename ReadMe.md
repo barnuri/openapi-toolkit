@@ -56,7 +56,7 @@ BASE_URL=https://api.example.com uv run python src/mcp_server.py --transport str
 
 A fully generated example (Petstore API) is available in this repo: [examples/pet-store-mcp](https://github.com/barnuri/openapi-toolkit/tree/master/examples/pet-store-mcp)
 
-![pet-store-mcp folder structure](https://github.com/barnuri/openapi-toolkit/blob/master/docs/pet-store-mcp-vscode.png?raw=true)
+![pet-store-mcp folder structure](/docs/pet-store-mcp-vscode.png?raw=true)
 
 ## Environment variables
 
