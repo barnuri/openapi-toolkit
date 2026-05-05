@@ -3,6 +3,7 @@ import { ServerGenerators } from '../models/ServerGenerators';
 import { ClientGenerators } from '../models/ClientGenerators';
 import { TypescriptNestServerGenerator } from './server/TypescriptNestServerGenerator';
 import { CSharpServerGenerator } from './server/CSharpServerGenerator';
+import { PythonMcpServerGenerator } from './server/PythonMcpServerGenerator';
 
 export function ServerGeneratorGetter(generator: ClientGenerators | ServerGenerators) {
     if (!Object.values(ServerGenerators).find(x => x.toLowerCase() === generator.toLowerCase())) {
@@ -20,6 +21,9 @@ export function ServerGeneratorGetter(generator: ClientGenerators | ServerGenera
     }
     if (generator === ServerGenerators.Go) {
         return GoServerGenerator;
+    }
+    if (generator === ServerGenerators.PythonMcpServer) {
+        return PythonMcpServerGenerator;
     }
     throw new Error('not implemented: ' + generator);
 }
