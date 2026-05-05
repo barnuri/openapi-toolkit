@@ -38,4 +38,4 @@ const ex = async () = {
 
 ### Result
 
-![Example](https://github.com/barnuri/openapi-toolkit/blob/master/ex.png?raw=true)
+![Example](https://github.com/barnuri/openapi-toolkit/blob/master/docs/ex.png?raw=true)

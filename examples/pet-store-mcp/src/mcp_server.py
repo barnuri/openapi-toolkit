@@ -35,7 +35,7 @@ def main() -> None:
 
     parser = argparse.ArgumentParser(description="pet-store-mcp MCP server")
     parser.add_argument("--transport", default="stdio", choices=["stdio", "sse", "streamable-http"], help="Transport type (default: stdio)")
-    parser.add_argument("--host", default="127.0.0.1", help="Host for HTTP transports (default: 127.0.0.1)")
+    parser.add_argument("--host", default="0.0.0.0", help="Host for HTTP transports (default: 0.0.0.0)")
     parser.add_argument("--port", type=int, default=8000, help="Port for HTTP transports (default: 8000)")
     parser.add_argument("--path", default="/mcp", help="Path for streamable-http transport (default: /mcp)")
     args = parser.parse_args()

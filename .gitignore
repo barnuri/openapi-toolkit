@@ -22,3 +22,4 @@ package-lock.json
 tasks.md
 plan.md
 code-review.md
+.playwright-mcp
