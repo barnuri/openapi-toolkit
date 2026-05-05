@@ -19,3 +19,7 @@ test*
 openapiSchemaExample.json
 package-lock.json
 .gitconfig
+tasks.md
+plan.md
+code-review.md
+.playwright-mcp

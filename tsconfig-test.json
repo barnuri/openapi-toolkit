@@ -1,9 +1,10 @@
 {
     "compilerOptions": {
         "module": "commonjs",
-        "target": "es5",
+        "target": "ES2020",
         "jsx": "preserve",
         "moduleResolution": "node",
+        "ignoreDeprecations": "6.0",
         "emitDecoratorMetadata": true,
         "experimentalDecorators": true,
         "sourceMap": true,
@@ -16,7 +17,6 @@
         "allowSyntheticDefaultImports": true,
         "esModuleInterop": true,
         "importHelpers": true,
-        "downlevelIteration": true,
         "strict": true,
         "alwaysStrict": true,
         "newLine": "LF",
@@ -28,7 +28,7 @@
         "strictBindCallApply": true,
         "strictNullChecks": true,
         "skipLibCheck": true,
-        "lib": ["es2015", "dom"],
+        "lib": ["ES2020", "dom"],
         "rootDir": "test"
     },
     "include": ["test-typescript-axios", "test-typescript-models", "test-typescript-react-query"],

@@ -3,5 +3,6 @@ export enum ClientGenerators {
     TypescriptReactQuery = 'typescript-react-query',
     CSharp = 'c#',
     Python = 'python',
+    PythonPydantic = 'python-pydantic',
     Go = 'go',
 }

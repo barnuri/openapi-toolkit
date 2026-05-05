@@ -2,6 +2,7 @@ import { TypescriptReactQueryClientGenerator } from './client/TypescriptReactQue
 import { ServerGenerators } from '../models/ServerGenerators';
 import { ClientGenerators } from '../models/ClientGenerators';
 import { PythonClientGenerator } from './client/PythonClientGenerator';
+import { PythonPydanticClientGenerator } from './client/PythonPydanticClientGenerator';
 import { CSharpClientGenerator } from './client/CSharpClientGenerator';
 import { TypescriptAxiosClientGenerator } from './client/TypescriptAxiosClientGenerator';
 import { GoClientGenerator } from './client/GoClientGenerator';
@@ -22,6 +23,9 @@ export function ClientGeneratorGetter(generator: ClientGenerators | ServerGenera
     }
     if (generator === ClientGenerators.Python) {
         return PythonClientGenerator;
+    }
+    if (generator === ClientGenerators.PythonPydantic) {
+        return PythonPydanticClientGenerator;
     }
     if (generator === ClientGenerators.Go) {
         return GoClientGenerator;
